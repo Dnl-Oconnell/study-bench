@@ -17,9 +17,9 @@ window.STUDY = {
     mom: { code:"MEC1014", name:"Mechanics of Machines", color:"--m-mom", ready:true,
       assess:"Continuous assessment 100%: quizzes in weeks 4, 8, 10 (10% each) and a final quiz in week 12 (40%); two practical submissions (10% each); SolidWorks assignment 10%",
       blurb:"Free and forced vibration of single degree of freedom systems, then gear trains and epicyclic gears." },
-    da: { code:"MEC1029", tutorials:["Tutorial 1: Introduction to R and databases","Tutorial 2: Data frames","Tutorial 3: Data visualisation and missing data","Tutorial 4: Subsetting datasets","Tutorial 5: Relationships between factors","Tutorial 6: Non-linear relationships","Tutorial 7: Simulating the central limit theorem","Tutorial 8: More on time series","Tutorial 9: Confidence intervals and the Framingham Heart Study","Tutorial 10: Non-parametric tests in R"], name:"Data Analytics for Engineers", color:"--m-da", ready:false,
-      blurb:"Statistics in R: summaries, probability, regression, time series, inference, t-tests and ANOVA.",
-      planned:[ ["Describing data","Summary statistics"],["Describing data","Relationships between variables"],["Probability","Further probability"],["Relationships","Two continuous variables & regression"],["Relationships","How good is my model?"],["Time series","Time series analysis"],["Inference","Inference & the central limit theorem"],["Inference","Small samples"],["Inference","Comparing sample means"],["Inference","Small independent samples and paired t-tests"],["Inference","Confidence intervals for the standard deviation"],["Inference","ANOVA"] ] },
+    da: { code:"MEC1029", name:"Data Analytics for Engineers", color:"--m-da", ready:true,
+      assess:"100% CA: open-book Loop quizzes in the Friday slot (SA101): week 4 5%, week 7 10%, week 10 15%, week 12 final 70%",
+      blurb:"Statistics in R: summaries, tables and probability, the normal model, regression, time series, confidence intervals, t-tests, ANOVA and non-parametric tests." },
     pd: { code:"MEC1017", name:"Product Design", color:"--m-pd", ready:false,
       blurb:"The FireFighter design project and product design specifications.",
       planned:[ ["Project","Module overview & the FireFighter brief"],["Process","Product design specifications"] ] }
