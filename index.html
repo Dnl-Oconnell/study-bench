@@ -2046,7 +2046,7 @@ function tutorial(mid, id){
       <div class="qt">${q.q}</div>
       ${figs.map(f=>`<figure class="tfig"><img src="${S.figs[f]}" alt="Figure from the tutorial sheet for ${label(q)}"></figure>`).join("")}
       ${t ? hintBlock(mid, t, q, {hash: mid+".tut-"+id, id: "tq"+q.nums[0], label: label(q)}) : (q.hint?`<details><summary>Hint</summary><div class="sol">${q.hint}</div></details>`:"")}
-      ${q.sol?`<details><summary>Worked solution</summary><div class="sol">${q.sol}${q.ans?`<div class="ans">Answer: ${esc(q.ans)}</div>`:""}<p class="prov">${esc(provenance(q.src||("Tutorial Q"+q.nums.join(" & Q"))))}</p></div></details>`:""}
+      ${q.sol?`<details><summary>Worked solution</summary><div class="sol">${q.sol}${q.ans?`<div class="ans">Answer: ${esc(q.ans)}</div>`:""}<p class="prov">${esc(q.prov||provenance(q.src||("Tutorial Q"+q.nums.join(" & Q"))))}</p></div></details>`:""}
       <div class="tools"><button class="btn small" data-copy="${i}">Copy question for Claude</button>${t?`<a class="btn small" href="#${mid}.${t.id}">Revise the theory</a>`:""}</div></article>`;
   });
   h += `</div>` + askBox() + `</div></main>`;
@@ -2085,7 +2085,7 @@ function topic(mid, tid){
     <article class="q" id="pq${i}"><div class="qh"><span class="qn">Q${i+1}</span><span class="src">${esc(q.src)}</span></div>
     <div class="qt">${q.q}</div>
     ${hintBlock(mid, t, q, {hash: mid+"."+tid, id: "pq"+i, label: "Q"+(i+1)})}
-    <details><summary>Worked solution</summary><div class="sol">${q.sol}${q.ans?`<div class="ans">Answer: ${esc(q.ans)}</div>`:""}<p class="prov">${esc(provenance(q.src))}</p></div></details>
+    <details><summary>Worked solution</summary><div class="sol">${q.sol}${q.ans?`<div class="ans">Answer: ${esc(q.ans)}</div>`:""}<p class="prov">${esc(q.prov||provenance(q.src))}</p></div></details>
     <div class="tools"><button class="btn small" data-copy="${i}">Copy question for Claude</button></div></article>`).join("")}</div>
 </section>
   ${t.traps&&t.traps.length?`<section class="block" id="traps"><h2>Hazards <small>common traps</small></h2><ul class="traps">${t.traps.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></section>`:""}
