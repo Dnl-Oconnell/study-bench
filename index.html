@@ -629,6 +629,10 @@ h3.subhead{font-family:var(--f-display);font-weight:650;font-size:21px;margin:34
 @media (max-width:820px){ [data-skin="workshop"] body,[data-skin="workshop"] .modpane{background-attachment:scroll} }
 [data-skin="workshop"] .view main{background:linear-gradient(rgba(10,10,9,.8),rgba(10,10,9,.8))}
 [data-skin="workshop"] .pplist .pg,[data-skin="workshop"] .pgpart > summary{text-shadow:0 1px 2px #000}
+
+.prose pre,.sol pre,.qt pre{background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.12);padding:10px 12px;margin:10px 0;overflow-x:auto;font:12.5px/1.5 var(--f-mono);white-space:pre;border-radius:4px;max-width:100%}
+.prose :not(pre)>code,.sol :not(pre)>code,.qt :not(pre)>code{overflow-wrap:anywhere;word-break:break-word}
+.prose code,.sol code{font-family:var(--f-mono);font-size:.92em}
 </style>
 <div id="app"></div>
 <script>
@@ -650,9 +654,9 @@ window.STUDY = {
     ssc: { code:"EEN1020", name:"Introduction to Systems, Signals & Control", color:"--m-ssc", ready:true,
       assess:"Exam 80% (2 h) · CA 20%: four Loop quizzes, best three count (wk 3 transforms, wk 6 block diagrams, wk 8 stability & transient, wk 11 state space)",
       blurb:"Laplace and Z transforms, modelling circuits and mechanical systems, stability and first/second-order response." },
-    ems: { code:"EEN1029", name:"Electromechanical Systems", color:"--m-ems", ready:false,
-      blurb:"Phasors and AC power, inductors and transformers, DC motors and their control. Three past papers with solutions.",
-      planned:[ ["Background","Complex numbers"],["Background","Operational amplifiers and amplifiers"],["Background","Basic mechanical units"],["Task 1","Phasors and AC power"],["Task 1","Inductance and ideal transformers"],["Task 1","Inductor measurements and calculations"],["Task 2","DC motors"],["Task 2","DC motor characteristics"],["Task 2","DC motor control and encoders"] ] },
+    ems: { code:"EEN1029", name:"Electromechanical Systems", color:"--m-ems", ready:true,
+      assess:"Exam 50% (2 h, answer 4 of 5) · CA 50%: weekly quizzes 5%, demos 10%, reports 25%, peer/self-assessment 10%",
+      blurb:"Phasors and AC power, op-amp signal conditioning, inductors and transformers, DC motors, H-bridges, steppers, encoders and TRIAC switching." },
     mom: { code:"MEC1014", name:"Mechanics of Machines", color:"--m-mom", ready:true,
       assess:"Continuous assessment 100%: quizzes in weeks 4, 8, 10 (10% each) and a final quiz in week 12 (40%); two practical submissions (10% each); SolidWorks assignment 10%",
       blurb:"Free and forced vibration of single degree of freedom systems, then gear trains and epicyclic gears." },
@@ -1770,6 +1774,739 @@ const see = {
 const c = STUDY.content.msp;
 c.topics.forEach(t => (see[t.id]||[]).forEach((s,i) => { if (t.questions[i]) t.questions[i].see = s; }));
 c.tutorials[0].questions.forEach(q => { if (q.nums[0]===35) q.see = [3]; });
+})();
+/* EEN1029 Electromechanical Systems — background, Task 1 (inductors and transformers) */
+(function(){
+const R = String.raw;
+const T = STUDY.content.ems = STUDY.content.ems || { topics: [] };
+
+T.topics.push({
+id: "acpower", part: "Background & signal conditioning", title: "Phasors, Impedance & AC Power",
+lectures: "Phasors and AC Power; Task 1 – Inductor Measurements; Background Notes – Complex Numbers", status: "lectured",
+summary: "Sinusoids as phasors, adding waveforms with complex numbers, impedance of R, L and C, leading/lagging, and real, reactive and apparent power with the power triangle. Measuring them all with a two-channel scope. This is Q1 on every past paper.",
+theory: R`
+<h3>0. Sinusoids</h3>
+$$v(t) = V_m\cos(\omega t + \theta),\qquad \omega = 2\pi f,\quad \omega T = 2\pi,\quad f = 1/T$$
+<p>The <b>rms</b> value is the dc-equivalent for power in a resistor: $V = V_{rms} = V_m/\sqrt2$. From a peak-to-peak reading: $V_{rms} = V_{pp}/(2\sqrt2)$.</p>
+
+<h3>1. Phasors</h3>
+<p>A phasor is a rotating vector frozen at $t=0$: magnitude and phase only. It works for waveforms of the <b>same frequency</b>. To add sinusoids:</p>
+<ol class="steps">
+<li>Write everything as cosines: $\sin\omega t = \cos(\omega t - 90^\circ)$.</li>
+<li>Write each as $V_m\angle\theta$ (i.e. $\text{Re}[V_me^{j(\omega t + \theta)}]$ with $e^{j\omega t}$ dropped).</li>
+<li>Convert to rectangular, add, convert back.</li>
+</ol>
+<p>Lecture example: $10\cos\omega t + 5\sin(\omega t + 60^\circ) + 5\cos(\omega t + 90^\circ) = 10\angle0^\circ + 5\angle{-30^\circ} + 5\angle90^\circ$</p>
+<p>$= 10 + (4.33 - j2.5) + j5 = 14.33 + j2.5 = 14.54\angle9.90^\circ$, i.e. $14.54\cos(\omega t + 9.90^\circ)$.</p>
+
+<h3>2. Impedance</h3>
+$$Z = R + jX,\qquad \mathbf V = Z\mathbf I\ \text{(Ohm's law in phasor form)}$$
+<div class="tbl"><table class="data">
+<tr><th>Load</th><th>Impedance</th><th>Phase</th><th>Current</th></tr>
+<tr><td>Resistor</td><td>$R$</td><td>$\theta = 0^\circ$</td><td>In phase</td></tr>
+<tr><td>Inductor</td><td>$j\omega L$, $X_L = 2\pi fL$</td><td>$\theta = 90^\circ$ (V ahead)</td><td><b>Lags</b> voltage</td></tr>
+<tr><td>Capacitor</td><td>$-j/\omega C$, $X_C = 1/2\pi fC$</td><td>$\theta = -90^\circ$</td><td><b>Leads</b> voltage</td></tr>
+</table></div>
+<p>Memory aid: <b>ELI the ICE man</b>: in L, E (voltage) before I; in C, I before E. $X_L$ grows with frequency; $X_C$ falls with frequency; $L$ and $C$ themselves don't change with frequency. For series R and X: $|Z| = \sqrt{R^2 + X^2}$, $R = |Z|\cos\theta$, $X = |Z|\sin\theta$.</p>
+
+<h3>3. Power</h3>
+<p>Instantaneous power $p(t) = v(t)i(t)$. Its mean over a cycle is the <b>real power</b>.</p>
+<div class="tbl"><table class="data">
+<tr><th>Quantity</th><th>Formula</th><th>Unit</th></tr>
+<tr><td>Apparent power $S$</td><td>$V_{rms}I_{rms}$</td><td>VA</td></tr>
+<tr><td>Real power $P$</td><td>$S\cos\theta = \langle v(t)i(t)\rangle$</td><td>W</td></tr>
+<tr><td>Reactive power $Q$</td><td>$S\sin\theta = I_{rms}^2X$</td><td>var</td></tr>
+<tr><td>Power factor</td><td>$P/S = \cos\theta$</td><td>–</td></tr>
+<tr><td>Power angle $\theta$</td><td>$\cos^{-1}(P/S)$ = phase of V relative to I</td><td>°</td></tr>
+</table></div>
+<p>The <b>power triangle</b>: $P$ horizontal, $Q$ vertical, $S$ the hypotenuse at angle $\theta$, so $S = \sqrt{P^2 + Q^2}$. Reactive power is energy stored and returned each cycle; a low power factor means lots of current for little useful power.</p>
+
+<h3>4. Reading θ from a scope plot</h3>
+$$\theta = \frac{\Delta t}{T}\times360^\circ$$
+<p>where $\Delta t$ is how far the current peak trails the voltage peak (positive = current lags = inductive). Current peaking first = leading = capacitive, $\theta$ negative.</p>
+
+<h3>5. Measuring with a two-channel scope (Task 1 Part A)</h3>
+<p>Ch1 across a known series resistor $R_1$ gives the current; Ch2 across the inductor (or load) gives its voltage:</p>
+$$I = \frac{V_{rms,Ch1}}{R_1},\quad S = \frac{V_{rms,Ch1}V_{rms,Ch2}}{R_1},\quad P = \frac{\langle v_{Ch1}(t)v_{Ch2}(t)\rangle}{R_1},\quad \cos\theta = \frac{\langle v_{Ch1}v_{Ch2}\rangle}{V_{rms,Ch1}V_{rms,Ch2}}$$
+<p>Then $Q = I^2X_L = I^2\omega L$ gives $L = \dfrac{Q}{I^2\omega}$, or equivalently $L = \dfrac{V_{rms,Ch2}R_1\sin\theta}{V_{rms,Ch1}\omega}$. Lecture example: $\langle v_1v_2\rangle = 0.021$ V², $V_1V_2 = 0.0387$ V² ⇒ pf = 0.543.</p>`,
+formulas: [
+ {name:"RMS", tex:R`V_{rms} = \frac{V_m}{\sqrt2} = \frac{V_{pp}}{2\sqrt2}`},
+ {name:"Reactances", tex:R`X_L = 2\pi fL,\quad X_C = \frac{1}{2\pi fC}`},
+ {name:"Power angle from scope", tex:R`\theta = \frac{\Delta t}{T}\,360^\circ`},
+ {name:"Apparent / real / reactive", tex:R`S = VI,\ P = S\cos\theta,\ Q = S\sin\theta`},
+ {name:"Power triangle", tex:R`S^2 = P^2 + Q^2`},
+ {name:"Reactive power", tex:R`Q = I^2X`},
+ {name:"Real power (scope)", tex:R`P = \langle v(t)\,i(t)\rangle`},
+ {name:"Series R–X", tex:R`|Z| = \frac{V}{I} = \sqrt{R^2+X^2},\ X = |Z|\sin\theta`}
+],
+questions: [
+ {src:"Exam 2025 Q1(b)", see:[4,3,2], q:R`A resistor $R$ in series with an inductor $L$ is fed from 7.07 V rms at 50 Hz. The scope shows $V_{pp} = 20$ V and $I_{pp} = 200$ mA, with the current peak 2.5 ms after the voltage peak. Find the power angle, $S$, $P$, $Q$, the reactance and the inductance.`,
+  hint:"θ = (2.5/20)·360°. rms values from p-p. Then Q = I²X and X = ωL.",
+  sol:R`<p>$\theta = \dfrac{2.5}{20}360^\circ = 45^\circ$ (current lags: inductive).</p>
+  <p>$V = 20/(2\sqrt2) = 7.07$ V, $I = 0.2/(2\sqrt2) = 70.7$ mA, $S = 0.500$ VA.</p>
+  <p>$P = 0.5\cos45^\circ = 0.354$ W; $Q = 0.5\sin45^\circ = 0.354$ var.</p>
+  <p>$X = Q/I^2 = 0.354/0.0707^2 = 70.8$ Ω; $L = X/2\pi f = 70.8/314.2 = 225$ mH.</p>`,
+  ans:"45°, 0.5 VA, 0.354 W, 0.354 var, 70.8 Ω, 225 mH", prov:"Follows the posted exam solution."},
+ {src:"Exam 2025 Q1(c)", see:[2], q:R`For the same circuit, what happens to (i) the inductance and (ii) the reactance if the frequency goes from 50 Hz to 500 Hz?`,
+  hint:"Which one has f in its formula?",
+  sol:R`<p>(i) $L$ is a property of the coil: <b>unchanged</b>.</p><p>(ii) $X = 2\pi fL$: increases 10×, to about 708 Ω.</p>`,
+  ans:"L unchanged; X ×10", prov:"Follows the posted exam solution."},
+ {src:"Exam 2026 Q1(b)", see:[4,2], q:R`$R$ in series with unknown component $x$, 7.07 V rms at 50 Hz, $V_{pp} = 20$ V, $I_{pp} = 200$ mA. The voltage peaks 2.5 ms <i>after</i> the current. Is $x$ capacitive or inductive? Find the power angle, impedance and reactance.`,
+  hint:"Current peaking first = current leads.",
+  sol:R`<p>Current leads ⇒ <b>capacitive</b>. $\theta = -\dfrac{2.5}{20}360^\circ = -45^\circ$.</p>
+  <p>$|Z| = V_m/I_m = 10/0.1 = 100$ Ω.</p>
+  <p>$X_C = |Z|\sin\theta = 100\sin(-45^\circ) = -70.7$ Ω (and $R = 70.7$ Ω).</p>`,
+  ans:"Capacitive; −45°; 100 Ω; −70.7 Ω", prov:"Follows the posted exam solution."},
+ {src:"Exam 2026 Q1(c)", see:[2], q:R`For that RC circuit, predict how doubling the frequency to 100 Hz changes (i) the impedance and (ii) the reactance.`,
+  hint:"X_C ∝ 1/f; R doesn't change.",
+  sol:R`<p>$X_C$ halves: 70.7 → 35.4 Ω. $R$ stays 70.7 Ω.</p>
+  <p>$|Z| = \sqrt{70.7^2 + 35.4^2} = 79.0$ Ω: it falls, but by less than the reactance does.</p>`,
+  ans:"X: 70.7 → 35.4 Ω; Z: 100 → 79 Ω", prov:"Follows the posted exam solution."},
+ {src:"Lecture example (phasors)", see:[1], q:R`Express $v(t) = 10\cos\omega t + 5\sin(\omega t + 60^\circ) + 5\cos(\omega t + 90^\circ)$ as a single sinusoid.`,
+  hint:"Convert the sine to a cosine first (subtract 90°).",
+  sol:R`<p>$5\sin(\omega t + 60^\circ) = 5\cos(\omega t - 30^\circ)$.</p>
+  <p>$10 + (4.33 - j2.5) + j5 = 14.33 + j2.5 = 14.54\angle9.90^\circ$</p>
+  <p>$v(t) = 14.54\cos(\omega t + 9.90^\circ)$</p>`,
+  ans:"14.54 cos(ωt + 9.90°)", prov:"From the worked example in the Phasors and AC Power lecture."},
+ {src:"Exam 2025 Q1(a)", see:[3], q:R`Sketch the power triangle and explain the difference between instantaneous power and real power, with a formula linking them.`,
+  hint:"One is a value at an instant; the other is a mean.",
+  sol:R`<p>Triangle: $P = S\cos\theta$ horizontal, $Q = S\sin\theta$ vertical, $S = \sqrt{P^2+Q^2}$ hypotenuse, $\theta$ between $P$ and $S$.</p>
+  <p>Instantaneous power $p(t) = v(t)i(t)$ at one moment; real power is its mean over a cycle: $P = \langle p(t)\rangle$.</p>`,
+  ans:"P = ⟨v(t)i(t)⟩", prov:"Follows the posted exam solution."}
+],
+traps: [
+ "Convert peak-to-peak to rms by dividing by 2√2, not √2.",
+ "Sign of θ: current lagging (inductive) = positive; current leading (capacitive) = negative.",
+ "Inductance and capacitance don't change with frequency; reactances do (X_L ∝ f, X_C ∝ 1/f).",
+ "Reactive power unit is var, apparent power VA, real power W. Marks are given for units.",
+ "Phasors only add for sinusoids of the same frequency. Convert sines to cosines first."
+]
+});
+
+T.topics.push({
+id: "sigcond", part: "Background & signal conditioning", title: "Op-Amps & Signal Conditioning for the ESP32",
+lectures: "Background Notes – Operational Amplifiers, Overview of Amplifiers; scope front-end exam questions", status: "lectured",
+summary: "Ideal op-amp rules and the standard circuits, then the exam's favourite design: scaling, offsetting and buffering a ±V signal into the ESP32's 0–3.3 V input without clipping or loading.",
+theory: R`
+<h3>0. Ideal op-amp rules</h3>
+<ul>
+<li>Infinite open-loop gain: with negative feedback, $V_+ = V_-$.</li>
+<li>Infinite input impedance: no current flows into the inputs.</li>
+</ul>
+<div class="tbl"><table class="data">
+<tr><th>Circuit</th><th>Output</th></tr>
+<tr><td>Non-inverting</td><td>$V_{out} = \left(1 + \dfrac{R_1}{R_2}\right)V_{in}$</td></tr>
+<tr><td>Inverting</td><td>$V_{out} = -\dfrac{R_2}{R_1}V_{in}$</td></tr>
+<tr><td>Differential (equal ratios)</td><td>$V_{out} = \dfrac{R_2}{R_1}(V_1 - V_2)$</td></tr>
+<tr><td>Inverting summer</td><td>$V_{out} = -(V_1 + V_2)$ (equal resistors)</td></tr>
+<tr><td>Voltage follower</td><td>$V_{out} = V_{in}$ (buffer: high $Z_{in}$, low $Z_{out}$)</td></tr>
+<tr><td>Integrator</td><td>$V_{out} = -\dfrac{1}{RC}\int V_{in}\,dt$</td></tr>
+<tr><td>Differentiator</td><td>$V_{out} = -RC\dfrac{dV_{in}}{dt}$</td></tr>
+</table></div>
+
+<h3>1. Design requirements and objectives</h3>
+<p><b>Requirement:</b> for the full input range (e.g. ±20 V), the output must stay within the ESP32's 0–3.3 V.</p>
+<p><b>Objectives:</b> keep the signal linear over the full range; add as little noise as possible; load the measurand as little as possible.</p>
+
+<h3>2. The standard front-end</h3>
+<ol class="steps">
+<li><b>Scale</b> with a divider $R_1$–$R_2$: $v_{scale} = v_{in}\dfrac{R_2}{R_1+R_2}$. $R_1$ is large (1 MΩ) to give high input impedance.</li>
+<li><b>Offset</b> to mid-rail with a second divider from 5 V ($R_3$–$R_4$): $v_{OS} = 5\dfrac{R_4}{R_3+R_4} \approx 1.65$ V, so a bipolar signal sits between 0 and 3.3 V.</li>
+<li><b>Buffer</b> with a rail-to-rail op-amp powered from 0 and 3.3 V: unity gain, very high input impedance (little loading), and its output physically can't leave 0–3.3 V, which protects the pin.</li>
+<li>A second op-amp as a voltage follower can provide a stiff 3.3 V reference rail.</li>
+</ol>
+
+<h3>3. Diagnosing clipping</h3>
+<ul>
+<li>Clipped equally top and bottom ⇒ bias right, <b>scaling</b> wrong: shrink the divider ratio (change $R_2$, keep $R_1$ big).</li>
+<li>Clipped only at the top (or bottom) ⇒ <b>offset</b> wrong: fix the $R_3$–$R_4$ divider.</li>
+<li>Check both extremes: $0 < v_{scale,min} + v_{OS}$ and $v_{scale,max} + v_{OS} < 3.3$ V.</li>
+</ul>
+
+<h3>4. Simple logic-level shifting</h3>
+<p>A 5 V digital signal (encoder, Hall sensor) into a 3.3 V pin needs only a divider: $V_{out} = V_{in}\dfrac{R_2}{R_1+R_2}$ with ratio ≤ 0.66. E.g. 1.8 kΩ / 3.3 kΩ ⇒ 3.24 V; 2 kΩ / 3.3 kΩ ⇒ 3.1 V. Current ≈ 1 mA: negligible power, but big enough that pin leakage doesn't upset it.</p>`,
+formulas: [
+ {name:"Golden rules", tex:R`V_+ = V_-,\quad I_{in} = 0`},
+ {name:"Non-inverting", tex:R`\frac{V_{out}}{V_{in}} = 1 + \frac{R_1}{R_2}`},
+ {name:"Inverting", tex:R`\frac{V_{out}}{V_{in}} = -\frac{R_2}{R_1}`},
+ {name:"Divider", tex:R`V_{out} = V_{in}\frac{R_2}{R_1+R_2}`},
+ {name:"Scaling condition", tex:R`\frac{R_1+R_2}{R_2} \ge \frac{V_{in,pp}}{3.3\text{ V}}`}
+],
+questions: [
+ {src:"Exam 2025 Q3(c)", see:[2,3], q:R`A scope front-end feeds a ±20 V measurand to an ESP32 (0–3.3 V) via a divider $R_1 = 1$ MΩ, $R_2$, a 1.65 V offset and a rail-to-rail buffer. The output is a correctly-centred sine clipped equally at 0 V and 3.3 V. Diagnose and redesign.`,
+  hint:"Equal clipping top and bottom means the bias is fine and the gain is too high.",
+  sol:R`<p>The output stays in range (requirement met) but is clipped, so linearity (an objective) fails. Equal clipping ⇒ offset fine, <b>scaling</b> wrong.</p>
+  <p>Keep $R_1 = 1$ MΩ (high input impedance) and pick $R_2$ so 40 V p-p becomes ≤ 3.3 V p-p:</p>
+  <p>$\dfrac{R_1 + R_2}{R_2} \ge \dfrac{40}{3.3} \Rightarrow R_2 \le \dfrac{1\text{ MΩ}}{40/3.3 - 1} = 89.9$ kΩ</p>
+  <p>Use 88.7 kΩ or 82 kΩ; everything else unchanged.</p>`,
+  ans:"R₂ ≤ 89.9 kΩ (e.g. 82 kΩ)", prov:"Follows the posted exam solution."},
+ {src:"Sample 2025 Q3(c)", see:[2,3], q:R`Same front-end for ±50 V with $R_1 = 1$ MΩ, $R_2 = 30$ kΩ, offset divider $R_3$–$R_4$ (with $R_4 = 2$ kΩ) from 5 V. The output runs from about 1 V and is clipped at 3.3 V on top only. Find what's wrong and fix it.`,
+  hint:"Clipping on one side only points at the offset.",
+  sol:R`<p>Scaling: $\pm50 \times \dfrac{30k}{1.03M} = \pm1.45$ V, which fits a 3.3 V span. Clipping only at the top ⇒ the offset is too high.</p>
+  <p>Target $v_{OS} = 1.65$ V: $R_3 = (5/1.65 - 1)(2\text{ kΩ}) = 4.06$ kΩ ⇒ use 4 kΩ, giving 1.67 V.</p>
+  <p>Check: $1.67 + 1.45 = 3.12$ V < 3.3 V and $1.67 - 1.45 = 0.22$ V > 0 V ✓.</p>`,
+  ans:"R₃ ≈ 4 kΩ (offset 1.67 V)", prov:"Follows the posted sample-paper solution."},
+ {src:"Exam 2025 Q3(b)", see:[2], q:R`In the front-end, OpAmp_A is a voltage follower on a 3.3 V reference whose output powers OpAmp_B; OpAmp_B is a unity-gain buffer on the signal path. Explain each one's purpose.`,
+  hint:"Think about loading and about what a rail-to-rail op-amp can output.",
+  sol:R`<p><b>OpAmp_A:</b> a buffered, stiff 3.3 V supply for OpAmp_B's positive rail, unaffected by loading.</p>
+  <p><b>OpAmp_B:</b> very high input impedance, so the circuit hardly loads the measurand; and being rail-to-rail on 0/3.3 V rails, its output is clamped to 0–3.3 V, protecting the ESP32 pin.</p>`,
+  ans:"Reference buffer; signal buffer + clamp", prov:"Follows the posted exam solution."},
+ {src:"Exam 2026 Q3(a)", see:[4], q:R`A Hall-effect encoder outputs 0–5 V into ESP32 pins rated 0–3.3 V via $R_1$ (series) and $R_2$ (to ground). Explain their purpose and choose values.`,
+  hint:"Ratio R₂/(R₁+R₂) ≤ 0.66 using standard values.",
+  sol:R`<p>They form a divider that linearly attenuates the 5 V logic level to ≤ 3.3 V (shape, frequency and phase unchanged), so the pin's absolute maximum isn't exceeded.</p>
+  <p>$R_1 = 1.8$ kΩ, $R_2 = 3.3$ kΩ: $5 \times \dfrac{3.3}{5.1} = 3.24$ V. Current ≈ 1 mA.</p>`,
+  ans:"1.8 kΩ / 3.3 kΩ → 3.24 V", prov:"Follows the posted exam solution."}
+],
+traps: [
+ "Change R₂, not R₁: R₁ sets the input impedance and should stay large.",
+ "Equal top/bottom clipping = scale problem; one-sided clipping = offset problem.",
+ "Always check both extremes after a redesign (max and min input).",
+ "Divider ratio is R₂/(R₁+R₂) with R₂ the resistor to ground.",
+ "A rail-to-rail buffer protects the pin but doesn't fix clipping: the signal is still distorted."
+]
+});
+
+T.topics.push({
+id: "magnetics", part: "Task 1: Inductors & transformers", title: "Magnetism, Inductance & Magnetic Circuits",
+lectures: "Task 1 – Inductance and Ideal Transformers; Task 1 Supporting Notes", status: "lectured",
+summary: "Flux and flux density, the field of a wire and a solenoid, flux linkage and Faraday's law, inductance, B and H, permeability, saturation and hysteresis, and magnetic circuits with reluctance (including air gaps).",
+theory: R`
+<h3>0. Flux and fields</h3>
+<p>Magnetic flux through a surface: $\Phi = \iint B\cdot dA$ (Wb), so $B$ (T) is the <b>flux density</b>. Flux lines run from north to south and form closed loops.</p>
+<ul>
+<li>Long straight wire (Biot–Savart): $B = \dfrac{\mu_0}{4\pi}\dfrac{2I}{r}$; direction by the right-hand rule.</li>
+<li>Solenoid: $B = \mu_0 NI$ per unit length (field proportional to turns × current).</li>
+</ul>
+
+<h3>1. Faraday and inductance</h3>
+<p>Flux linkage $\lambda = N\Phi$. A changing flux induces an emf:</p>
+$$e = N\frac{d\Phi}{dt}$$
+<p>Inductance is flux linkage per amp: $L = \lambda/i$, so $e = L\dfrac{di}{dt}$. Unit: henry (H). A conductor moving through a field also has an emf $e = Blu$ (used for motors).</p>
+
+<h3>2. B, H and permeability</h3>
+<p>$H$ (A/m) is set by the currents alone; $B$ also includes the material's magnetisation:</p>
+$$B = \mu H = \mu_0\mu_rH,\qquad \mu_0 = 4\pi\times10^{-7}\text{ H/m}$$
+<p>Ampère's circuital law: $\oint H\cdot dl = \sum i$, which for a uniform path becomes $Hl = Ni$.</p>
+<ul>
+<li>Ferromagnetic: $\mu \gg \mu_0$ (iron, ferrite). Paramagnetic: slightly above $\mu_0$. Diamagnetic: slightly below.</li>
+<li>Above the <b>Curie temperature</b> a ferromagnet becomes merely paramagnetic.</li>
+</ul>
+
+<h3>3. Saturation and hysteresis</h3>
+<p>$B$–$H$ is non-linear. Once all domains are aligned the core <b>saturates</b> (iron: about 1–2 T) and $B$ only grows as if $\mu_r = 1$. Cycling $H$ traces a <b>hysteresis loop</b>: when $H$ returns to zero a residual $B$ remains (the core "remembers"). The area inside the loop is energy turned into heat per cycle, so hysteresis loss ∝ frequency.</p>
+
+<h3>4. Magnetic circuits</h3>
+<p>Treat the core like a circuit:</p>
+<div class="tbl"><table class="data">
+<tr><th>Magnetic</th><th>Electrical analogue</th></tr>
+<tr><td>mmf $\mathcal F = Ni$ (A·turns)</td><td>voltage source</td></tr>
+<tr><td>flux $\Phi$</td><td>current</td></tr>
+<tr><td>reluctance $\mathcal R = \dfrac{l}{\mu A}$</td><td>resistance $R = \dfrac{l}{\sigma A}$</td></tr>
+<tr><td>$\mathcal F = \Phi\mathcal R$</td><td>Ohm's law</td></tr>
+</table></div>
+<p>Series reluctances add; mmfs round a loop sum to zero; flux in = flux out at a junction.</p>
+$$L = \frac{N^2}{\mathcal R_c + \mathcal R_g},\qquad \mathcal R_g = \frac{l_g}{\mu_0A_g}$$
+<p>An <b>air gap</b> dominates the total reluctance. It lowers $L$, raises the saturation current $I_{sat} = \dfrac{B_{sat}A_c(\mathcal R_c + \mathcal R_g)}{N}$, and makes $L$ much less sensitive to the core's permeability.</p>`,
+formulas: [
+ {name:"Flux", tex:R`\Phi = \iint B\cdot dA \approx BA`},
+ {name:"Faraday", tex:R`e = N\frac{d\Phi}{dt} = L\frac{di}{dt}`},
+ {name:"Inductance", tex:R`L = \frac{N\Phi}{i} = \frac{N^2}{\mathcal R}`},
+ {name:"B–H", tex:R`B = \mu_0\mu_rH`},
+ {name:"Ampère", tex:R`Hl = Ni`},
+ {name:"Reluctance", tex:R`\mathcal R = \frac{l}{\mu A}`},
+ {name:"Magnetic Ohm's law", tex:R`Ni = \Phi(\mathcal R_c + \mathcal R_g)`}
+],
+questions: [
+ {src:"Practice (Claude)", see:[4], q:R`A ferrite core has mean path 0.1 m, area $1\ \text{cm}^2$ and $\mu_r = 2000$, with a 1 mm air gap. With 100 turns, find the core and gap reluctances and the inductance. What would $L$ be with no gap?`,
+  hint:"R = l/(μA) for each part; L = N²/R_total.",
+  sol:R`<p>$\mathcal R_c = \dfrac{0.1}{2000(4\pi\times10^{-7})(10^{-4})} = 3.98\times10^5$ A/Wb</p>
+  <p>$\mathcal R_g = \dfrac{10^{-3}}{(4\pi\times10^{-7})(10^{-4})} = 7.96\times10^6$ A/Wb (20× the core)</p>
+  <p>$L = \dfrac{100^2}{8.36\times10^6} = 1.20$ mH. Without the gap: $L = 10^4/3.98\times10^5 = 25$ mH.</p>`,
+  ans:"R_c ≈ 0.40 MA/Wb, R_g ≈ 7.96 MA/Wb, L ≈ 1.2 mH (25 mH ungapped)", prov:"Worked by Claude to practise the magnetic-circuit method. Not from your course files."},
+ {src:"Practice (Claude)", see:[3], q:R`Why does the hysteresis loss of a core rise with frequency, and why does a gapped core saturate at a higher current?`,
+  hint:"Loss per cycle vs cycles per second; I_sat formula.",
+  sol:R`<p>Each trip round the loop turns a fixed energy (the loop area × volume) into heat, so power = energy per cycle × cycles per second ∝ $f$.</p>
+  <p>$I_{sat} = \dfrac{B_{sat}A_c(\mathcal R_c + \mathcal R_g)}{N}$: the gap adds a large reluctance, so more current is needed to drive the core flux up to $B_{sat}$.</p>`,
+  ans:"Loss ∝ f; gap raises total reluctance", prov:"Worked by Claude from the Task 1 supporting notes."}
+],
+traps: [
+ "L = N²/R: inductance scales with turns SQUARED.",
+ "An air gap usually dominates the reluctance even if it's tiny, because μ₀ ≪ μ_core.",
+ "H depends only on the currents; B also depends on the material.",
+ "Saturation happens around 1–2 T for iron: beyond it μ_r effectively drops to 1."
+]
+});
+
+T.topics.push({
+id: "transformers", part: "Task 1: Inductors & transformers", title: "Ideal & Real Transformers: No-Load and Short-Circuit Tests",
+lectures: "Task 1 – Inductance and Ideal Transformers; Supporting Notes §3.3–3.12", status: "lectured",
+summary: "Mutual inductance and the dot convention, ideal transformer voltage, current and impedance ratios, the real transformer model, core and copper losses, laminations, and the two tests (with a two-channel scope) that measure the model. Q2 on every past paper.",
+theory: R`
+<h3>0. Mutual inductance</h3>
+<p>Two coils on one core share flux. The self-terms are $\lambda_{11} = L_1i_1$, $\lambda_{22} = L_2i_2$; the shared terms are $\lambda_{12} = Mi_2$, $\lambda_{21} = Mi_1$, so $\lambda_1 = L_1i_1 \pm Mi_2$. The <b>dot convention</b> sets the sign: currents into both dotted ends make the fluxes add.</p>
+
+<h3>1. The ideal transformer</h3>
+<p>Same flux through both windings (Faraday) and zero net mmf (infinite permeability):</p>
+$$\frac{v_p}{v_s} = \frac{N_p}{N_s},\qquad \frac{i_p}{i_s} = \frac{N_s}{N_p},\qquad p_{in} = p_{out}$$
+<p>$N_p > N_s$: step-down; $N_p < N_s$: step-up. Turns ratio $n = N_s/N_p$.</p>
+<p><b>Reflecting impedance:</b> a load $Z_L$ on the secondary looks like</p>
+$$Z_L' = \left(\frac{N_1}{N_2}\right)^2Z_L$$
+<p>from the primary. E.g. $N_1 = 50$, $N_2 = 100$, 100 Ω load ⇒ 25 Ω seen at the primary.</p>
+
+<h3>2. The real transformer model</h3>
+<p>Series branches $R_1$, $L_1$ (primary) and $R_2$, $L_2$ (secondary) around a shunt branch $L_M \parallel R_C$, then an ideal transformer.</p>
+<div class="tbl"><table class="data">
+<tr><th>Element</th><th>Represents</th></tr>
+<tr><td>$R_1$, $R_2$</td><td>Copper (winding) resistance: $I^2R$ "copper losses"</td></tr>
+<tr><td>$L_1$, $L_2$</td><td><b>Leakage</b> flux that links only one winding; energy stored and returned each cycle</td></tr>
+<tr><td>$L_M$</td><td><b>Magnetising</b> inductance: finite core permeability (non-zero reluctance) needs a magnetising current $I_M$ to set up the flux; $L_M = N_1^2/\mathcal R$</td></tr>
+<tr><td>$R_C$</td><td><b>Core loss</b>: hysteresis (loop area × f) and eddy currents (induced circulating currents heating the core)</td></tr>
+</table></div>
+<p><b>Laminations</b>: thin iron sheets insulated from each other, oriented so the induced emfs are across the insulation. That breaks up eddy-current paths and cuts the $R_C$ losses. Skin effect at high frequency also raises winding resistance.</p>
+
+<h3>3. No-load (open-circuit) test → $R_C$, $L_M$</h3>
+<p>Secondary open, rated voltage on the primary. Only the shunt branch carries current (the series parts are negligible). Scope: Ch1 across a sense resistor $R_{Ch1}$ (current), Ch2 across the primary (voltage).</p>
+$$I = \frac{V_{rms,Ch1}}{R_{Ch1}},\quad V = V_{rms,Ch2},\quad P = \frac{\langle v_{Ch1}v_{Ch2}\rangle}{R_{Ch1}}$$
+$$R_C = \frac{V^2}{P},\quad I_C = \frac{V}{R_C},\quad I_M = \sqrt{I^2 - I_C^2},\quad L_M = \frac{V}{2\pi fI_M}$$
+
+<h3>4. Short-circuit test → $R_{eq}$, $L_{eq}$</h3>
+<p>One winding shorted (usually the low-voltage side), a small voltage applied to the other until <b>rated current</b> flows. The shunt branch is a much higher impedance and the voltage is low, so core losses are negligible; only the series branch remains.</p>
+$$R_{eq} = \frac{P_{SC}}{I_{SC}^2},\quad |Z_{eq}| = \frac{V_{SC}}{I_{SC}},\quad X_{eq} = \sqrt{Z_{eq}^2 - R_{eq}^2},\quad L_{eq} = \frac{X_{eq}}{2\pi f}$$
+<p>Referred to the HV side: $R_{eq,HV} = R_1/a^2 + R_2$, $L_{eq,HV} = L_1/a^2 + L_2$ with $a = N_1/N_2$.</p>
+
+<h3>5. How losses change</h3>
+<ul>
+<li>Core loss $P = V^2/R_C$ and magnetising $Q = V^2/X_M$ depend on the <b>applied voltage</b>: halve $v_P$, quarter them. They don't depend on the load.</li>
+<li>Copper loss $P_{Cu} = i_P^2R_1 + i_S^2R_2$ depends on the <b>currents</b>: with a fixed load, $P_{Cu} \propto v_P^2$; with fixed $v_P$, $P_{Cu} \propto 1/R_{load}^2$.</li>
+</ul>`,
+formulas: [
+ {name:"Voltage ratio", tex:R`\frac{v_p}{v_s} = \frac{N_p}{N_s}`},
+ {name:"Current ratio", tex:R`\frac{i_p}{i_s} = \frac{N_s}{N_p}`},
+ {name:"Reflected impedance", tex:R`Z' = \left(\frac{N_1}{N_2}\right)^2Z_L`},
+ {name:"No-load: core resistance", tex:R`R_C = \frac{V^2}{P}`},
+ {name:"No-load: magnetising", tex:R`L_M = \frac{V}{2\pi f\sqrt{I^2 - (V/R_C)^2}}`},
+ {name:"Short-circuit", tex:R`R_{eq} = \frac{P}{I^2},\ X_{eq} = \sqrt{(V/I)^2 - R_{eq}^2}`},
+ {name:"Core vs copper loss", tex:R`P_{core} = \frac{V^2}{R_C},\quad P_{Cu} = i_P^2R_1 + i_S^2R_2`}
+],
+questions: [
+ {src:"Exam 2025 Q2(a)", see:[2], q:R`For the real transformer model, explain what $L_M$ and $R_C$ represent and why laminated cores are used.`,
+  hint:"One is about finite permeability, the other about two loss mechanisms in the iron.",
+  sol:R`<p>$L_M$: the core has non-zero reluctance (finite permeability), so a magnetising current is needed to set up the working flux. (It's non-linear in reality because of saturation, usually ignored in the model.)</p>
+  <p>$R_C$: power lost in the core to hysteresis (energy per cycle = loop area, so ∝ f) and eddy currents (induced circulating currents heating the iron).</p>
+  <p>Laminations: thin insulated sheets with the insulation across the induced emf direction, blocking eddy-current paths and reducing the $R_C$ loss.</p>`,
+  ans:"Magnetising; hysteresis + eddy losses; laminations cut eddy currents", prov:"Follows the posted exam solution."},
+ {src:"Exam 2025 Q2(b)", see:[3], q:R`Identify a test to find $L_M$ and $R_C$, describe how to do it with a two-channel scope, and derive expressions for them from the measurements.`,
+  hint:"Which test makes the series branch irrelevant?",
+  sol:R`<p><b>No-load (open-circuit) test</b>: secondary open, rated voltage on the primary through a sense resistor $R_{Ch1}$.</p>
+  <p>Ch1 across $R_{Ch1}$ (current), Ch2 across the primary (voltage). Measure $V_{rms,Ch1}$, $V_{rms,Ch2}$ and $\langle v_{Ch1}v_{Ch2}\rangle$.</p>
+  <p>$I = V_{rms,Ch1}/R_{Ch1}$, $V = V_{rms,Ch2}$, $P = \langle v_{Ch1}v_{Ch2}\rangle/R_{Ch1}$</p>
+  <p>$R_C = V^2/P$; $I_C = V/R_C$; $I_M = \sqrt{I^2 - I_C^2}$; $L_M = \dfrac{V}{2\pi f I_M} = \dfrac{V}{2\pi f\sqrt{I^2 - P^2/V^2}}$</p>`,
+  ans:"No-load test; R_C = V²/P; L_M = V/(2πf·√(I² − (P/V)²))", prov:"Follows the posted exam solution (which prints ⟨v_Ch1·v_Ch1⟩; the product needed is Ch1 × Ch2)."},
+ {src:"Sample 2025 Q2(b)", see:[4], q:R`For a 50:100 turn transformer, identify a test to find the equivalent coil resistance and leakage inductance referred to the HV side, and derive them from scope measurements.`,
+  hint:"Short one winding, drive rated current through the other.",
+  sol:R`<p><b>Short-circuit test</b>: short the LV winding, apply a small voltage to the HV winding until rated current flows. The shunt branch is a far higher impedance and core loss is negligible at this low voltage.</p>
+  <p>$I_{SC} = V_{rms,Ch1}/R_{Ch1}$, $V_{SC} = V_{rms,Ch2}$, $P_{SC} = \langle v_{Ch1}v_{Ch2}\rangle/R_{Ch1}$</p>
+  <p>$R_{eq,HV} = P_{SC}/I_{SC}^2$; $Z = V_{SC}/I_{SC}$; $X_{eq} = \sqrt{Z^2 - R_{eq}^2}$; $L_{eq,HV} = X_{eq}/2\pi f$</p>`,
+  ans:"Short-circuit test; R = P/I², L = √((V/I)² − R²)/2πf", prov:"Follows the posted sample-paper solution."},
+ {src:"Exam 2025 Q2(c)", see:[5], q:R`In normal operation, how are the losses in $L_M$ and $R_C$ affected by (i) a decrease in $v_P$, (ii) a decrease in $R_{load}$?`,
+  hint:"The shunt branch only sees the applied voltage.",
+  sol:R`<p>(i) $P = V^2/R_C$ and $Q = V^2/X_M$: both fall <b>quadratically</b>.</p>
+  <p>(ii) The load changes the winding currents, not $v_P$: core $P$ and $Q$ are <b>unchanged</b>.</p>`,
+  ans:"(i) both ∝ v_P²; (ii) unchanged", prov:"Follows the posted exam solution."},
+ {src:"Exam 2026 Q2(c)", see:[5], q:R`With a resistive load, how does a decrease in $v_P$ affect the losses in (i) $R_C$ and (ii) $R_1$?`,
+  hint:"For R₁, follow the currents through the turns ratio.",
+  sol:R`<p>(i) $P_{core} = V^2/R_C$: decreases quadratically.</p>
+  <p>(ii) $v_S = v_P N_2/N_1$, $i_S = v_S/R_{load}$, $i_P = i_SN_2/N_1$: all proportional to $v_P$, so $P_{Cu} \propto v_P^2$: also quadratic.</p>`,
+  ans:"Both decrease ∝ v_P²", prov:"Follows the posted exam solution."},
+ {src:"Practice (Claude)", see:[3], q:R`A no-load test at 50 Hz gives $V = 10$ V rms, $I = 50$ mA rms and $P = 0.2$ W. Find $R_C$ and $L_M$.`,
+  hint:"R_C first, then split the current.",
+  sol:R`<p>$R_C = 10^2/0.2 = 500$ Ω, $I_C = 10/500 = 20$ mA.</p>
+  <p>$I_M = \sqrt{50^2 - 20^2} = 45.8$ mA, $X_M = 10/0.0458 = 218$ Ω, $L_M = 218/(2\pi\cdot50) = 0.695$ H.</p>`,
+  ans:"R_C = 500 Ω, L_M ≈ 0.70 H", prov:"Worked by Claude with made-up numbers to practise the method."}
+],
+traps: [
+ "No-load test → shunt branch (R_C, L_M). Short-circuit test → series branch (R_eq, L_eq). Don't swap them.",
+ "Real power from the scope is the mean of Ch1 × Ch2 divided by the sense resistor.",
+ "Impedance reflects with the turns ratio SQUARED.",
+ "Core losses depend on voltage, not load; copper losses depend on current.",
+ "Laminations reduce eddy-current loss, not hysteresis loss."
+]
+});
+})();
+/* EEN1029 — Task 2 (motors, drives, encoders) and Task 3 (ac switching, from past papers) */
+(function(){
+const R = String.raw;
+const T = STUDY.content.ems = STUDY.content.ems || { topics: [] };
+
+T.topics.push({
+id: "dcmotors", part: "Task 2: Motors", title: "DC Machine Principles & Motor Characteristics",
+lectures: "Task 2 – DC Motors; DC Motor Characteristics", status: "lectured",
+summary: "The linear machine (Lorentz force and back emf), motor vs generator action, commutation, the DC machine equations, torque–speed lines for PM, shunt and series motors, and how brushed, brushless, universal and stepper motors compare.",
+theory: R`
+<h3>0. The linear machine</h3>
+<p>A bar on rails in a perpendicular field $B$, fed from $V_T$ through $R_A$:</p>
+<ul>
+<li>At start: $i_A = V_T/R_A$, force $F = i_Al\times B$ pushes the bar.</li>
+<li>As it moves at speed $u$ it cuts flux: back emf $e_A = Blu$ opposes the supply, so $i_A = (V_T - e_A)/R_A$ falls.</li>
+<li>With no load it settles where $e_A = V_T$.</li>
+<li><b>Motor action:</b> a load slows the bar, $e_A$ drops, current flows and the force balances the load (electrical → mechanical).</li>
+<li><b>Generator action:</b> push it faster, $e_A > V_T$, current reverses (mechanical → electrical).</li>
+</ul>
+
+<h3>1. Construction and commutation</h3>
+<p>Stator: field windings or permanent magnets (even number of poles). Rotor: laminated iron with the armature windings in slots. The <b>commutator</b> (copper segments) and graphite <b>brushes</b> reverse the armature current every half-turn so torque stays one direction. Downsides: wear, sparking/EMI, speed limit, maintenance.</p>
+
+<h3>2. The DC machine equations</h3>
+$$V_T = R_AI_A + E_A,\quad E_A = K\phi\omega_m,\quad T_{dev} = K\phi I_A,\quad P_{dev} = E_AI_A = T_{dev}\omega_m$$
+<p>$K$ is the machine constant, $\phi$ the flux per pole. $T_{out} < T_{dev}$ because of rotational losses (friction, windage, eddy, hysteresis, roughly ∝ speed). Magnetisation curve: $E_A$ vs field current at fixed speed has the shape of $\phi$ vs $I_F$ and flattens with saturation; $E_{A1}/E_{A2} = n_1/n_2$.</p>
+
+<h3>3. Torque–speed characteristics</h3>
+<p><b>PM and shunt / separately excited</b> ($\phi$ constant): a straight line</p>
+$$T_{dev} = \frac{K\phi}{R_A}(V_T - K\phi\omega_m),\qquad T_{stall} = \frac{K\phi V_T}{R_A},\qquad \omega_{no\,load} = \frac{V_T}{K\phi}$$
+<p>Raising $V_T$ shifts the line outward in parallel: simple speed control. Shunt power flow: $P_{in} = V_TI_L$, field loss $V_T^2/(R_F + R_{adj})$, armature loss $I_A^2R_A$.</p>
+<p><b>Series</b> ($I_A = I_F$, $\phi = K_FI_A$):</p>
+$$T_{dev} = KK_FI_A^2 = \frac{KK_FV_T^2}{(R_F + R_A + KK_F\omega_m)^2}$$
+<p>Huge starting torque, speed falls steeply with load, dangerous (runaway) unloaded.</p>
+
+<h3>4. Motor comparison</h3>
+<div class="tbl"><table class="data">
+<tr><th>Type</th><th>Character</th><th>Typical uses</th></tr>
+<tr><td>PM brushed</td><td>Linear T–ω, simple control, compact; brush wear; flux fixed</td><td>Window motors, small tools, robotics</td></tr>
+<tr><td>Shunt</td><td>Nearly constant speed, good regulation, field adjustable</td><td>Machine tools</td></tr>
+<tr><td>Series</td><td>Very high starting torque, T ∝ I²</td><td>Starters, traction, cranes</td></tr>
+<tr><td>Compound</td><td>Between shunt and series</td><td>Elevators</td></tr>
+<tr><td>Universal</td><td>Series motor on ac or dc, laminated stator, fast, noisy</td><td>Power tools, vacuums</td></tr>
+<tr><td>Brushless (BLDC)</td><td>PM rotor, electronic commutation (Hall/encoder), 85–95% efficient</td><td>Drones, EVs, HDDs</td></tr>
+<tr><td>Stepper</td><td>Discrete steps (1.8° = 200/rev), open-loop position, holding torque</td><td>3D printers, CNC</td></tr>
+</table></div>
+
+<h3>5. Speed control of wound-field motors</h3>
+<p>Below rated speed: vary armature voltage at full field (constant torque available). Above rated speed: <b>field weakening</b>, reduce $I_F$ so $\phi$ falls and $\omega \propto 1/\phi$ rises; torque drops, power stays constant.</p>`,
+formulas: [
+ {name:"Armature KVL", tex:R`V_T = R_AI_A + E_A`},
+ {name:"Back emf", tex:R`E_A = K\phi\omega_m`},
+ {name:"Torque", tex:R`T_{dev} = K\phi I_A`},
+ {name:"Power", tex:R`P_{dev} = E_AI_A = T_{dev}\omega_m`},
+ {name:"PM / shunt T–ω", tex:R`T = \frac{K\phi}{R_A}(V_T - K\phi\omega)`},
+ {name:"Stall & no-load", tex:R`T_{stall} = \frac{K\phi V_T}{R_A},\ \omega_{0} = \frac{V_T}{K\phi}`},
+ {name:"Series motor", tex:R`T = \frac{KK_FV_T^2}{(R_F+R_A+KK_F\omega)^2}`}
+],
+questions: [
+ {src:"Practice (Claude)", see:[2,3], q:R`A PM dc motor has $R_A = 2$ Ω and $K\phi = 0.05$ V·s/rad, supplied at 12 V. Find the stall torque, no-load speed (rpm), and the speed, current and developed power at a load torque of 0.1 N·m (ignore rotational losses).`,
+  hint:"I_A = T/Kφ, then E_A = V_T − I_AR_A, then ω = E_A/Kφ.",
+  sol:R`<p>$T_{stall} = 0.05(12)/2 = 0.30$ N·m; $\omega_0 = 12/0.05 = 240$ rad/s = 2292 rpm.</p>
+  <p>At 0.1 N·m: $I_A = 0.1/0.05 = 2$ A, $E_A = 12 - 4 = 8$ V, $\omega = 8/0.05 = 160$ rad/s (1528 rpm).</p>
+  <p>$P_{dev} = E_AI_A = 16$ W $= T\omega = 0.1 \times 160$ ✓.</p>`,
+  ans:"0.30 N·m; 2292 rpm; 1528 rpm, 2 A, 16 W", prov:"Worked by Claude with made-up numbers to practise the equations."},
+ {src:"Exam 2026 Q4(c)", see:[4], q:R`Compare a PM brushed dc motor and a stepper motor for positioning a 3D-printer head that needs high positional accuracy, repeatability and holding torque.`,
+  hint:"Think about feedback, holding torque, maintenance and efficiency.",
+  sol:R`<div class="tbl"><table class="data"><tr><th></th><th>PM brushed dc</th><th>Stepper</th></tr>
+  <tr><td>Control</td><td>Continuous rotation, no position info; needs encoder + closed loop</td><td>Discrete 1.8° steps; position known by counting; open loop</td></tr>
+  <tr><td>Accuracy</td><td>Set by encoder resolution and loop tuning</td><td>Set by step angle; better with microstepping</td></tr>
+  <tr><td>Repeatability</td><td>Feedback corrects drift</td><td>Inherently repeatable, but lost steps go undetected</td></tr>
+  <tr><td>Holding torque</td><td>None passively; servo must actively hold</td><td>Strong holding torque whenever energised</td></tr>
+  <tr><td>Maintenance</td><td>Brushes wear, EMI</td><td>Brushless, essentially maintenance-free</td></tr>
+  <tr><td>Efficiency</td><td>Higher, better at speed</td><td>Lower, runs warm, resonance</td></tr></table></div>
+  <p><b>Stepper</b> is the better choice here.</p>`,
+  ans:"Stepper", prov:"Follows the posted exam solution."}
+],
+traps: [
+ "E_A is the back emf: it opposes the supply, so I_A = (V_T − E_A)/R_A.",
+ "Torque ∝ current, speed ∝ back emf: T = KφI_A and E_A = Kφω.",
+ "Series motors: never run unloaded (speed runs away).",
+ "Use rad/s in the equations; convert rpm = ω × 60/2π at the end.",
+ "T_out < T_dev because of rotational losses."
+]
+});
+
+T.topics.push({
+id: "drive", part: "Task 2: Motors", title: "H-Bridges, PWM & Stepper Control on the ESP32",
+lectures: "Task 2 – DC Motor Control and Encoders; DC Motor Characteristics (stepper control); Task 2 description", status: "lectured",
+summary: "Why an H-bridge is needed, direction and braking, PWM speed control and its practicalities, current sensing, open vs closed loop (P and PI), servos, and driving a bipolar stepper through an SN754410 with full-step sequences. Q4 on every past paper.",
+theory: R`
+<h3>0. Why an H-bridge</h3>
+<ul>
+<li>Lets logic-level signals control a higher-voltage supply to the motor, so the ESP32 sets the <b>polarity</b> across the motor ⇒ bidirectional control.</li>
+<li>A PWM on an input sets the average voltage ⇒ <b>speed</b> control.</li>
+<li>Without it, ESP32 pins give too little voltage and can't supply motor current. The H-bridge gives some protection, but not full isolation.</li>
+</ul>
+<div class="tbl"><table class="data">
+<tr><th>1A</th><th>2A</th><th>Motor</th></tr>
+<tr><td>H (or PWM)</td><td>L</td><td>Clockwise</td></tr>
+<tr><td>L</td><td>H (or PWM)</td><td>Anti-clockwise</td></tr>
+<tr><td>H</td><td>H</td><td><b>Brake</b>: both terminals at the supply, motor shorted; any back emf drives a current that resists rotation</td></tr>
+<tr><td colspan="2">EN low</td><td>Coast (outputs off)</td></tr>
+</table></div>
+<p>Good practice: disable the enable pin, change the inputs, re-enable.</p>
+
+<h3>1. PWM speed control</h3>
+<p>$V_A = I_AR_A + K_e\omega_m$; with light load $V_A \propto \omega_m$. PWM duty cycle $D = t_{on}/T$ gives $V_{avg} = DV_{supply}$; the motor's inductance smooths the current. On the ESP32 Arduino core, <code>analogWrite(pin, 0–255)</code>.</p>
+<ul>
+<li>&lt; 2 kHz: audible whine; 20–50 kHz: good; &gt; 50 kHz: high switching losses.</li>
+<li><b>Dead-time</b> (a short delay when switching) stops both transistors in one leg conducting together (shoot-through = supply shorted).</li>
+</ul>
+
+<h3>2. Current sensing and control loops</h3>
+<p>Shunt resistor: $I_A = V_{shunt}/R_{shunt}$, cheap and accurate but intrusive ($I^2R$ loss), the mV signal needs amplifying, and it must be rated $P > I_{max}^2R$. Hall-effect sensor: isolated and non-invasive, but dearer and less accurate at low current.</p>
+<p><b>Open loop</b>: no feedback, can't correct for load changes. <b>Closed loop</b>: error = setpoint − measured. P control $u = K_pe$ leaves a steady-state error under load; PI $u = K_pe + K_i\int e\,dt$ removes it.</p>
+<p><b>Hobby servos</b>: motor + gearbox + pot + controller in one unit; a 50 Hz signal whose <b>pulse width</b> (≈1–2 ms) sets the angle. For limited-range positioning, not continuous speed.</p>
+
+<h3>3. Steppers</h3>
+<p>Brushless; the rotor follows a stator field held at discrete positions. Hybrid is most common, 1.8° per step (200 steps/rev). Bipolar: one winding per phase, needs an H-bridge per phase, 4 wires, full torque. Unipolar: centre-tapped, simpler drive, about 70% of the torque.</p>
+<div class="tbl"><table class="data">
+<tr><th>Step</th><th>A</th><th>B</th></tr>
+<tr><td>1</td><td>+</td><td>+</td></tr>
+<tr><td>2</td><td>−</td><td>+</td></tr>
+<tr><td>3</td><td>−</td><td>−</td></tr>
+<tr><td>4</td><td>+</td><td>−</td></tr>
+</table></div>
+<p>Step 1→4 one way, 4→1 the other. Half-step doubles the resolution (400/rev); microstepping uses sine-weighted currents (1600, 3200+). Driver ICs (A4988, DRV8825, TMC2208) take STEP and DIR pulses.</p>
+<p><b>Speed:</b> steps per second = rpm × steps/rev ÷ 60, so delay per step = 60 000 ms / (rpm × steps/rev). At 1 rpm with 200 steps/rev: 300 ms per step.</p>
+
+<h3>4. Exam-style code pattern</h3>
+<pre>void motorCW(int duty) {          // duty 0–255
+  digitalWrite(EN, LOW);
+  direction = 1;  count = 0;
+  analogWrite(IN_1A, duty);
+  digitalWrite(IN_2A, LOW);
+  digitalWrite(EN, HIGH);
+}
+void motorBrake() {               // both sides high = shorted motor
+  digitalWrite(EN, LOW);
+  digitalWrite(IN_1A, HIGH); digitalWrite(IN_2A, HIGH);
+  digitalWrite(EN, HIGH);
+}
+void IRAM_ATTR ISR() { count += direction; }</pre>
+<p>Sequence long tasks with a <code>stage</code> variable in <code>loop()</code> and compare <code>count</code> with the target. For fractions of a turn use <code>CHANGE</code> interrupts to double the counts.</p>`,
+formulas: [
+ {name:"PWM average", tex:R`V_{avg} = D\,V_{supply},\ D = t_{on}/T`},
+ {name:"Steps per rev", tex:R`N = 360^\circ/\theta_{step}`},
+ {name:"Step delay", tex:R`t_{step} = \frac{60}{\text{rpm}\times N}`},
+ {name:"Shunt", tex:R`I_A = \frac{V_{shunt}}{R_{shunt}},\ P = I^2R`},
+ {name:"PI control", tex:R`u = K_pe + K_i\int e\,dt`}
+],
+questions: [
+ {src:"Exam 2025 Q4(a)", see:[0], q:R`Explain why the H-bridge is necessary and why the ESP32 can't drive the motor directly.`,
+  hint:"Direction, speed, voltage and current, protection.",
+  sol:R`<p>The H-bridge lets logic-level inputs switch a higher-voltage supply across the motor; its output polarity follows the inputs, giving bidirectional control, and PWM on an input controls speed. It gives some (not complete) protection to the ESP32.</p>
+  <p>Directly, the ESP32's logic voltage would be too low to drive the motor and the motor current far too high for its pins.</p>`,
+  ans:"Bidirectional + PWM speed control; ESP32 can't supply the voltage/current", prov:"Follows the posted exam solution."},
+ {src:"Exam 2025 Q4(b)", see:[0], q:R`What does the motor do when <code>motorBrake()</code> sets 1A and 2A both HIGH with the bridge enabled?`,
+  hint:"Same voltage on both terminals.",
+  sol:R`<p>Both outputs sit at the motor supply, effectively shorting the motor. Turning the shaft would generate an emf, which now drives a current that opposes the rotation, so the motor resists being turned: it brakes.</p>`,
+  ans:"Motor shorted → dynamic braking", prov:"Follows the posted exam solution."},
+ {src:"Exam 2026 Q4(b)", see:[3,4], q:R`A 1.8° bipolar stepper on an SN754410. Write code to (1) turn 20 steps clockwise, (2) stop for 2 s, (3) turn one rotation anti-clockwise at 1 rpm, (4) stop.`,
+  hint:"200 steps/rev; at 1 rpm, 60 000 ms / 200 = 300 ms per step. Index the 4-step table with position mod 4.",
+  sol:R`<p>200 steps per rotation. Delay per step at 1 rpm = 300 ms.</p>
+<pre>void setup() {
+  /* pin setup as given */
+  rotate(+1, 20, 10);       // 20 steps CW, 10 ms/step
+  delay(2000);
+  rotate(-1, 200, 300);     // 1 rev CCW at 1 rpm
+}
+void loop() { }
+
+void rotate(int dir, unsigned long steps, unsigned int ms) {
+  for (unsigned long i = 0; i &lt; steps; i++) {
+    position += dir;
+    switch (((position % 4) + 4) % 4) {
+      case 0: set_output_pins(1,0,1,0); break;  // A+ B+
+      case 1: set_output_pins(0,1,1,0); break;  // A- B+
+      case 2: set_output_pins(0,1,0,1); break;  // A- B-
+      case 3: set_output_pins(1,0,0,1); break;  // A+ B-
+    }
+    delay(ms);
+  }
+}</pre>`,
+  ans:"200 steps/rev, 300 ms/step at 1 rpm", prov:"Follows the posted exam solution, tidied by Claude: the posted loop steps by 'direction' and uses abs(position) % 4, which miscounts going anti-clockwise."},
+ {src:"Exam 2025 Q4(c)", see:[4,1], q:R`A brushed motor with a 10-gap encoder (rising-edge interrupt) on an H-bridge. Outline code to: 1 turn CW; stop 2 s; 1 turn CW at about half speed; stop 2 s; 0.75 turn anti-clockwise; stop.`,
+  hint:"PWM for speed, a direction variable in the ISR, CHANGE interrupts for 20 counts/rev, and a stage variable.",
+  sol:R`<ul><li>Speed: <code>analogWrite</code> on 1A (CW) or 2A (CCW) with duty 250 then 125.</li>
+  <li>Direction: global <code>direction</code> = ±1 set in <code>motorCW/motorCCW</code>, and <code>count += direction</code> in the ISR; reset <code>count</code> at each move.</li>
+  <li>Resolution: 10 rising edges per rev can't give 0.75 rev (7.5). Use <code>CHANGE</code> ⇒ 20 interrupts/rev, so 0.75 rev = 15 counts.</li>
+  <li><code>loop()</code> with <code>switch(stage)</code>: stage 1 wait for count ≥ 20 → brake, 2 s, CW at 125; stage 2 count ≥ 20 → brake, 2 s, CCW; stage 3 count ≤ −15 → brake.</li></ul>`,
+  ans:"PWM + direction + CHANGE interrupts (20/rev) + stage machine", prov:"Follows the posted exam solution."}
+],
+traps: [
+ "1A = 2A = HIGH is brake, not stop-and-coast. Disabling EN lets it coast.",
+ "Speed comes from PWM duty, not from the H-bridge supply.",
+ "Steps per rev = 360/1.8 = 200. Delay per step = 60 s ÷ (rpm × 200).",
+ "Going backwards through the step table: don't use abs(position) % 4. Use ((position % 4) + 4) % 4.",
+ "Keep ISRs short; no delays inside them."
+]
+});
+
+T.topics.push({
+id: "encoders", part: "Task 2: Motors", title: "Encoders, Interrupts & Signal Interfacing",
+lectures: "Task 2 – DC Motor Control and Encoders", status: "lectured",
+summary: "Incremental encoders (optical and Hall), quadrature signals and direction, 4× decoding and speed calculation, signal conditioning and noise immunity, and writing interrupt-driven encoder code on the ESP32.",
+theory: R`
+<h3>0. Incremental encoders</h3>
+<p>They turn rotation into pulses and measure <b>change</b> in position (so they need homing at power-up). PPR = pulses per revolution per channel.</p>
+<ul>
+<li><b>Optical:</b> LED and detector through a slotted wheel (transmissive, very high resolution) or off a patterned disc (reflective, compact). Need a clean environment and precise alignment.</li>
+<li><b>Magnetic / Hall:</b> a multipole magnet passes two Hall sensors 90° apart; comparators give digital outputs. Robust to dust, oil and vibration; long life.</li>
+</ul>
+
+<h3>1. Quadrature</h3>
+<p>Two square waves A and B, 90° apart. If A leads B the shaft turns one way; if B leads A, the other. Check B's level on each rising edge of A. The pair cycles through four states (00, 01, 11, 10), so counting every edge on both channels gives <b>4 × PPR</b> counts per rev.</p>
+$$\text{rpm} = \frac{\Delta C \times 60}{4\times\text{PPR}\times\Delta t}$$
+<p>Short $\Delta t$: fast updates but noisy at low speed; long $\Delta t$: smooth but slow.</p>
+
+<h3>2. Signal conditioning</h3>
+<ul>
+<li><b>Level matching:</b> divider from 5 V to ≤ 3.3 V (e.g. 2 kΩ / 3.3 kΩ ⇒ 3.1 V).</li>
+<li><b>Noise immunity:</b> Schmitt triggers (hysteresis between rising and falling thresholds), RC low-pass ($f_c = 1/2\pi RC$, balanced against signal speed), pull-ups/pull-downs for open-collector outputs.</li>
+<li><b>Protection</b> against ESD and overvoltage. Poor conditioning means damaged pins, miscounts and unreliable behaviour.</li>
+</ul>
+
+<h3>3. Interrupts on the ESP32</h3>
+<ul>
+<li>Interrupts only act when a pin changes, so no counts are missed even if <code>loop()</code> is busy (polling wastes time and misses edges).</li>
+<li><code>attachInterrupt(digitalPinToInterrupt(pin), isr, CHANGE)</code>: <code>RISING</code> counts one edge per pulse; <code>CHANGE</code> counts both.</li>
+<li>Variables changed in an ISR must be <code>volatile</code>; <code>IRAM_ATTR</code> puts the ISR in fast RAM.</li>
+<li>Keep ISRs short: set a flag or update a counter; do timing in <code>loop()</code>.</li>
+</ul>
+
+<h3>4. Full 4× quadrature decoder</h3>
+<p>Attach <code>CHANGE</code> interrupts to <b>both</b> A and B, and use the previous and current states (4 bits):</p>
+<pre>volatile long position = 0;
+volatile bool Aprev, Bprev;
+void IRAM_ATTR encoderISR() {
+  bool A = digitalRead(ENC_A), B = digitalRead(ENC_B);
+  uint8_t s = (Aprev &lt;&lt; 3) | (Bprev &lt;&lt; 2) | (A &lt;&lt; 1) | B;
+  if (s==0b1110 || s==0b0111 || s==0b0001 || s==0b1000) position++;  // CW
+  if (s==0b1101 || s==0b0100 || s==0b0010 || s==0b1011) position--;  // CCW
+  Aprev = A; Bprev = B;
+}</pre>`,
+formulas: [
+ {name:"Counts per rev (4×)", tex:R`4\times\text{PPR}`},
+ {name:"Speed", tex:R`\text{rpm} = \frac{60\,\Delta C}{4\,\text{PPR}\,\Delta t}`},
+ {name:"RC filter", tex:R`f_c = \frac{1}{2\pi RC}`},
+ {name:"Level divider", tex:R`V_{out} = V_{in}\frac{R_2}{R_1+R_2}`}
+],
+questions: [
+ {src:"Exam 2026 Q3(c)", see:[3,4,1], q:R`The given code increments <code>position</code> on each RISING edge of channel A only. Adapt it so <code>position</code> increases clockwise and decreases anti-clockwise, with the highest possible resolution.`,
+  hint:"Both channels, CHANGE, compare previous and current A/B states.",
+  sol:R`<p>Store the previous A and B; attach <code>CHANGE</code> interrupts to <b>both</b> pins (the posted answer attaches A twice by mistake); in the ISR form the 4-bit code (Aprev Bprev A B), increment for the CW transitions and decrement for the CCW ones (see section 4). This counts all four edges per cycle: 4 × 8 = 32 counts per rev instead of 8.</p>`,
+  ans:"4× decoding on both channels: 32 counts/rev", prov:"Follows the posted exam solution, with Claude's note on the duplicated attachInterrupt line."},
+ {src:"Exam 2026 Q3(b)", see:[1], q:R`Sketch the encoder outputs $v_A$ and $v_B$ at constant speed (i) clockwise and (ii) anti-clockwise.`,
+  hint:"Same square waves, but which leads swaps.",
+  sol:R`<p>Two equal square waves offset by a quarter period. (i) A leads B by 90°. (ii) B leads A by 90°. (Which you call clockwise depends on the sensor placement; the point is that the lead swaps.)</p>`,
+  ans:"Quadrature, lead swaps with direction", prov:"Worked by Claude; the posted solution is a sketch."},
+ {src:"Practice (Claude)", see:[1], q:R`An 8-PPR encoder read in 4× mode counts 160 edges in 0.1 s. What is the shaft speed?`,
+  hint:"Counts per rev = 32.",
+  sol:R`<p>$\text{rpm} = \dfrac{160 \times 60}{32 \times 0.1} = 3000$ rpm.</p>`,
+  ans:"3000 rpm", prov:"Worked by Claude."}
+],
+traps: [
+ "4× resolution needs interrupts on BOTH channels with CHANGE.",
+ "Variables shared with an ISR must be volatile.",
+ "An incremental encoder doesn't know absolute position after power-up: it needs homing.",
+ "Don't connect a 5 V output straight to an ESP32 pin."
+]
+});
+
+T.topics.push({
+id: "triacs", part: "Task 3: AC switching", title: "Thyristors, TRIACs & Zero-Crossing Phase Control",
+lectures: "Not lectured yet: built from the 2025/2026 past papers and Task 3 component datasheets", status: "pending",
+summary: "Thyristor operating modes, TRIACs and DIACs, firing angle, optocoupled TRIAC drivers (MOC30xx), zero-crossing detection (H11L1), resistor sizing, and phase-control code. Q5 on every past paper. Revisit when the Task 3 lectures are posted.",
+theory: R`
+<h3>0. Thyristor (SCR) modes</h3>
+<ul>
+<li><b>Reverse blocking:</b> reverse-biased like a diode; off, leakage only.</li>
+<li><b>Forward blocking:</b> forward-biased but not yet triggered (no gate current); off.</li>
+<li><b>Forward conducting:</b> triggered by a gate pulse; stays on, even with no gate signal, until the current falls below the <b>holding current</b> $I_H$.</li>
+</ul>
+<p><b>TRIAC</b>: conducts both ways, like two anti-parallel thyristors with one gate, so it can control both half-cycles of ac (preferred for ac motors and heaters). <b>DIAC</b>: a gateless TRIAC that conducts once its symmetric breakover voltage is reached.</p>
+
+<h3>1. Phase control</h3>
+<p>The <b>firing angle</b> α is measured from the zero crossing (0–180° each half-cycle). Firing later delivers less of each half-cycle to the load, so less average power. Delay in time: $t = \dfrac{\alpha}{360^\circ}\cdot\dfrac{1}{f}$, e.g. 90° at 50 Hz = 5 ms.</p>
+<p>The load voltage jumps from 0 to the source voltage at firing, follows the source, then drops to 0 just before the zero crossing when the current falls below $I_H$.</p>
+
+<h3>2. Optocoupled TRIAC driver (MOC3021/3031)</h3>
+<ul>
+<li>Isolates the logic side (ESP32) from mains, letting 3.3 V logic fire a high-voltage device.</li>
+<li>Its small photo-TRIAC can't carry the load current, so it fires a power TRIAC (BT136) that does.</li>
+<li>LED resistor: $R_1 = \dfrac{3.3 - V_F}{I_F}$ (≈ 35 Ω for 60 mA, $V_F$ = 1.2 V): use at least this to stay within $I_F$, while still giving enough trigger current.</li>
+<li>Gate resistor $R_2 > V_{peak}/I_{TSM}$: e.g. $220\sqrt2/1\text{ A} = 311$ Ω, protecting the photo-TRIAC from turn-on surge.</li>
+</ul>
+
+<h3>3. Zero-crossing detection (H11L1 Schmitt optocoupler)</h3>
+<ul>
+<li>A <b>bridge rectifier</b> lets the single input LED light on both half-cycles (a pulse every 10 ms at 50 Hz) and protects it from 311 V reverse (rating 6 V).</li>
+<li><b>Series resistor</b> sets the LED current between the turn-on threshold (1.6 mA) and the maximum (30 mA): $R \ge (311 - 1.2)/30\text{ mA} = 10.3$ kΩ; a 10 mA design gives 33 kΩ.</li>
+<li><b>Decoupling capacitor</b> on the output-side supply gives clean switching edges.</li>
+<li>The detector's edge often comes slightly before the true zero crossing; compensate in software.</li>
+</ul>
+
+<h3>4. Phase-control code</h3>
+<pre>volatile bool zcFlag = false;
+void IRAM_ATTR readZC_ISR() { zcFlag = true; }   // keep the ISR short
+void loop() {
+  if (zcFlag) {
+    zcFlag = false;
+    delayMicroseconds(ZC_COMPENSATION);                 // e.g. 1000 us
+    delayMicroseconds(convert_phase_to_microsec(firingAngle, freq));
+    digitalWrite(PIN_TRIAC, LOW);                         // fire (active low)
+    delayMicroseconds(pulseWidth);
+    digitalWrite(PIN_TRIAC, HIGH);
+  }
+}</pre>`,
+formulas: [
+ {name:"Firing delay", tex:R`t = \frac{\alpha}{360^\circ f}`},
+ {name:"LED resistor", tex:R`R = \frac{V_{supply} - V_F}{I_F}`},
+ {name:"Surge resistor", tex:R`R_2 > \frac{V_{peak}}{I_{TSM}}`},
+ {name:"Mains peak", tex:R`V_{peak} = \sqrt2V_{rms}`}
+],
+questions: [
+ {src:"Exam 2025 Q5(a)", see:[0], q:R`Outline the three operating modes of a thyristor; the differences between a thyristor, TRIAC and DIAC; and why a TRIAC is preferred for controlling an ac motor.`,
+  hint:"Two blocking modes and one conducting; one-way vs two-way.",
+  sol:R`<p>Reverse blocking (off, leakage only); forward blocking (forward biased but not triggered, off); forward conducting (triggered, stays on until current &lt; holding current).</p>
+  <p>Thyristor conducts one way; TRIAC both ways (≈ two anti-parallel thyristors, one gate); DIAC is a gateless TRIAC that conducts at its breakover voltage.</p>
+  <p>A TRIAC can conduct in both half-cycles of the ac supply.</p>`,
+  ans:"See modes; TRIAC = bidirectional", prov:"Follows the posted exam solution."},
+ {src:"Exam 2026 Q5(a)", see:[3], q:R`In the zero-crossing circuit, explain the purpose of the four diodes, R1 and C1, and size R1 for 220 V rms mains (H11L1: $V_F$ = 1.2 V, $V_R$ = 6 V max, $I_{F(on)}$ = 1.6 mA, $I_F$ = 30 mA max).`,
+  hint:"Worst-case current is at the mains peak, 311 V.",
+  sol:R`<p>Diodes: bridge rectifier, so the LED lights on both half-cycles (pulse every 10 ms) and never sees 311 V reverse.</p>
+  <p>R1: limits LED current between 1.6 and 30 mA. C1: decouples the output-side supply for clean edges.</p>
+  <p>$R_1 \ge (311 - 1.2)/0.03 = 10.3$ kΩ. Designing for 10 mA: 30.8 kΩ ⇒ 33 kΩ (peak 9.3 mA).</p>`,
+  ans:"R1 = 33 kΩ (≥ 10.3 kΩ)", prov:"Follows the posted exam solution."},
+ {src:"Exam 2026 Q5(b)", see:[1,2], q:R`Why are both the MOC3021M and the BT136 needed? From $v_{load}$, explain the jump at 5 ms and the drop at 9.5 ms, and find the load current just before 9.5 ms (BT136 $I_H$ = 2.2 mA).`,
+  hint:"Isolation vs current capacity; a TRIAC switches off at its holding current.",
+  sol:R`<p>The MOC3021M isolates the ESP32 from mains and fires the TRIAC; the BT136 carries the load current, which the MOC's small photo-TRIAC can't.</p>
+  <p>5 ms: firing pulse (90°), the TRIAC switches on and $v_{load}$ jumps to the source voltage.</p>
+  <p>9.5 ms: current falls below $I_H$ and the TRIAC turns off. Current just before = $I_H$ = <b>2.2 mA</b>.</p>`,
+  ans:"I = I_H = 2.2 mA", prov:"Follows the posted exam solution."},
+ {src:"Exam 2025 Q5(b)", see:[2], q:R`An MOC3031M drives a TRIAC on 220 V rms, 50 Hz from a 3.3 V ESP32 pin ($I_F$ = 60 mA, $V_F$ ≈ 1.15–1.2 V, $I_{TSM}$ = 1 A). Explain the MOC3031M's purpose and size R1 (LED) and R2 (gate).`,
+  hint:"R1 from the LED loop; R2 from peak mains over surge current.",
+  sol:R`<p>The MOC3031M isolates the logic side from mains and lets logic levels control the high-voltage TRIAC.</p>
+  <p>$R_1 = (3.3 - 1.2)/0.06 \approx 35$ Ω (the minimum to keep within 60 mA).</p>
+  <p>$R_2 > 220\sqrt2/1 = 311$ Ω.</p>`,
+  ans:"R1 ≈ 35 Ω; R2 > 311 Ω", prov:"Follows the posted solutions. The 2025 paper writes 'R1 < 47 Ω'; staying within I_F actually needs R1 ≥ 35 Ω, which is how the sample paper treats it."},
+ {src:"Exam 2026 Q5(c)", see:[4,3], q:R`The phase-control code puts the firing delay inside the zero-crossing ISR and ignores the fact that the detector's edge arrives 1 ms before the true zero crossing. Fix both.`,
+  hint:"Flag in ISR, timing in loop, add 1 ms.",
+  sol:R`<p>Issue 1: the 1 ms early edge isn't compensated ⇒ add a 1000 µs delay before the firing delay.</p>
+  <p>Issue 2: long blocking delays inside an ISR ⇒ ISR just sets <code>zcFlag</code>; do the timing in <code>loop()</code> (see section 4).</p>`,
+  ans:"Compensate 1 ms; move timing out of the ISR", prov:"Follows the posted exam solution."}
+],
+traps: [
+ "A thyristor/TRIAC stays on after the gate pulse until the current drops below the HOLDING current.",
+ "Worst-case LED current is at the mains PEAK: 220 V rms × √2 = 311 V.",
+ "A bridge rectifier gives a zero-crossing pulse every 10 ms at 50 Hz (twice per cycle).",
+ "No long delays inside an ISR.",
+ "Firing angle is measured from the zero crossing: 90° at 50 Hz = 5 ms."
+]
+});
+})();
+/* EEN1029 past papers: questions live on the topic pages and are gathered here by source */
+(function(){
+const T = STUDY.content.ems = STUDY.content.ems || { topics: [] };
+T.tutorials = [
+ { id:"e26", short:"26", title:"2026 Exam (with posted solutions)", note:"Q1 AC power · Q2 transformers · Q3 encoders · Q4 steppers · Q5 TRIAC", fromTopics:"Exam 2026 ", intro:"The most recent paper. Answer 4 of 5 in 2 hours." },
+ { id:"e25", short:"25", title:"2025 Exam (with posted solutions)", note:"Q1 AC power · Q2 transformers · Q3 signal conditioning · Q4 H-bridge · Q5 TRIAC", fromTopics:"Exam 2025 ", intro:"Same five-question structure as 2026." },
+ { id:"s25", short:"S", title:"2025 Sample Paper", note:"Selected questions", fromTopics:"Sample 2025 ", intro:"Questions from the sample paper that add something beyond the two real papers." }
+];
 })();
 /* MEC1014 Mechanics of Machines — free vibration (Lecture 1, Tutorials 1–3) */
 (function(){
