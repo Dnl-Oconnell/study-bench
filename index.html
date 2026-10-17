@@ -444,7 +444,7 @@ h3.subhead{font-family:var(--f-display);font-weight:650;font-size:21px;margin:34
 [data-skin="workshop"] .plateid::before,[data-skin="workshop"] .plateid::after{content:"";width:5px;height:5px;border-radius:50%;background:#5c4a00;box-shadow:inset 0 1px 0 rgba(0,0,0,.5)}
 
 /* ---- hangar hero ---- */
-.hero{position:relative;height:clamp(340px,46vw,580px);overflow:hidden;background:#0b0b0a;border-bottom:12px solid transparent;border-image:repeating-linear-gradient(-45deg,#f5c518 0 12px,#121110 12px 24px) 12}
+.hero{position:relative;height:clamp(340px,46vw,720px);overflow:hidden;background:#0b0b0a;border-bottom:12px solid transparent;border-image:repeating-linear-gradient(-45deg,#f5c518 0 12px,#121110 12px 24px) 12}
 .hero.short{height:clamp(220px,26vw,300px)}
 .hero canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .hero .hero-txt{position:absolute;left:0;right:0;bottom:0;top:0;display:flex;align-items:flex-end;padding:24px max(16px,env(safe-area-inset-left,0px)) 26px;background:linear-gradient(90deg,rgba(10,10,9,.92) 0%,rgba(10,10,9,.72) 32%,rgba(10,10,9,0) 58%),linear-gradient(180deg,transparent 60%,rgba(10,10,9,.55))}
@@ -1941,7 +1941,7 @@ function home(){
   const sem = curSem();
   const ready = sem.modules.filter(id=>S.content[id]);
   const nTopics = ready.reduce((a,id)=>a+S.content[id].topics.length,0), nQ = ready.reduce((a,id)=>a+S.content[id].topics.reduce((x,t)=>x+t.questions.length,0),0);
-  let h = `<div class="hero"><img class="heroimg" src="${S.art.bay}" alt="" style="object-position:62% 55%"><div class="sign" aria-hidden="true"><span class="tri"><i></i></span><span class="txt"><b>Caution</b><span>Unit in maintenance</span></span></div><div class="hero-txt"><div class="wrap">
+  let h = `<div class="hero"><img class="heroimg" src="${S.art.bay}" alt="" style="object-position:62% 12%"><div class="sign" aria-hidden="true"><span class="tri"><i></i></span><span class="txt"><b>Caution</b><span>Unit in maintenance</span></span></div><div class="hero-txt"><div class="wrap">
     <span class="eyebrow">DCU · ${esc(sem.year||"Year 3")} · Engineering hangar</span>
     <h1>${esc(sem.year||"Year 3")} · ${esc(sem.name)}</h1>
     <div class="readout"><span><b>${sem.modules.length}</b> modules docked</span><span><b>${nTopics}</b> topics ready</span><span><b>${nQ}</b> practice questions</span></div>
