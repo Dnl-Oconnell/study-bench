@@ -20,9 +20,9 @@ window.STUDY = {
     da: { code:"MEC1029", name:"Data Analytics for Engineers", color:"--m-da", ready:true,
       assess:"100% CA: open-book Loop quizzes in the Friday slot (SA101): week 4 5%, week 7 10%, week 10 15%, week 12 final 70%",
       blurb:"Statistics in R: summaries, tables and probability, the normal model, regression, time series, confidence intervals, t-tests, ANOVA and non-parametric tests." },
-    pd: { code:"MEC1017", name:"Product Design", color:"--m-pd", ready:false,
-      blurb:"The FireFighter design project and product design specifications.",
-      planned:[ ["Project","Module overview & the FireFighter brief"],["Process","Product design specifications"] ] }
+    pd: { code:"MEC1017", name:"Product Design", color:"--m-pd", ready:true,
+      assess:"Semester 1 = 50%: design review presentation (wk 5–6) 20%, SW assembly & animation (wk 9) 15%, spring–damper & circuit review (wk 10) 10%, motion simulation (wk 11) 15%, drawings & order list (wk 12) 20%, design portfolio (wk 13) 20%. Semester 2 build & competition = 50%",
+      blurb:"The FireFighter ladder-climbing robot: brief and constraints, product design specifications, concept selection with weighted matrices, and the real hardware limits." }
   },
   content: {}
 };

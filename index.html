@@ -660,12 +660,12 @@ window.STUDY = {
     mom: { code:"MEC1014", name:"Mechanics of Machines", color:"--m-mom", ready:true,
       assess:"Continuous assessment 100%: quizzes in weeks 4, 8, 10 (10% each) and a final quiz in week 12 (40%); two practical submissions (10% each); SolidWorks assignment 10%",
       blurb:"Free and forced vibration of single degree of freedom systems, then gear trains and epicyclic gears." },
-    da: { code:"MEC1029", tutorials:["Tutorial 1: Introduction to R and databases","Tutorial 2: Data frames","Tutorial 3: Data visualisation and missing data","Tutorial 4: Subsetting datasets","Tutorial 5: Relationships between factors","Tutorial 6: Non-linear relationships","Tutorial 7: Simulating the central limit theorem","Tutorial 8: More on time series","Tutorial 9: Confidence intervals and the Framingham Heart Study","Tutorial 10: Non-parametric tests in R"], name:"Data Analytics for Engineers", color:"--m-da", ready:false,
-      blurb:"Statistics in R: summaries, probability, regression, time series, inference, t-tests and ANOVA.",
-      planned:[ ["Describing data","Summary statistics"],["Describing data","Relationships between variables"],["Probability","Further probability"],["Relationships","Two continuous variables & regression"],["Relationships","How good is my model?"],["Time series","Time series analysis"],["Inference","Inference & the central limit theorem"],["Inference","Small samples"],["Inference","Comparing sample means"],["Inference","Small independent samples and paired t-tests"],["Inference","Confidence intervals for the standard deviation"],["Inference","ANOVA"] ] },
-    pd: { code:"MEC1017", name:"Product Design", color:"--m-pd", ready:false,
-      blurb:"The FireFighter design project and product design specifications.",
-      planned:[ ["Project","Module overview & the FireFighter brief"],["Process","Product design specifications"] ] }
+    da: { code:"MEC1029", name:"Data Analytics for Engineers", color:"--m-da", ready:true,
+      assess:"100% CA: open-book Loop quizzes in the Friday slot (SA101): week 4 5%, week 7 10%, week 10 15%, week 12 final 70%",
+      blurb:"Statistics in R: summaries, tables and probability, the normal model, regression, time series, confidence intervals, t-tests, ANOVA and non-parametric tests." },
+    pd: { code:"MEC1017", name:"Product Design", color:"--m-pd", ready:true,
+      assess:"Semester 1 = 50%: design review presentation (wk 5–6) 20%, SW assembly & animation (wk 9) 15%, spring–damper & circuit review (wk 10) 10%, motion simulation (wk 11) 15%, drawings & order list (wk 12) 20%, design portfolio (wk 13) 20%. Semester 2 build & competition = 50%",
+      blurb:"The FireFighter ladder-climbing robot: brief and constraints, product design specifications, concept selection with weighted matrices, and the real hardware limits." }
   },
   content: {}
 };
@@ -1774,6 +1774,903 @@ const see = {
 const c = STUDY.content.msp;
 c.topics.forEach(t => (see[t.id]||[]).forEach((s,i) => { if (t.questions[i]) t.questions[i].see = s; }));
 c.tutorials[0].questions.forEach(q => { if (q.nums[0]===35) q.see = [3]; });
+})();
+/* MEC1029 Data Analytics for Engineers — part A: R basics, describing data, relationships, time series */
+(function(){
+const R = String.raw;
+const T = STUDY.content.da = STUDY.content.da || { topics: [] };
+const LOOP = "Worked in your MEC1029 answer bank (re-computed in R from the course datasets); Loop's marking from the 2025 sitting is noted where it was visible.";
+
+T.topics.push({
+id: "rbasics", part: "Getting started", title: "R, Data Structures & Reading Data",
+lectures: "Lecture 1; Tutorials 1–2", status: "lectured",
+summary: "The four types of analytics, base R vs RStudio, packages, setting the working directory and reading CSV, .data, JSON, Excel and XML files, then R's data types and structures: vectors, data frames, matrices, arrays, lists and time series.",
+theory: R`
+<h3>0. What data analytics is for</h3>
+<p>Separating signal from noise to make useful predictions. Four components: generation, storage, retrieval, analysis. Four types:</p>
+<div class="tbl"><table class="data">
+<tr><th>Type</th><th>Question</th></tr>
+<tr><td>Descriptive</td><td>What happened? (sales up this month?)</td></tr>
+<tr><td>Diagnostic</td><td>Why did it happen? (did the weather affect sales?)</td></tr>
+<tr><td>Predictive</td><td>What is likely to happen next?</td></tr>
+<tr><td>Prescriptive</td><td>What should we do about it?</td></tr>
+</table></div>
+<p>Techniques named: regression, factor analysis, cohort analysis, Monte Carlo simulation, time-series analysis.</p>
+
+<h3>1. R, packages and the working directory</h3>
+<p>Base R is all you need (one-line commands); RStudio adds an editor, history and plot pane. Packages come from CRAN:</p>
+<pre>install.packages("dplyr")   # once (quotes!)
+library(dplyr)              # every session
+setwd("~/R")                # folder holding your data
+getwd()                     # check it</pre>
+<p>The three packages the course leans on: <code>swirl</code> (interactive R course), <code>dplyr</code> (data manipulation), <code>ggplot2</code> (graphics).</p>
+
+<h3>2. Reading data</h3>
+<div class="tbl"><table class="data">
+<tr><th>Format</th><th>Code</th></tr>
+<tr><td>CSV (most common)</td><td><code>d &lt;- read.csv("file.csv")</code> → a data frame</td></tr>
+<tr><td>.data / text</td><td><code>read.table("auto-mpg.data")</code>; add <code>sep = ","</code> for commas; name columns with <code>names(d)[1] &lt;- "mpg"</code></td></tr>
+<tr><td>JSON</td><td><code>library(rjson); fromJSON(file = "iris.json")</code> → a list; <code>as.data.frame()</code></td></tr>
+<tr><td>Excel</td><td><code>library(readxl); read_excel("x.xls")</code></td></tr>
+<tr><td>XML</td><td><code>library(XML); xmlParse(file = "x.xml")</code></td></tr>
+</table></div>
+<p>Built-in datasets: <code>data()</code> lists them (iris, mtcars, airquality, women, cars, AirPassengers, ...).</p>
+
+<h3>3. Data types and structures</h3>
+<ul>
+<li>Types: character <code>"25"</code>, numeric <code>12</code>, integer <code>30L</code>, complex <code>5+6i</code>, logical <code>TRUE/FALSE</code>. Check with <code>class(x)</code>.</li>
+<li><b>Vector</b> <code>c(58, 85, 77)</code>, <code>1:10</code>; index <code>v[3]</code>, <code>v[c(3,4)]</code>; <code>length(v)</code>.</li>
+<li><b>Data frame</b>: columns of possibly different types; what <code>read.csv</code> returns. <code>d$col</code>, <code>d[8, c(1,2,3)]</code>, <code>d[1000, 9]</code> = row 1000, column 9.</li>
+<li><b>Matrix</b> (one type, 2-D): <code>matrix(c(...), nrow = 3, byrow = TRUE)</code>; <code>det(m)</code>, <code>solve(m)</code> (inverse).</li>
+<li><b>Array</b> (more than 2-D), <b>list</b> (anything, <code>[[1]]</code>), <b>time series</b> <code>ts(x, start = c(2021,1), frequency = 12)</code>; class <code>"ts"</code>.</li>
+</ul>
+<p>First look at any dataset: <code>class</code>, <code>names</code>, <code>head</code>/<code>tail</code>, <code>dim</code>, <code>str</code>, <code>summary</code>.</p>`,
+formulas: [
+ {name:"Install & load", tex:R`\texttt{install.packages("pkg")};\ \texttt{library(pkg)}`},
+ {name:"Element access", tex:R`\texttt{d[row, col]}`, note:"d[1000, 9] = row 1000, column 9"}
+],
+questions: [
+ {src:"Quiz 1 (2025) Q8", see:[3], q:R`Find the determinant of the 4×4 matrix filled <b>by rows</b> with 1, 0, −1, 2, 2, 3, 4, 5, 1, 0, −1, 4, 6, −5, 7, 9.`,
+  hint:"matrix(..., nrow = 4, byrow = TRUE) then det().",
+  sol:R`<pre>m &lt;- matrix(c(1,0,-1,2, 2,3,4,5, 1,0,-1,4, 6,-5,7,9), nrow = 4, byrow = TRUE)
+det(m)   # -138</pre>`, ans:"−138", prov:LOOP+" Marked correct."},
+ {src:"Quiz 1 (2025) Q10", see:[3], q:R`For the same matrix, give the entry in row 2, column 3 of its inverse.`,
+  hint:"solve(m) gives the inverse (it exists because det ≠ 0).",
+  sol:R`<pre>solve(m)[2, 3]   # -0.2246377</pre>`, ans:"−0.22463768", prov:LOOP+" Marked correct."},
+ {src:"Quiz 1 (2025) Q6", see:[2,3], q:R`What data structure does <code>read.csv("water_potability.csv")</code> create? And what is <code>LakeHuron</code> (Q2)?`,
+  hint:"class().",
+  sol:R`<p><code>class(water)</code> → <code>"data.frame"</code>. <code>class(LakeHuron)</code> → <code>"ts"</code>, a time series.</p>`, ans:"Data frame; time series", prov:LOOP+" Both marked correct."},
+ {src:"Quiz 1 (2025) Q7", see:[3], q:R`In <code>water_potability.csv</code> (3276 rows × 10 columns), give the value in row 1000, column 9 to 1 dp.`,
+  hint:"d[row, col].",
+  sol:R`<pre>water[1000, 9]   # Turbidity 5.284233 → 5.3</pre><p>Rows: <code>nrow(water)</code> = 3276 (Q3).</p>`, ans:"5.3", prov:LOOP+" Marked correct."}
+],
+traps: [
+ "install.packages needs quotes; library does not (both work with quotes, but install never works without).",
+ "R is case sensitive: Species is not species.",
+ "read.csv only finds files in the working directory: setwd first.",
+ "matrix() fills by COLUMN unless byrow = TRUE."
+]
+});
+
+T.topics.push({
+id: "summary", part: "Describing data", title: "Summary Statistics, Missing Data & Outliers",
+lectures: "Lecture 2; Tutorial 3", status: "lectured",
+summary: "Every numerical column needs three things: a typical value, a spread and a frequency plot. Mean vs median, standard deviation and coefficient of variation, quantiles and the IQR, confidence intervals for the DATA, density plots, bar charts, boxplots and outliers, and handling NAs.",
+theory: R`
+<h3>0. Visualise first</h3>
+<p><code>plot(iris)</code> gives every pairwise scatterplot. With a factor, ggplot2 shows how each level affects a numerical variable:</p>
+<pre>library(ggplot2)
+ggplot(iris) + aes(x = Species, y = Sepal.Width, color = Species) +
+  geom_jitter() + theme(legend.position = "none")</pre>
+<p><code>geom_jitter()</code> spreads points sideways so they don't overlap; <code>theme()</code> removes the pointless legend.</p>
+
+<h3>1. The typical value</h3>
+<p>Mean $\bar x = \sum x / n$ (the default). Median: the middle value, <b>robust</b> to outliers; use it when there are outliers (income, Airbnb prices). Mode: rarely useful.</p>
+<p>If mean ≈ median there are probably no outliers; if mean ≫ median the data are right-skewed / have large outliers.</p>
+<pre>summary(iris)                     # min, quartiles, median, mean, NA count
+apply(iris[1:4], 2, mean)         # 2 = columns, 1 = rows
+sapply(d, sd)                     # per column
+mean(iris$Sepal.Width)</pre>
+
+<h3>2. Spread</h3>
+<p>Sample standard deviation (what R's <code>sd()</code> uses):</p>
+$$s = \sqrt{\frac{\sum(x - \bar x)^2}{n-1}}$$
+<p>It measures <b>consistency</b> (manufacturing tolerances). Two datasets can share mean and median yet differ wildly in spread (18 19 20 20 20 21 22 vs 1 1 1 20 39 39 39). Divide by $n$ only for a complete population (never in practice).</p>
+<p><b>Coefficient of variation</b> compares spread relative to the mean: $CV = s/\bar x \times 100\%$.</p>
+<p>With the median, use the <b>interquartile range</b> $IQR = Q_3 - Q_1$ (<code>IQR(x)</code>).</p>
+
+<h3>3. Quantiles and the confidence interval for the data</h3>
+<pre>quantile(x)                    # 0, 25, 50, 75, 100 %
+quantile(x, 0.25)              # value below which 25% lie
+quantile(x, c(0.05, 0.95))     # 90% of the DATA lies between these
+range(x)</pre>
+<p>"95% confidence interval for [a variable]" with no mention of the mean = <code>quantile(x, c(0.025, 0.975))</code>. This is a range for the data (wide), not for the mean (narrow, see Inference).</p>
+
+<h3>4. Frequency plots</h3>
+<ul>
+<li><b>Continuous</b> (many possible values, > ~10): kernel density, <code>plot(density(x))</code>. Same mean and sd can hide very different shapes, so always plot.</li>
+<li><b>Discrete</b> (few values): <code>barplot(table(mtcars$cyl))</code>.</li>
+</ul>
+
+<h3>5. Boxplots and outliers</h3>
+<p>Box from $Q_1$ to $Q_3$ with the median inside; whiskers reach the most extreme data points within $1.5\times IQR$ of the box; anything beyond is plotted as an outlier.</p>
+<pre>boxplot(subset(iris, Species == "setosa")$Sepal.Width)
+boxplot(price ~ room_type, data = ny)</pre>
+<p><b>True</b> outliers (natural variation) stay; <b>systematic</b> ones (measurement, entry or sampling errors) are investigated and possibly removed.</p>
+
+<h3>6. Missing data (NA)</h3>
+<pre>mean(airquality$Ozone)               # NA
+mean(airquality$Ozone, na.rm = TRUE) # 42.13
+colSums(is.na(d))                    # NAs per column
+rowSums(is.na(d))                    # NAs per row: spot collection failures
+aqc &lt;- na.omit(airquality)          # drops 42 of 153 rows</pre>
+<p><code>na.omit</code> drops the whole row, so means of other columns change too (Ozone 42.10 instead of 42.13). It assumes the dropped rows are typical; check for a pattern first. A column with many NAs suggests a collection problem.</p>`,
+formulas: [
+ {name:"Mean", tex:R`\bar x = \frac{\sum x}{n}`},
+ {name:"Sample sd", tex:R`s = \sqrt{\frac{\sum (x-\bar x)^2}{n-1}}`},
+ {name:"Coefficient of variation", tex:R`CV = \frac{s}{\bar x}\times 100\%`},
+ {name:"Interquartile range", tex:R`IQR = Q_3 - Q_1`},
+ {name:"Boxplot whiskers", tex:R`Q_1 - 1.5\,IQR,\ \ Q_3 + 1.5\,IQR`}
+],
+questions: [
+ {src:"Lecture 2 example", see:[2], q:R`Imperfections per sheet for two processes: P1 = 13 11 13 15 12 14 12 15 11 13; P2 = 13 19 13 14 13 20 12 13 15 10. Which process is better?`,
+  hint:"Compare mean, sd and CV.",
+  sol:R`<p>P1: $\bar x$ = 12.9, $s$ = 1.45, CV = 11.2%. P2: $\bar x$ = 14.2, $s$ = 3.08, CV = 21.7%.</p><p>P1 has fewer imperfections and is more consistent, even relative to its mean. (Strictly, decisions shouldn't rest on point estimates alone: that comes later with confidence intervals.)</p>`,
+  ans:"Process 1", prov:"Lecture 2 example; CVs computed by Claude."},
+ {src:"Quiz 1 (2025) Q1", see:[3,6], q:R`Sulfate (781 NAs) in <code>water_potability.csv</code>: value below which 25% of the data lie, to the nearest integer.`,
+  hint:"Lower quartile, with na.rm.",
+  sol:R`<pre>quantile(water$Sulfate, 0.25, na.rm = TRUE)   # 307.6995</pre><p>Round as told: <b>308</b>. (307.7 was marked wrong in 2025: rounding instructions are strict.)</p>`, ans:"308", prov:LOOP},
+ {src:"Quiz 1 (2025) Q5", see:[2], q:R`IQR of Conductivity to the nearest integer.`,
+  hint:"IQR(x) or Q3 − Q1.",
+  sol:R`<pre>IQR(water$Conductivity)   # 116.0579 → 116</pre>`, ans:"116", prov:LOOP+" Marked correct."},
+ {src:"Quiz 1 (2025) Q4", see:[1], q:R`Median and mean Organic_carbon (1 dp) (Q4 and Q9).`,
+  hint:"median(), mean().",
+  sol:R`<pre>median(water$Organic_carbon)   # 14.218 → 14.2
+mean(water$Organic_carbon)     # 14.285 → 14.3</pre>`, ans:"14.2 and 14.3", prov:LOOP+" Both marked correct."},
+ {src:"Quiz 2 (2025) Q1", see:[6], q:R`Which variable in <code>framingham.csv</code> has the most missing values?`,
+  hint:"colSums(is.na(...)).",
+  sol:R`<pre>colSums(is.na(fh))   # glucose 388, education 105, BPMeds 53, cigsPerDay 29 ...</pre>`, ans:"glucose", prov:LOOP+" Marked correct."},
+ {src:"Quiz 2 (2025) Q6", see:[3], q:R`<code>airquality</code>: the temperature exceeded by 50% of the data (nearest integer).`,
+  hint:"Exceeded by half = the middle value.",
+  sol:R`<pre>median(airquality$Temp)   # 79</pre>`, ans:"79", prov:LOOP+" Marked correct."},
+ {src:"Final (2025) Q1", see:[3], q:R`<code>StudentsPerformance.csv</code>: the 95% confidence interval for writing score.`,
+  hint:"It doesn't say 'for the mean'.",
+  sol:R`<pre>quantile(sp$writing.score, c(0.025, 0.975))   # 38 96</pre><p>The interval for the mean, (67.1, 69.0), was not an option.</p>`, ans:"(38, 96)", prov:LOOP+" Marked correct."}
+],
+traps: [
+ "Most functions return NA if any value is NA: add na.rm = TRUE.",
+ "na.omit drops the whole row, changing the other columns too.",
+ "'CI for a variable' (data) uses quantile(); 'CI for the mean' uses t.test().",
+ "Read rounding instructions literally: numeric answers get no partial credit.",
+ "Mean much bigger than median means right skew / outliers: the median is the better typical value."
+]
+});
+
+T.topics.push({
+id: "factors", part: "Relationships", title: "Subsetting, Contingency Tables & Bayes' Theorem",
+lectures: "Lecture 3; Tutorials 4–5", status: "lectured",
+summary: "Subsetting rows and columns in base R and dplyr, two-way tables and which proportion a question wants (joint, row or column), conditional probability and Bayes' theorem, Simpson's paradox, and summarising a number by a factor with by(), tapply() and aggregate().",
+theory: R`
+<h3>0. Three kinds of relationship</h3>
+<ol><li>One factor and one number: summaries per factor level.</li>
+<li>Two factors: tables, proportions, probability.</li>
+<li>Two numbers: scatterplots, correlation and regression.</li></ol>
+<p>Factors are often coded as integers (framingham: <code>male</code> 1/0, <code>currentSmoker</code>, <code>BPMeds</code>).</p>
+
+<h3>1. Subsetting</h3>
+<div class="tbl"><table class="data">
+<tr><th>Want</th><th>Code</th></tr>
+<tr><td>Columns by number or name</td><td><code>iris[c(1,3,5)]</code>, <code>d[c("price","room_type")]</code></td></tr>
+<tr><td>Rows for one level</td><td><code>subset(iris, Species == "setosa")</code></td></tr>
+<tr><td>Two conditions</td><td><code>subset(d, a == "x" &amp; b > 3)</code> (or <code>|</code>)</td></tr>
+<tr><td>Several levels</td><td><code>subset(d, g %in% c("A","B"))</code></td></tr>
+<tr><td>Rows and columns</td><td><code>subset(iris, Species == "virginica", select = c(Sepal.Length, Sepal.Width))</code></td></tr>
+<tr><td>Drop columns / rows</td><td><code>subset(d, select = -c(id, name))</code>, <code>subset(iris, Species != "setosa")</code></td></tr>
+<tr><td>Count matches</td><td><code>nrow(subset(...))</code>, <code>sum(x &lt; 0, na.rm = TRUE)</code></td></tr>
+<tr><td>dplyr</td><td><code>d %>% filter(g == "v") %>% select(a, b)</code></td></tr>
+</table></div>
+<p><code>==</code> not <code>=</code>; text levels need quotes and exact spelling (<code>unique(d$g)</code> to check).</p>
+
+<h3>2. Contingency tables and proportions</h3>
+<pre>t &lt;- table(fram$male, fram$currentSmoker)   # 1st = rows, 2nd = columns
+addmargins(t)          # totals
+prop.table(t)          # JOINT:   P(A and B)
+prop.table(t, 1)       # ROWS:    P(column level | row level)
+prop.table(t, 2)       # COLUMNS: P(row level | column level)
+mosaicplot(t)</pre>
+<p><b>Decoder:</b> the group after "of / from / given / among / for a ..." is the condition. Put it in the rows and use <code>prop.table(t, 1)</code>. "Proportion of all listings that are A and B" is joint.</p>
+
+<h3>3. Probability and Bayes' theorem</h3>
+$$P(E) = \frac{\text{number of data values of interest}}{\text{total number of data values}}$$
+<p>Conditional probability restricts the denominator to a subset: $P(S\mid M)$ = smokers among males. Proportions describe the past; probability uses the same numbers to predict.</p>
+$$P(A \text{ and } B) = P(A\mid B)P(B) = P(B\mid A)P(A)\quad\Rightarrow\quad P(A\mid B) = \frac{P(B\mid A)P(A)}{P(B)}$$
+
+<h3>4. Simpson's paradox</h3>
+<p>A trend in combined data can vanish or reverse in subgroups. Berkeley admissions: pooled, men 44.5% vs women 30.4% admitted; but in most departments women did as well or better (Dept A: women 82%, men 62%). Women applied mainly to departments with low admission rates. Always ask whether a third factor is lurking.</p>
+<pre>margin.table(UCBAdmissions, c(1, 2))
+prop.table(UCBAdmissions[, , "A"], 2)</pre>
+
+<h3>5. A number by a factor</h3>
+<pre>by(fh$sysBP, fh$education, median)
+tapply(d$y, d$g, mean, na.rm = TRUE)
+aggregate(price ~ neighbourhood_group + room_type, data = ny, FUN = mean)
+by(ny$price, ny$neighbourhood_group, quantile, c(.025, .975))
+sapply(S[c("PRES","DEWP","TEMP")], sd, na.rm = TRUE)</pre>`,
+formulas: [
+ {name:"Probability", tex:R`P(E) = \frac{\#\text{ of interest}}{\#\text{ total}}`},
+ {name:"Bayes", tex:R`P(A\cap B) = P(A\mid B)P(B) = P(B\mid A)P(A)`},
+ {name:"Conditional", tex:R`P(A\mid B) = \frac{P(A\cap B)}{P(B)}`}
+],
+questions: [
+ {src:"Lecture 3 example", see:[3], q:R`Admissions: admitted 1198 M / 557 F (1755); rejected 1493 M / 1278 F (2771); totals 2691 M, 1835 F, 4526. Find (1) P(female and admitted), (2) P(female), (3) P(admitted | female), (4) P(admitted), (5) P(female | admitted), and show Bayes holds.`,
+  hint:"Joint uses the grand total; conditionals use a row or column total.",
+  sol:R`<p>(1) 557/4526 = 0.123. (2) 1835/4526 = 0.405. (3) 557/1835 = 0.304. (4) 1755/4526 = 0.388. (5) 557/1755 = 0.317.</p><p>(1) = (2)×(3) = 0.405 × 0.304 = 0.123, and (1) = (4)×(5) = 0.388 × 0.317 = 0.123 ✓.</p>`,
+  ans:"0.123, 0.405, 0.304, 0.388, 0.317", prov:"Lecture 3 example; numbers worked by Claude."},
+ {src:"Tutorial 5 Q1", see:[2], q:R`Airbnb NYC (room_type × neighbourhood_group): (1) what proportion of listings are entire homes/apts in Queens? (2) probability that a Bronx listing is a private room? (3) proportion of entire home/apt listings that are in Manhattan?`,
+  hint:"(1) joint; (2) given Bronx; (3) of entire homes.",
+  sol:R`<pre>t &lt;- table(ny$room_type, ny$neighbourhood_group)
+prop.table(t)      # Entire/Queens 0.043
+prop.table(t, 2)   # Private | Bronx 0.598
+prop.table(t, 1)   # Manhattan | Entire 0.519</pre>`,
+  ans:"4%, 0.60, 52%", prov:"Tutorial 5 gives the answers; R code checked by Claude."},
+ {src:"Quiz 2 (2025) Q4", see:[2,3], q:R`Framingham: probability that someone on BP medication developed CHD within 10 years (3 dp).`,
+  hint:"Given BPMeds: BPMeds in the rows, row proportions.",
+  sol:R`<pre>prop.table(table(fh$BPMeds, fh$TenYearCHD), 1)   # 41/124 = 0.331</pre>`, ans:"0.331", prov:LOOP+" Marked correct."},
+ {src:"Quiz 2 (2025) Q2", see:[2], q:R`Framingham: proportion of females (3 dp).`,
+  hint:"male == 0.",
+  sol:R`<pre>mean(fh$male == 0)   # 0.5707547 → 0.571</pre>`, ans:"0.571", prov:LOOP+" Marked correct."},
+ {src:"Quiz 2 (2025) Q7", see:[1,5], q:R`Changping, wind direction "S" only: which of PRES, DEWP, TEMP, RAIN has the largest sd? How many TEMP readings are below 0 (Q8)?`,
+  hint:"subset first, then sapply / sum.",
+  sol:R`<pre>S &lt;- subset(cp, wd == "S")       # 1700 rows
+sapply(S[c("PRES","DEWP","TEMP","RAIN")], sd, na.rm = TRUE)  # DEWP 12.79 largest
+sum(S$TEMP &lt; 0, na.rm = TRUE)    # 94</pre>`, ans:"DEWP; 94", prov:LOOP+" Both marked correct."},
+ {src:"Quiz 2 (2025) Q10", see:[5], q:R`Framingham: which education group has the largest median systolic BP?`,
+  hint:"by(y, group, median).",
+  sol:R`<pre>by(fh$sysBP, fh$education, median)   # 1: 131, 2: 127.5, 3: 125, 4: 125</pre>`, ans:"Education 1", prov:LOOP+" Marked correct."},
+ {src:"Tutorial 4 Q1", see:[1], q:R`From the Airbnb data build: (1) entire homes/apts in Brooklyn under $150 a night; (2) the data without id, name, host_id and host_name; (3) number_of_reviews and last_review for Manhattan.`,
+  hint:"subset with & and select.",
+  sol:R`<pre>d1 &lt;- subset(ny, room_type == "Entire home/apt" &amp;
+              neighbourhood_group == "Brooklyn" &amp; price &lt; 150)        # 4933 rows
+d2 &lt;- subset(ny, select = -c(id, name, host_id, host_name))           # 12 columns
+d3 &lt;- subset(ny, neighbourhood_group == "Manhattan",
+              select = c(number_of_reviews, last_review))              # 21661 rows</pre>`,
+  ans:"4933 rows; 12 columns; 21661 × 2", prov:"Tutorial 4 exercise; computed by Claude in R."},
+ {src:"Tutorial 5 Q2", see:[5,0], q:R`Mean price of a private room in Brooklyn, and the median price by neighbourhood. Which is the better guide to what you'd pay?`,
+  hint:"aggregate with two factors.",
+  sol:R`<pre>aggregate(price ~ neighbourhood_group + room_type, ny, mean)   # Brooklyn private 76.50
+by(ny$price, ny$neighbourhood_group, median)  # Bronx 65, Brooklyn 90, Manhattan 150, Queens 75, SI 75
+quantile(ny$price, c(.025, .975))             # 35, 500</pre><p>Overall mean 152.7 vs median 106: large outliers (up to $10,000), so the <b>median</b> is the better guide.</p>`,
+  ans:"$76.50; median", prov:"Tutorial 5 challenge; computed by Claude in R."}
+],
+traps: [
+ "table(A, B): A is the rows. prop.table(t, 1) divides by ROW totals.",
+ "'Probability that a [given group] is X' is a conditional: the given group goes in the rows.",
+ "Use == in conditions, and quote text levels with the exact spelling.",
+ "Simpson's paradox: check subgroups before trusting a pooled table."
+]
+});
+
+T.topics.push({
+id: "probability", part: "Relationships", title: "Random Variables & the Normal Model",
+lectures: "Lecture 4", status: "lectured",
+summary: "Discrete and continuous random variables, the probability mass function, density curves, probabilities by counting, pnorm and qnorm for approximately normal data, the inverse problem, and Q-Q plots to check normality.",
+theory: R`
+<h3>0. Random variables</h3>
+<p>Think of a random variable as a measurement, or a column of a database. <b>Discrete</b>: few possible values (≤ ~10), usually integers (mtcars cyl, gear, carb). <b>Continuous</b>: many possible values (mpg, wt; hp and disp are integers but have many values, so count as continuous).</p>
+
+<h3>1. Discrete: the probability mass function</h3>
+<pre>prop.table(table(mtcars$gear))   # 3: 0.469, 4: 0.375, 5: 0.156
+barplot(table(mtcars$gear))</pre>
+<p>Probabilities of combined events add: P(fewer than 6 cylinders) = P(4).</p>
+
+<h3>2. Continuous: density and counting</h3>
+<p><code>plot(density(x))</code> is the probability density function $f(x)$; area under it between $a$ and $b$ is $P(a &lt; X &lt; b)$. In practice just count:</p>
+<pre>mean(mtcars$wt > 3.18)     # 0.5625
+quantile(mtcars$wt, 0.4375)  # inverse: 3.18</pre>
+
+<h3>3. The normal distribution</h3>
+<p>Bell-shaped; described fully by mean and sd: $X \approx N(\mu, \sigma)$. Setosa sepal length ≈ N(5.006, 0.352). Not everything is normal (Airbnb price is hugely skewed).</p>
+<div class="tbl"><table class="data">
+<tr><th>Want</th><th>Code</th></tr>
+<tr><td>P(X &lt; A)</td><td><code>pnorm(A, m, s)</code></td></tr>
+<tr><td>P(X > A)</td><td><code>1 - pnorm(A, m, s)</code></td></tr>
+<tr><td>P(A &lt; X &lt; B)</td><td><code>pnorm(B, m, s) - pnorm(A, m, s)</code></td></tr>
+<tr><td>Value below which p lie</td><td><code>qnorm(p, m, s)</code> (normal) or <code>quantile(x, p)</code> (data)</td></tr>
+<tr><td>Value exceeded p of the time</td><td><code>qnorm(1 - p, m, s)</code></td></tr>
+</table></div>
+<p>Counting gives the exact proportion in the data; <code>pnorm</code> is an approximation that assumes normality. If the question says "approximately normally distributed", use <code>pnorm</code>/<code>qnorm</code> with the sample mean and sd.</p>
+
+<h3>4. Checking normality</h3>
+<pre>qqnorm(x); qqline(x)</pre>
+<p>Points close to the line, with no systematic curve away from it: normal. Also look at <code>plot(density(x))</code>.</p>`,
+formulas: [
+ {name:"Below A", tex:R`P(X<A) = \texttt{pnorm(A, m, s)}`},
+ {name:"Above A", tex:R`P(X>A) = 1-\texttt{pnorm(A, m, s)}`},
+ {name:"Inverse", tex:R`x_p = \texttt{qnorm(p, m, s)}`},
+ {name:"Standardise", tex:R`Z = \frac{X-\mu}{\sigma}`}
+],
+questions: [
+ {src:"Lecture 4 example", see:[3], q:R`Setosa sepal length ≈ N(5.006, 0.352). Find P(length &lt; 5.4) by counting and by the normal model, and the value below which 33.33% of lengths lie.`,
+  hint:"sum(x < 5.4)/length(x) vs pnorm; quantile vs qnorm.",
+  sol:R`<pre>set_data &lt;- subset(iris, Species == "setosa")
+mean(set_data$Sepal.Length &lt; 5.4)     # 0.8   (exact, from the data)
+pnorm(5.4, 5.006, 0.352)               # 0.868 (normal approximation)
+quantile(set_data$Sepal.Length, 0.3333) # 4.9
+qnorm(0.3333, 5.006, 0.352)            # 4.854</pre>`,
+  ans:"0.8 (data) / 0.868 (normal); 4.9 / 4.854", prov:"Lecture 4 example."},
+ {src:"Practice (Claude)", see:[3], q:R`With the same model, find P(length > 5.4), P(4.8 &lt; length &lt; 5.2), and the length exceeded by only 10% of setosa flowers.`,
+  hint:"1 − pnorm; difference of two pnorms; qnorm(0.9, ...).",
+  sol:R`<pre>1 - pnorm(5.4, 5.006, 0.352)                              # 0.132
+pnorm(5.2, 5.006, 0.352) - pnorm(4.8, 5.006, 0.352)       # 0.430
+qnorm(0.9, 5.006, 0.352)                                  # 5.457</pre>`,
+  ans:"0.132; 0.430; 5.46", prov:"Worked by Claude in R."},
+ {src:"Quiz 3 (2025) Q10", see:[3], q:R`<code>CompanyABCProfit.csv</code>: Profit is approximately normally distributed. Find the profit exceeded only 10% of the time in the 20th century (1 dp).`,
+  hint:"The stem says approximately normal.",
+  sol:R`<pre>p20 &lt;- subset(p, Year >= 1901 &amp; Year &lt;= 2000)
+qnorm(0.9, mean(p20$Profit), sd(p20$Profit))   # 1639.4
+quantile(p20$Profit, 0.9)                      # 1647.8 (marked wrong)</pre><p>If the century is taken as 1900–1999 the same method gives 1657.2.</p>`,
+  ans:"1639.4", prov:LOOP+" The raw quantile, 1647.8, was marked wrong, which points to the qnorm answer."},
+ {src:"Practice (Claude)", see:[1], q:R`From <code>mtcars$cyl</code>: probability a car has fewer than 6 cylinders, and probability it has 4 or 6.`,
+  hint:"prop.table(table()) then add.",
+  sol:R`<pre>prop.table(table(mtcars$cyl))   # 4: 0.344, 6: 0.219, 8: 0.438</pre><p>P(&lt; 6) = P(4) = 0.344. P(4 or 6) = 0.344 + 0.219 = 0.563.</p>`,
+  ans:"0.344; 0.563", prov:"Lecture 4 question; worked by Claude."}
+],
+traps: [
+ "'Approximately normal' in the question: use pnorm/qnorm with mean() and sd(), not quantile().",
+ "No mention of normal: use the data (mean(x < a), quantile).",
+ "pnorm gives the LEFT tail. Above a value is 1 − pnorm.",
+ "'Exceeded by 10%' is the 90th percentile: qnorm(0.9, ...)."
+]
+});
+
+T.topics.push({
+id: "regression", part: "Relationships", title: "Correlation, Regression & Model Checking",
+lectures: "Lecture 5; Tutorial 6; 'How Good Is My Model' slides", status: "lectured",
+summary: "Scatterplots first, then the least-squares line with lm(), prediction with predict(), the correlation coefficient and its limits (Anscombe), power-law fits on logs, multiple regression with factors, and judging a model with R², residual diagnostics and actual-vs-fitted plots.",
+theory: R`
+<h3>0. Look first</h3>
+<pre>plot(women$height, women$weight)
+plot(airquality)       # all pairwise scatterplots at once</pre>
+<p>If a straight line fits by eye the relationship is linear, $y = a + bx$; otherwise non-linear (mercury vapour pressure vs temperature).</p>
+
+<h3>1. The regression line</h3>
+<pre>fit &lt;- lm(weight ~ height, data = women)    # y FIRST
+coef(fit)                                     # -87.52, 3.45
+predict(fit, data.frame(height = 64))         # 133.28
+plot(women$height, women$weight); abline(fit, col = "red")</pre>
+$$b = \frac{n\sum xy - \sum x\sum y}{n\sum x^2 - (\sum x)^2},\qquad a = \frac{\sum y}{n} - b\frac{\sum x}{n}$$
+<p>Only valid within the data range (heights 58–72). "Estimate diaBP for sysBP = 119" means <code>lm(diaBP ~ sysBP)</code>. If a group is named (March only), subset before fitting.</p>
+
+<h3>2. Correlation</h3>
+$$r = \frac{n\sum xy - \sum x\sum y}{\sqrt{[n\sum x^2 - (\sum x)^2][n\sum y^2 - (\sum y)^2]}}$$
+<p>−1 to +1. About ±0.3 weak, ±0.5 moderate, ±0.7 strong. <code>cor(x, y, use = "complete.obs")</code> with NAs. "Most linear" = largest |r| (−0.9 beats 0.8). women: 0.995; cars: 0.807.</p>
+<p>$r$ measures <b>linear</b> fit only: mercury pressure has r = 0.76 yet is clearly curved. <b>Anscombe's quartet</b>: four datasets with the same means, variances, r = 0.816 and line y = 3 + 0.5x, but completely different plots. Always plot. Correlation is not causation.</p>
+
+<h3>3. Non-linear: power laws</h3>
+<p>If $\log y$ vs $\log x$ is linear, $\log y = a + b\log x \Leftrightarrow y = e^a x^b$. (If $\log y$ vs $x$ is linear, $y = e^a e^{bx}$, exponential.)</p>
+<pre>lv  &lt;- by(log(DNase$density), log(DNase$conc), mean)
+vmd &lt;- as.vector(lv); vc &lt;- as.numeric(names(lv))
+cor(vc, vmd)                          # 0.992
+fit &lt;- lm(vmd ~ vc)                   # -0.8558 + 0.6700 vc
+exp(coef(fit)[1])                     # 0.4249  →  d = 0.42 c^0.67</pre>
+<p>Always back-transform with <code>exp()</code> before reporting $y$.</p>
+
+<h3>4. Multiple regression and factors</h3>
+<pre>lm(Petal.Length ~ Species + Petal.Width, iris)   # factor coded automatically
+lm(y ~ x1 * x2, d)       # with interaction
+lm(y ~ x + I(x^2), d)    # quadratic
+lm(log(y) ~ log(x1), d)  # transformed
+lm(y ~ ., d)             # all other columns</pre>
+<p>A factor becomes dummy variables: one level (setosa) is the baseline in the intercept; each other level gets its own shift (versicolor +1.70, virginica +2.28 cm, holding width fixed).</p>
+
+<h3>5. How good is the model?</h3>
+<ul>
+<li><code>summary(fit)</code>: coefficients, $R^2$ (fraction of variance explained; adjusted $R^2$ penalises extra terms), residual standard error, F-statistic. Petal.Width only: R² 0.927; + Species: 0.955, RSE 0.478 → 0.378.</li>
+<li><code>plot(fit)</code> diagnostics (<code>which = 1</code> is Residuals vs Fitted): residuals centred on 0 with no curve (linearity), Q-Q close to the line (normal residuals), flat Scale-Location (constant variance), no point with large Cook's distance.</li>
+<li>Actual vs fitted plot with the 45° line: points close and evenly scattered = good fit; systematically above or below = underfitting (missing a variable); tiny wiggles = overfitting.</li>
+<li><code>checkresiduals(fit)</code> (forecast package): Breusch–Godfrey p &gt; 0.05 means no evidence of autocorrelation in the residuals.</li>
+<li><code>predict(fit, newdata, interval = "confidence")</code> is for the mean response; <code>interval = "prediction"</code> is for one new value and is wider.</li>
+</ul>`,
+formulas: [
+ {name:"Line", tex:R`y = a + bx`},
+ {name:"Slope", tex:R`b = \frac{n\sum xy-\sum x\sum y}{n\sum x^2-(\sum x)^2}`},
+ {name:"Correlation", tex:R`r = \frac{n\sum xy-\sum x\sum y}{\sqrt{[n\sum x^2-(\sum x)^2][n\sum y^2-(\sum y)^2]}}`},
+ {name:"Power law", tex:R`\log y = a + b\log x \iff y = e^a x^b`},
+ {name:"Exponential", tex:R`\log y = a + bx \iff y = e^a e^{bx}`}
+],
+questions: [
+ {src:"Quiz 2 (2025) Q9", see:[1], q:R`Framingham: estimate diastolic BP for a systolic BP of 119 (1 dp).`,
+  hint:"diaBP is the y.",
+  sol:R`<pre>fit &lt;- lm(diaBP ~ sysBP, data = fh)    # diaBP = 26.809 + 0.4238 sysBP
+predict(fit, data.frame(sysBP = 119))  # 77.24</pre>`, ans:"77.2", prov:LOOP+" Marked correct."},
+ {src:"Quiz 2 (2025) Q3", see:[1], q:R`Changping, March only (month = 3): linear model of TEMP against day; estimate TEMP on day 15 (2 dp).`,
+  hint:"Subset, then lm(TEMP ~ day).",
+  sol:R`<pre>fit &lt;- lm(TEMP ~ day, data = subset(cp, month == 3))  # 2.6213 + 0.36096 day
+predict(fit, data.frame(day = 15))                    # 8.0357</pre>`, ans:"8.04", prov:LOOP+" Marked correct."},
+ {src:"Quiz 3 (2025) Q1", see:[2], q:R`<code>breast-cancer.csv</code>: which pair is the most linear: concavity_se–area_se, smoothness_se–compactness_se, compactness_se–concavity_se or area_se–smoothness_se?`,
+  hint:"Largest |r|.",
+  sol:R`<p>r = 0.271, 0.337, <b>0.801</b>, 0.075. compactness_se – concavity_se.</p>`, ans:"compactness_se – concavity_se", prov:LOOP+" Marked correct."},
+ {src:"Quiz 3 (2025) Q2", see:[5], q:R`mtcars: Model 1 <code>mpg ~ wt + hp</code>, Model 2 <code>log(mpg) ~ wt + hp</code> back-transformed. From actual-vs-fitted plots, which fits better?`,
+  hint:"exp() Model 2's fitted values first; compare closeness to the 45° line.",
+  sol:R`<pre>m1 &lt;- lm(mpg ~ wt + hp, mtcars); m2 &lt;- lm(log(mpg) ~ wt + hp, mtcars)
+sqrt(mean((mtcars$mpg - fitted(m1))^2))        # RMSE 2.47
+sqrt(mean((mtcars$mpg - exp(fitted(m2)))^2))   # RMSE 2.12</pre><p>Model 2's points sit closer to the line: Model 2 fits better.</p>`, ans:"Model 2", prov:LOOP+" The answer marked in 2025 was wrong; this is the answer the R output supports."},
+ {src:"Tutorial 6 Q1", see:[3], q:R`DNase: show mean log density is linear in log concentration, find the power law, and predict density at conc = 5.`,
+  hint:"lm on the logs, then exp().",
+  sol:R`<p>r = 0.992. $\log d = -0.8558 + 0.670\log c$ ⇒ $d = e^{-0.8558}c^{0.670} = 0.42c^{0.67}$.</p><pre>exp(predict(fit, data.frame(vc = log(5))))   # 1.25</pre>`, ans:"d = 0.42 c^0.67; ≈ 1.25 at c = 5", prov:"Tutorial 6; prediction computed by Claude in R."},
+ {src:"Final (2025) Q3", see:[4,1], q:R`<code>Exam_Results.csv</code>: model New_Scores on Previous_Scores × Hours_Studied (with interaction). For Previous_Scores = 35, what is the minimum whole number of hours to reach 40?`,
+  hint:"Solve for hours, then round UP.",
+  sol:R`<pre>fit &lt;- lm(New_Scores ~ Previous_Scores * Hours_Studied, data = er)
+predict(fit, data.frame(Previous_Scores = 35, Hours_Studied = 11:12))  # 37.34, 40.21</pre><p>11 hours falls short, 12 passes.</p>`, ans:"12", prov:LOOP+" Marked correct."},
+ {src:"Final (2025) Q9", see:[5], q:R`Which base-R call reproduces the "Residuals vs Fitted" diagnostic plot (title, red smoother, labelled points) for <code>fit &lt;- lm(y ~ x)</code>?`,
+  hint:"The built-in lm plots.",
+  sol:R`<pre>plot(fit, which = 1)</pre><p><code>plot(fitted(fit), resid(fit))</code> draws the points but no title, smoother or labels.</p>`, ans:"plot(fit, which = 1)", prov:LOOP+" The alternative was marked wrong in 2025."}
+],
+traps: [
+ "lm(y ~ x): the variable you're estimating goes FIRST.",
+ "r near 0 doesn't mean no relationship, only no LINEAR one. Plot it.",
+ "Back-transform log models with exp() before quoting y.",
+ "Subset to the named group BEFORE fitting.",
+ "Don't predict outside the range of the data.",
+ "A prediction interval (one new value) is wider than a confidence interval (the mean)."
+]
+});
+
+T.topics.push({
+id: "timeseries", part: "Relationships", title: "Time Series: Decomposition, Trend & Forecasting",
+lectures: "Lecture 6; Tutorial 8", status: "lectured",
+summary: "Trend, seasonal and random components; additive vs multiplicative models; decompose(), moving averages and the linear trend; forecasting by hand (AirPassengers January 1961); training/test splits, TSLM and ETS models, accuracy() metrics and checkresiduals().",
+theory: R`
+<h3>0. Structure</h3>
+<p>Many series combine a <b>trend</b> (medium-term), <b>seasonal factors</b> (short-term, e.g. monthly) and <b>random</b> noise. AirPassengers has structure; the Nile series looks random.</p>
+<pre>str(AirPassengers); start(AirPassengers); end(AirPassengers)   # 1949 1 to 1960 12</pre>
+
+<h3>1. Additive vs multiplicative</h3>
+$$\text{additive: } DATA = T + SF\qquad \text{multiplicative: } DATA = T\times SF$$
+<p>Seasonal swings constant in size → additive; growing with the trend → multiplicative (AirPassengers). Ultimately use whichever predicts better.</p>
+<pre>da &lt;- decompose(AirPassengers, "multiplicative")
+da$figure    # the 12 seasonal factors (Jan 0.910 ... Jul 1.227)
+plot(da)</pre>
+
+<h3>2. The trend</h3>
+<p><b>Moving averages</b> smooth the series (<code>rollmean(x, 5)</code> in zoo). Odd orders are symmetric. <code>decompose()</code> uses a <b>12-point centred</b> moving average (<code>ma(x, 12, centre = TRUE)</code>), so the first 6 and last 6 months have no trend value.</p>
+<p>To predict, approximate the trend with a straight line in $t = 1, 2, \ldots$:</p>
+<pre>t &lt;- 1:144
+lmAP &lt;- lm(da$trend ~ t)     # LT = 84.648 + 2.667 t</pre>
+<p>Seasonal factor (multiplicative) = mean of DATA/TREND for that month over all years. Random = DATA/(T × SF).</p>
+
+<h3>3. Forecasting by hand</h3>
+<ol class="steps"><li>Find $t$ for the target period (Jan 1961 = 145).</li>
+<li>Trend: $LT = 84.648 + 2.667(145) = 471.35$.</li>
+<li>Multiplicative: × SF(Jan) 0.9102 = <b>429.04</b>. (Additive: + SF.)</li></ol>
+<pre>trend &lt;- predict(lmAP, data.frame(t = 145:156))
+trend * as.vector(da$figure)   # Jan–Dec 1961</pre>
+<p>Forecasts carry no random component.</p>
+
+<h3>4. Train/test and model families (Tutorial 8)</h3>
+<p>For a time series the test set must be the <b>most recent</b> data (random selection destroys trend and seasonality).</p>
+<pre>library(forecast)
+train &lt;- window(BJsales, end = 138); test &lt;- window(BJsales, start = 139)
+m1 &lt;- tslm(train ~ trend)          # (+ season if seasonal)
+m2 &lt;- ets(train)                    # picks e.g. ETS(A,Ad,N)
+f1 &lt;- forecast(m1, h = 12); f2 &lt;- forecast(m2, h = 12)   # 80% and 95% prediction intervals
+accuracy(f1, test); accuracy(f2, test)
+checkresiduals(m2)</pre>
+<p><b>ETS</b> = Error, Trend, Seasonality, each N (none), A (additive), M (multiplicative) or damped (Ad). Smoothing parameters α (level), β (trend), γ (season), φ (damping, &lt; 1 flattens the trend). σ is the residual sd: judge it against the range of the data.</p>
+
+<h3>5. Judging a forecast</h3>
+<div class="tbl"><table class="data">
+<tr><th>Metric</th><th>Meaning</th></tr>
+<tr><td>ME</td><td>Average error: bias (positive = under-forecasting)</td></tr>
+<tr><td>RMSE, MAE</td><td>Typical error size (RMSE punishes big errors); lower is better</td></tr>
+<tr><td>MPE, MAPE</td><td>Percentage versions; unreliable near zero</td></tr>
+<tr><td>MASE</td><td>&lt; 1 beats the naïve last-value forecast</td></tr>
+<tr><td>ACF1</td><td>Lag-1 autocorrelation of residuals; near 0 is good</td></tr>
+<tr><td>Theil's U</td><td>&lt; 1 beats the naïve forecast</td></tr>
+</table></div>
+<p><code>checkresiduals()</code>: residuals should look like white noise (random about 0, bell-shaped histogram, ACF spikes inside the bounds). Breusch–Godfrey (regression) or Ljung–Box (others): <b>p &gt; 0.05</b> = no evidence of autocorrelation = good; p &lt; 0.05 = pattern left in the residuals.</p>`,
+formulas: [
+ {name:"Additive", tex:R`DATA = T + SF`},
+ {name:"Multiplicative", tex:R`DATA = T\times SF`},
+ {name:"Linear trend (AirPassengers)", tex:R`LT = 84.648 + 2.667t`},
+ {name:"Seasonal factor (mult.)", tex:R`SF = \overline{DATA/T}\ \text{for that season}`}
+],
+questions: [
+ {src:"Lecture 6 example", see:[2,3], q:R`AirPassengers (multiplicative, Jan 1949 = t = 1): predict January 1961, given LT = 84.648 + 2.667t and SF(Jan) = 0.9102304.`,
+  hint:"Dec 1960 is t = 144.",
+  sol:R`<p>$t = 145$; $LT = 84.648 + 2.667(145) = 471.35$; × 0.9102 = <b>429.04</b>.</p>`, ans:"429.04", prov:"Lecture 6 example."},
+ {src:"Quiz 3 (2025) Q8", see:[3], q:R`Additive model: trend = 345.12 − 1.35t and the seasonal factor for period 16 is −23.62. Forecast period 16 (nearest integer).`,
+  hint:"Additive: add the seasonal factor.",
+  sol:R`<p>Trend = 345.12 − 1.35(16) = 323.52; + (−23.62) = 299.9 ≈ <b>300</b>.</p>`, ans:"300", prov:LOOP+" Marked correct."},
+ {src:"Quiz 3 (2025) Q7", see:[2,3], q:R`JohnsonJohnson (quarterly, 1960 Q1 to 1980 Q4): linear trend value for Q1 1981 (3 dp).`,
+  hint:"84 quarters, so Q1 1981 is t = 85. Regress the decompose() trend on t.",
+  sol:R`<pre>da &lt;- decompose(JohnsonJohnson, "multiplicative"); t &lt;- 1:84
+lmJJ &lt;- lm(da$trend ~ t)              # -2.2627 + 0.16327 t
+predict(lmJJ, data.frame(t = 85))     # 11.615</pre><p>Regressing the raw series instead gives 11.729.</p>`, ans:"11.615", prov:LOOP+" 11.729 (raw-series regression) got half marks in 2025, which points to 11.615."},
+ {src:"Quiz 3 (2025) Q9", see:[4,5], q:R`ausbeer: hold out the last 10 quarters, fit ETS to the rest and evaluate against the test set. Test MAPE ≈ 2.5%, MASE ≈ 0.68, ME ≈ 10.5 on a level of ~400. Interpret.`,
+  hint:"MASE < 1; ME relative to the level.",
+  sol:R`<pre>train &lt;- window(ausbeer, end = c(2007, 4)); test &lt;- window(ausbeer, start = c(2008, 1))
+fc &lt;- forecast(ets(train), h = length(test))      # ETS(M,A,M)
+accuracy(fc, test); accuracy(snaive(train, h = 10), test)   # snaive MAPE 3.17, MASE 0.85</pre><p>Accurate (MAPE 2.5%), nearly unbiased (ME ≈ 2.4% of the level), and better than seasonal naïve (MASE &lt; 1 and lower than snaive's).</p>`, ans:"Accurate, nearly unbiased, beats seasonal naïve", prov:LOOP+" Marked correct."},
+ {src:"Final (2025) Q5", see:[5], q:R`ETS on <code>nottem</code>: <code>checkresiduals()</code> gives Ljung–Box Q* = 40.86, df = 24, p = 0.017. What does this say?`,
+  hint:"p < 0.05.",
+  sol:R`<p>p &lt; 0.05: reject "no autocorrelation". The residuals still contain autocorrelation, so the model hasn't captured all the structure. Not fully adequate, but that doesn't mean it must be discarded.</p>`, ans:"Residuals still contain autocorrelation", prov:LOOP+" Marked correct."}
+],
+traps: [
+ "Growing seasonal swings → multiplicative (× SF). Constant swings → additive (+ SF).",
+ "decompose() uses a centred moving average: no trend for the first and last half-season.",
+ "Count t carefully: for monthly data from Jan 1949, Jan 1961 is t = 145.",
+ "Test data for a time series = the most recent observations, never a random sample.",
+ "Residual tests: a HIGH p-value (> 0.05) is the good outcome.",
+ "MASE or Theil's U below 1 means better than the naïve forecast."
+]
+});
+})();
+/* MEC1029 Data Analytics for Engineers — part B: inference */
+(function(){
+const R = String.raw;
+const T = STUDY.content.da = STUDY.content.da || { topics: [] };
+const LOOP = "Worked in your MEC1029 answer bank (re-computed in R from the course datasets); Loop's marking from the 2025 sitting is noted where it was visible.";
+
+T.topics.push({
+id: "inference", part: "Inference", title: "The CLT & Confidence Intervals for the Mean",
+lectures: "Lectures 8 (Inference) and 9 (Small samples); Tutorials 7 and 9", status: "lectured",
+summary: "Why a sample mean needs an interval, the Central Limit Theorem and its simulation, z-intervals for large samples, t-intervals for small normal samples, t.test(), the difference between intervals for the mean and for the data, and normality checks.",
+theory: R`
+<h3>0. Point estimates aren't enough</h3>
+<p>The sample mean $\bar x$ estimates the population mean $\mu$, but another sample gives another $\bar x$ (you might have picked the 50 smallest setosa by chance). Inference puts a range on $\mu$. The sample must be representative (airquality has no winter days).</p>
+
+<h3>1. The Central Limit Theorem</h3>
+<p>For large samples ($n \ge 30$), sample means are normally distributed, whatever the population's shape:</p>
+$$\bar x \approx N\!\left(\mu,\ \frac{\sigma}{\sqrt n}\right)$$
+<p>$\sigma/\sqrt n$ is the <b>standard error</b>. Tutorial 7 simulation:</p>
+<pre>pop &lt;- sample(1:100, 10000, replace = TRUE)          # uniform, not normal
+means &lt;- vector(length = 1000)
+for (i in 1:1000) means[i] &lt;- mean(sample(pop, 40))
+plot(density(means))            # bell-shaped
+mean(means); sd(means)          # ≈ mean(pop), ≈ sd(pop)/sqrt(40)</pre>
+
+<h3>2. Large-sample interval</h3>
+<p>From $P(-1.96 &lt; Z &lt; 1.96) = 0.95$ with $Z = (\bar x - \mu)/(\sigma/\sqrt n)$:</p>
+$$\bar x \pm z\frac{\sigma}{\sqrt n},\qquad z = 1.645\ (90\%),\ 1.96\ (95\%),\ 2.58\ (99\%)$$
+<p>$\pm 3\sigma/\sqrt n$ (quality control) is 99.73%. With σ unknown (always), use $s$ for $n \ge 30$. Bigger $n$ → narrower; higher confidence → wider.</p>
+<pre>qnorm(c(0.025, 0.975))                    # ±1.96
+t.test(airquality$Temp)$conf.int           # 76.37 79.39   ← use this in the exam
+t.test(airquality$Temp, conf.level = 0.99) # 75.89 79.88</pre>
+
+<h3>3. Small samples ($n &lt; 30$)</h3>
+<p><b>Only valid if the data come from a normal population: check first.</b></p>
+<pre>qqnorm(x); qqline(x)     # points on the line → normal</pre>
+<p>With σ unknown use the <b>t-distribution with n − 1 degrees of freedom</b> (wider, flatter than Z; close to Z by 29 df):</p>
+$$\bar x \pm t_{n-1}\frac{s}{\sqrt n}$$
+<p>Alloy failure loads ($n$ = 22): $\bar x$ = 13.71, $s$ = 3.55, $t_{0.975,21}$ = 2.08 ⇒ 13.71 ± 1.57 = (12.14, 15.28). <code>t.test(alloy)</code> gives the same. <code>t.test</code> works for large samples too (practically the same as z).</p>
+<p>Tutorial 7 normality checks: 1–9 → normal; 1628.75, 1613.63, ... → probably not (only six points; the shape is hard to judge); 0/1 data → not normal. A sample of 5 from a uniform population does not give normal means.</p>
+
+<h3>4. Interval for the mean vs for the data</h3>
+<div class="tbl"><table class="data">
+<tr><th>Question says</th><th>Means</th><th>Code</th></tr>
+<tr><td>"95% CI for the mean [var]", "population mean"</td><td>Where μ lies</td><td><code>t.test(x, conf.level = .95)$conf.int</code></td></tr>
+<tr><td>"95% CI for [var]", "middle 95% of the data"</td><td>Where the data lie</td><td><code>quantile(x, c(.025, .975))</code></td></tr>
+</table></div>
+<p>Framingham sysBP: mean interval (131.69, 133.02), data interval (100.5, 188.0). If someone claims a typical sysBP is 130, we're 95% sure they're wrong.</p>`,
+formulas: [
+ {name:"CLT", tex:R`\bar x \approx N\left(\mu, \frac{\sigma}{\sqrt n}\right)`},
+ {name:"Large-sample CI", tex:R`\bar x \pm z\frac{s}{\sqrt n}`},
+ {name:"Small-sample CI", tex:R`\bar x \pm t_{n-1}\frac{s}{\sqrt n}`},
+ {name:"z values", tex:R`1.645,\ 1.96,\ 2.58`, note:"90%, 95%, 99%"}
+],
+questions: [
+ {src:"Lecture 8 example", see:[2], q:R`airquality Temp: $\bar x$ = 77.882, $s$ = 9.465, $n$ = 153. Find the 95% CI by formula and compare with <code>t.test</code>. What are the 90% and the ±3 SE confidence levels?`,
+  hint:"1.96 × s/√n.",
+  sol:R`<p>$77.882 \pm 1.96(9.465/\sqrt{153}) = 77.882 \pm 1.500 = (76.38, 79.38)$. t.test: (76.37, 79.39), slightly wider and the one to use.</p><p>90%: z = <code>qnorm(0.95)</code> = 1.645. ±3 SE: <code>pnorm(3) - pnorm(-3)</code> = 0.9973, i.e. 99.73%.</p>`,
+  ans:"(76.38, 79.38); 1.645; 99.73%", prov:"Lecture 8 example and exercises; worked by Claude."},
+ {src:"Lecture 9 example", see:[3], q:R`Battery life (min): 176, 191, 214, 220, 205, 192, 201, 190, 183, 185. Is it normal? Give a 95% CI for the mean.`,
+  hint:"Q-Q plot first, then t.test.",
+  sol:R`<pre>sam &lt;- c(176,191,214,220,205,192,201,190,183,185)
+qqnorm(sam); qqline(sam)    # close to the line: normal
+t.test(sam)$conf.int         # 185.66 205.74</pre><p>$\bar x$ = 195.7, $s$ = 14.03, $t_{9}$ = 2.26.</p>`,
+  ans:"(185.7, 205.7) min", prov:"Lecture 9 example; interval computed by Claude in R."},
+ {src:"Quiz 3 (2025) Q3", see:[3], q:R`Downtime (h) for 10 shifts: 1.8, 2.1, 1.5, 3.0, 2.4, 1.9, 1.6, 2.3, 2.0, 1.7. 99% CI for the mean.`,
+  hint:"Small sample: check normality, then t.test with conf.level.",
+  sol:R`<pre>qqnorm(x3); qqline(x3)                   # roughly linear
+t.test(x3, conf.level = 0.99)$conf.int   # 1.570276 2.489724</pre><p>(1.71, 2.35) was the 95% interval: a trap option.</p>`, ans:"(1.570276, 2.489724)", prov:LOOP+" Marked correct."},
+ {src:"Quiz 3 (2025) Q4", see:[3], q:R`Diameter deviations (mm): 0.12, 0.09, 0.15, 0.11, 0.13, 0.12, 0.10, 0.14. Give the 95% CI for the mean and the engineering conclusion.`,
+  hint:"How wide is it, and where is it?",
+  sol:R`<pre>t.test(x4)$conf.int   # 0.1033 0.1367</pre><p>Narrow (≈ 0.033 mm wide), so the process is highly consistent, with the mean deviation pinned at about 0.10–0.14 mm.</p>`, ans:"(0.103, 0.137): consistent process", prov:LOOP+" The answer chosen in 2025 was marked wrong; this is the one the output supports."},
+ {src:"Quiz 3 (2025) Q5", see:[2], q:R`<code>breast-cancer.csv</code>, diagnosis B: 95% CI for the mean concavity_se.`,
+  hint:"Subset, then t.test.",
+  sol:R`<pre>B &lt;- subset(bc, diagnosis == "B")    # n = 357
+t.test(B$concavity_se)$conf.int      # 0.02257040 0.02942307</pre>`, ans:"(0.02257, 0.02942)", prov:LOOP+" Marked correct."},
+ {src:"Quiz 3 (2025) Q6", see:[2,4], q:R`mtcars: 95% CI for mean mpg is (17.92, 22.26) against a spec of "at least 20 mpg". What should the engineer conclude?`,
+  hint:"Is 20 inside? Look at the group means by cyl.",
+  sol:R`<p>20 is inside the interval, so you can neither conclude the spec is met nor failed. The means differ hugely by cylinders (4: 26.7, 6: 19.7, 8: 15.1), so the pooled interval hides subgroups: investigate variation across engine configurations.</p>`, ans:"Investigate variation across engine configurations", prov:LOOP+" The answer chosen in 2025 was marked wrong; this is the one the analysis supports."},
+ {src:"Quiz 2 (2025) Q5", see:[4], q:R`airquality, September only: the 99% confidence interval for Ozone.`,
+  hint:"It doesn't say 'mean'.",
+  sol:R`<pre>sep &lt;- subset(airquality, Month == 9)
+quantile(sep$Ozone, c(0.005, 0.995), na.rm = TRUE)   # 7.28 95.30</pre><p>The mean interval (19.06, 43.84) wasn't an option.</p>`, ans:"(7.28, 95.30)", prov:LOOP+" The option chosen in 2025 was marked wrong; this one matches R exactly."},
+ {src:"Tutorial 9 Q1", see:[2,4], q:R`Framingham sysBP: 95% CI for the mean, 95% interval for the data, and 95% CIs for the mean for men and women separately.`,
+  hint:"t.test vs quantile; subset by male.",
+  sol:R`<pre>t.test(fd$sysBP)$conf.int                 # 131.69 133.02
+quantile(fd$sysBP, c(.025, .975))         # 100.5 188.0
+t.test(subset(fd, male == 1)$sysBP)$conf.int   # 130.55 132.34
+t.test(subset(fd, male == 0)$sysBP)$conf.int   # 132.09 133.99</pre>`, ans:"(131.69, 133.02); (100.5, 188.0); M (130.55, 132.34), F (132.09, 133.99)", prov:"Tutorial 9 gives these answers."}
+],
+traps: [
+ "Small samples (n < 30): CHECK NORMALITY FIRST, then t with n − 1 df.",
+ "The other confidence level is almost always offered as a distractor.",
+ "Mean interval (t.test) is narrow; data interval (quantile) is wide.",
+ "Higher confidence → wider interval. Bigger sample → narrower interval.",
+ "CLT is about the distribution of sample MEANS, not of the data."
+]
+});
+
+T.topics.push({
+id: "twomeans", part: "Inference", title: "Comparing Two Means: Welch & Paired t-Tests",
+lectures: "Lectures 10–11; Tutorial 9", status: "lectured",
+summary: "Independent vs dependent samples, overlapping intervals, the interval for the difference in means and why 0 is the number to look for, hypothesis-testing language, Welch's t-test for small independent samples, and the paired t-test.",
+theory: R`
+<h3>0. Independent or dependent?</h3>
+<p><b>Dependent</b> (paired): a definite reason to match values, e.g. the same car carrying one tyre of each brand, the same girder tested by two methods, the same subject before and after. <b>Independent</b>: no reason to pair, e.g. tyres worn on a machine, two separate groups of volunteers.</p>
+
+<h3>1. Large independent samples</h3>
+<p>Rough approach: build each CI; no overlap ⇒ different means. Better: the CLT for the difference,</p>
+$$(\bar x_1 - \bar x_2) \pm 1.96\sqrt{\frac{s_1^2}{n_1} + \frac{s_2^2}{n_2}}$$
+<p><b>0 is the important number.</b> 0 inside ⇒ $\mu_1$ could equal $\mu_2$. 0 outside ⇒ different, and the interval says by how much.</p>
+<pre>ps  &lt;- subset(iris, Species == "setosa")$Petal.Length
+pvs &lt;- subset(iris, Species == "versicolor")$Petal.Length
+t.test(ps, pvs)$conf.int     # -2.94 -2.66: setosa petals 2.66–2.94 cm shorter</pre>
+
+<h3>2. Hypothesis testing language</h3>
+<p>$H_0$: $\mu_1 = \mu_2$; $H_a$: $\mu_1 \ne \mu_2$. We either reject $H_0$ or fail to reject it (never "prove" $H_0$). 0 outside the 95% CI ⇔ p &lt; 0.05 ⇔ reject $H_0$ at 5%. The maximum confidence at which the means differ is $(1 - p)\times 100\%$.</p>
+
+<h3>3. Small independent samples</h3>
+<p>Check <b>each</b> sample is normal (two Q-Q plots). Then Welch's t-interval, with degrees of freedom</p>
+$$\nu = \frac{\left(\frac{s_1^2}{n_1} + \frac{s_2^2}{n_2}\right)^2}{\frac{(s_1^2/n_1)^2}{n_1-1} + \frac{(s_2^2/n_2)^2}{n_2-1}},\qquad (\bar x_1-\bar x_2) \pm t_{\nu}\sqrt{\frac{s_1^2}{n_1}+\frac{s_2^2}{n_2}}$$
+<pre>t.test(bt, rm, conf.level = 0.9)   # Welch is R's default</pre>
+
+<h3>4. Paired samples</h3>
+<p>Work with the differences $d_i = x_i - y_i$. For small samples <b>check the differences are normal</b>, then</p>
+$$\bar d \pm t_{n-1}\frac{s_d}{\sqrt n}$$
+<pre>d &lt;- m1 - m2; qqnorm(d); qqline(d)
+t.test(m1, m2, paired = TRUE)</pre>
+<p>Using the unpaired test on paired data gives a different interval and possibly the wrong conclusion.</p>`,
+formulas: [
+ {name:"Large, independent", tex:R`(\bar x_1-\bar x_2)\pm z\sqrt{\frac{s_1^2}{n_1}+\frac{s_2^2}{n_2}}`},
+ {name:"Small, independent (Welch)", tex:R`(\bar x_1-\bar x_2)\pm t_\nu\sqrt{\frac{s_1^2}{n_1}+\frac{s_2^2}{n_2}}`},
+ {name:"Paired", tex:R`\bar d \pm t_{n-1}\frac{s_d}{\sqrt n}`},
+ {name:"Decision", tex:R`0\in CI \Rightarrow \text{could be equal}`}
+],
+questions: [
+ {src:"Lecture 10 example", see:[1], q:R`Petrol prices: Texgas $n$ = 35, $\bar x$ = €1.48, $s$ = 0.12; Quick-Check $n$ = 40, $\bar x$ = €1.39, $s$ = 0.10. Is Quick-Check cheaper (95%)? Use both approaches.`,
+  hint:"Two separate CIs; then the CI for the difference.",
+  sol:R`<p>Texgas 1.48 ± 1.96(0.12/√35) = (1.44, 1.52). Quick-Check 1.39 ± 1.96(0.10/√40) = (1.36, 1.42). No overlap.</p>
+  <p>Difference: $0.09 \pm 1.96\sqrt{0.12^2/35 + 0.10^2/40} = 0.09 \pm 0.05 = (0.04, 0.14)$. 0 is outside: 95% sure Texgas is 4c–14c dearer.</p>`,
+  ans:"Yes: Texgas 4c–14c dearer", prov:"Lecture 10 example."},
+ {src:"Lecture 11 example", see:[3], q:R`Blowout times (h). Beltex: 3.82, 3.11, 3.21, 2.64, 4.16, 3.51, 2.44. Roadmaster: 4.16, 3.92, 3.94, 4.22, 4.15, 3.62, 4.11. Compare at 90% and 99%.`,
+  hint:"Independent (machine-worn), small: two normality checks, then Welch.",
+  sol:R`<pre>t.test(bt, rm, conf.level = 0.90)$conf.int   # -1.209 -0.286
+t.test(bt, rm, conf.level = 0.99)$conf.int   # -1.591  0.097</pre><p>90%: Beltex lasts 0.3–1.2 h less. 99%: 0 is inside, so no difference can be claimed at 99%.</p>`,
+  ans:"90%: Beltex 0.3–1.2 h shorter; 99%: not significant", prov:"Lecture 11 example."},
+ {src:"Lecture 11 example", see:[4], q:R`Shear strength predictions for nine girders, Method 1: 1.186, 1.151, 1.322, 1.339, 1.200, 1.402, 1.365, 1.537, 1.559; Method 2: 1.061, 0.992, 1.063, 1.062, 1.065, 1.178, 1.037, 1.086, 1.052. Is there a difference (95%)?`,
+  hint:"Same girders → paired. Check the differences.",
+  sol:R`<pre>d &lt;- m1 - m2; qqnorm(d); qqline(d)          # normal enough
+t.test(m1, m2, paired = TRUE)$conf.int      # 0.170 0.378</pre><p>Method 1 predicts 0.17–0.38 higher. (Unpaired would give (0.159, 0.389): a different interval.)</p>`,
+  ans:"Method 1 higher by 0.17–0.38", prov:"Lecture 11 example."},
+ {src:"Final (2025) Q7", see:[1], q:R`<code>forestfires.csv</code>: 99% CI for the difference in mean FFMC, August minus September.`,
+  hint:"Large independent samples.",
+  sol:R`<pre>aug &lt;- subset(ff, month == "aug")$FFMC   # n = 184
+sep &lt;- subset(ff, month == "sep")$FFMC   # n = 172
+t.test(aug, sep, conf.level = 0.99)$conf.int   # 0.0598 2.1281</pre>`, ans:"(0.0597903, 2.1280762)", prov:LOOP+" Marked correct."},
+ {src:"Tutorial 9 Q2", see:[1,2], q:R`Framingham: 95% and 99% CIs for the difference in mean sysBP, men minus women. What's the highest confidence at which you can say men's mean is lower?`,
+  hint:"0 in or out? Then use the p-value.",
+  sol:R`<pre>t.test(m$sysBP, f$sysBP)$conf.int                    # -2.899 -0.295
+t.test(m$sysBP, f$sysBP, conf.level = 0.99)$conf.int # -3.309  0.115
+t.test(m$sysBP, f$sysBP)$p.value                     # 0.0162</pre><p>95%: 0 outside → men lower. 99%: 0 inside. The two-sided interval just touches 0 at 1 − 0.0162 = <b>98.4%</b>.</p>`,
+  ans:"95% yes, 99% no; up to ≈ 98.4%", prov:"Tutorial 9 gives the intervals; the 98.4% is worked by Claude in R."}
+],
+traps: [
+ "0 is the key number for a DIFFERENCE in means; 1 is the key number for a RATIO of variances.",
+ "Same subjects or items measured twice → paired = TRUE.",
+ "Small samples: check normality of EACH sample (independent) or of the DIFFERENCES (paired).",
+ "Say 'fail to reject H0', not 'accept H0'.",
+ "Watch the direction: t.test(a, b) gives an interval for μa − μb."
+]
+});
+
+T.topics.push({
+id: "variance", part: "Inference", title: "Confidence Intervals for σ & Comparing Variances",
+lectures: "Lecture 12 (CIs for the population standard deviation)", status: "lectured",
+summary: "Why spread matters in manufacturing, the chi-squared interval for σ (varTest in EnvStats), comparing two variances with the F-distribution and var.test, and why 1 is the number to look for. Normality is required throughout.",
+theory: R`
+<h3>0. Spread is the quality measure</h3>
+<p>Controlling variability is central to operations management. The point estimate of σ is $s$; σ mainly has meaning when compared.</p>
+
+<h3>1. Chi-squared interval for σ</h3>
+<p>For a sample from a <b>normal</b> population, $(n-1)s^2/\sigma^2$ has a $\chi^2$ distribution with $n - 1$ df. <code>qchisq(p, df)</code> gives the value with area p to its LEFT: <code>qchisq(c(.025,.975), 5)</code> = (0.83, 12.83).</p>
+$$\sqrt{\frac{(n-1)s^2}{\chi^2_{0.975,\,n-1}}}\ \le\ \sigma\ \le\ \sqrt{\frac{(n-1)s^2}{\chi^2_{0.025,\,n-1}}}$$
+<pre>library(EnvStats)
+qqnorm(samp); qqline(samp)          # must be normal
+sqrt(varTest(samp)$conf.int)         # CI for σ  (varTest gives the variance)</pre>
+<p>Alloy loads: σ between 2.73 and 5.08 (95%).</p>
+
+<h3>2. Comparing two variances: the F test</h3>
+<p>For two independent normal samples with equal variances, $s_1^2/s_2^2$ follows an F distribution with $(n_1 - 1, n_2 - 1)$ df. CI for $\sigma_1^2/\sigma_2^2$:</p>
+$$\left(\frac{s_1^2/s_2^2}{F_{0.975}},\ \frac{s_1^2/s_2^2}{F_{0.025}}\right)$$
+<pre>var.test(set, ver)                     # CI for the ratio of variances
+sqrt(var.test(set, ver)$conf.int)      # ratio of sds
+var.test(B, A, alternative = "greater")</pre>
+<p><b>1 is the important number.</b> 1 inside ⇒ variances could be equal; outside ⇒ different. Setosa vs versicolor sepal length: ratio (0.26, 0.82), sd ratio (0.51, 0.91): setosa is less variable.</p>`,
+formulas: [
+ {name:"Chi-squared statistic", tex:R`\frac{(n-1)s^2}{\sigma^2}\sim\chi^2_{n-1}`},
+ {name:"F statistic", tex:R`\frac{s_1^2}{s_2^2}\sim F_{n_1-1,\,n_2-1}`},
+ {name:"Decision", tex:R`1\in CI\Rightarrow\ \text{variances could be equal}`}
+],
+questions: [
+ {src:"Lecture 12 example", see:[1], q:R`Alloy failure loads (n = 22, $s$ = 3.554, normal). 95% CI for σ by formula and in R.`,
+  hint:"χ² values for 21 df: qchisq(c(.025,.975), 21) = 10.28, 35.48.",
+  sol:R`<p>$\sqrt{21(3.554^2)/35.48} = 2.73$ and $\sqrt{21(3.554^2)/10.28} = 5.08$.</p><pre>sqrt(varTest(alloy)$conf.int)   # 2.733948 5.078290</pre><p>95% sure σ for all U-700 alloys is between 2.7 and 5.1.</p>`,
+  ans:"(2.73, 5.08)", prov:"Lecture 12 example; formula check by Claude."},
+ {src:"Final (2025) Q2", see:[2], q:R`Machine A and B (15 parts each). Is B's standard deviation significantly greater than A's at 5%?`,
+  hint:"Normality, then var.test.",
+  sol:R`<pre>qqnorm(A); qqline(A); qqnorm(B); qqline(B)     # both fine
+var.test(B, A, alternative = "greater")        # F = 6.17, p = 0.0008
+var.test(A, B)$conf.int                        # 0.054 0.483 (1 outside)</pre><p>sd A = 1.49, sd B = 3.71: B is significantly more variable.</p>`, ans:"Yes, B has a significantly larger sd", prov:LOOP+" Marked correct."},
+ {src:"Final (2025) Q4", see:[1], q:R`95% CI for the standard deviation of female math scores in <code>StudentsPerformance.csv</code>. Options: (14.60, 16.50); can't be calculated; (213.2, 272.2); (62.3, 65.0).`,
+  hint:"What does the chi-squared interval require?",
+  sol:R`<pre>f &lt;- subset(sp, gender == "female")$math.score
+qqnorm(f); qqline(f)     # lower tail bends away (scores of 0 and 8)
+shapiro.test(f)          # p = 0.0035 → not normal</pre><p>The interval needs normal data, so it <b>can't be calculated</b> validly. (14.60, 16.50) is what you'd get ignoring the check; the others are the variance and mean intervals.</p>`, ans:"Can not be calculated", prov:LOOP+" (14.60, 16.50) was marked wrong in 2025, which points to this answer."}
+],
+traps: [
+ "varTest gives the VARIANCE interval: square-root it for σ.",
+ "No normality → no chi-squared or F interval.",
+ "For variances the key number is 1, not 0.",
+ "qchisq gives LEFT-tail areas; the lecture's notation uses right-tail areas."
+]
+});
+
+T.topics.push({
+id: "anova", part: "Inference", title: "ANOVA, Tukey & Assumption Checks",
+lectures: "Lectures 12 (ANOVA) and 13 (ANOVA of the iris data)", status: "lectured",
+summary: "Comparing three or more means: the three assumptions (independence, normal residuals, equal variances) and how to check them, aov() and the F test, Tukey's post-hoc comparisons, two-way ANOVA with interaction, and the alternatives when assumptions fail.",
+theory: R`
+<h3>0. Why ANOVA</h3>
+<p>Three or more groups (iris species). Repeated t-tests on every pair inflate the chance of a false difference, so use one ANOVA then a multiple-comparisons procedure. Visualise first with ggplot2 + <code>geom_jitter()</code>.</p>
+
+<h3>1. The three assumptions</h3>
+<ol>
+<li><b>Independence:</b> random, independent replicates (essential; the F test is sensitive to this). Iris: no reason to pair flowers; we hope they were sampled randomly.</li>
+<li><b>Normal residuals:</b> robust to mild departures, especially with large samples.
+<pre>library(onewaytests); nor.test(Sepal.Width ~ Species, data = iris)
+res &lt;- aov(Sepal.Width ~ Species, data = iris)$residuals
+library(car); qqPlot(res); shapiro.test(res)</pre></li>
+<li><b>Equal variances:</b> not critical with equal group sizes, but check: visual (<code>plot(iris)</code> ranges), rule of thumb largest/smallest variance ≤ 4 (3–5 depending on author), or Levene's test.
+<pre>leveneTest(Sepal.Width ~ Species, data = iris)   # p > 0.05 → equal variances OK</pre>
+Sepal width variances (0.144, 0.098, 0.104) pass; petal width (0.011, 0.039, 0.075, ratio ≈ 7) fails.</li>
+</ol>
+
+<h3>2. One-way ANOVA and Tukey</h3>
+<pre>a &lt;- aov(Sepal.Width ~ Species, data = iris)
+summary(a)        # F = 49.2, Pr(>F) &lt; 2e-16 → means not all equal
+TukeyHSD(a)       # pairwise differences with adjusted p</pre>
+<p>Each Tukey row compares two groups: <code>p adj</code> &lt; 0.05 ⇒ significantly different; its interval excludes 0. Iris: setosa is 0.658 wider than versicolor and 0.454 wider than virginica; virginica 0.204 wider than versicolor (p = 0.009). All three differ.</p>
+
+<h3>3. Two-way ANOVA</h3>
+<p>ToothGrowth: <code>len</code> depends on <code>supp</code> (OJ, VC) and <code>dose</code> (0.5, 1, 2), a 2×3 factorial design. Dose is stored as a number, so convert it first.</p>
+<pre>tg &lt;- ToothGrowth; tg$dose &lt;- as.factor(tg$dose)
+a2 &lt;- aov(len ~ supp * dose, data = tg)
+summary(a2)     # supp p = 0.0002, dose p &lt; 2e-16, supp:dose p = 0.022
+TukeyHSD(a2)
+library(HH); interaction2wt(len ~ supp * dose, data = tg)</pre>
+<p>Main effects: OJ gives longer teeth; length rises with dose. Interaction: the effect of dose depends on the supplement (at dose 2, OJ and VC are the same). Equal group sizes keep the factors orthogonal and the assumptions robust. ANOVA is a linear model: the intercept is the OJ/0.5 cell.</p>
+
+<h3>4. When assumptions fail</h3>
+<div class="tbl"><table class="data">
+<tr><th>Problem</th><th>Use</th></tr>
+<tr><td>Unbalanced two-way</td><td>Type II (no interaction) or Type III (<code>car::Anova(m, type = "III")</code>)</td></tr>
+<tr><td>Unequal variances, one-way</td><td>Welch: <code>oneway.test(y ~ g, var.equal = FALSE)</code>; Games–Howell post hoc</td></tr>
+<tr><td>Unequal variances, two-way</td><td>Robust ANOVA, <code>WRS2::t2way</code></td></tr>
+<tr><td>Dependent samples</td><td>Repeated-measures ANOVA (<code>rstatix::anova_test</code>)</td></tr>
+<tr><td>Non-normal residuals</td><td>Kruskal–Wallis (one-way), ART (two-way), Friedman (repeated)</td></tr>
+</table></div>`,
+formulas: [
+ {name:"Hypotheses", tex:R`H_0: \mu_1=\mu_2=\cdots=\mu_k`},
+ {name:"Variance rule of thumb", tex:R`\frac{s^2_{max}}{s^2_{min}} \le 4`},
+ {name:"Decision", tex:R`p < 0.05 \Rightarrow \text{reject } H_0`}
+],
+questions: [
+ {src:"Lecture 13 example", see:[1,2], q:R`Check the assumptions and run a one-way ANOVA on iris Sepal.Width by Species. Which species differ?`,
+  hint:"Variance ratio, aov, TukeyHSD.",
+  sol:R`<p>Variances 0.144 / 0.098 / 0.104: ratio 1.46 &lt; 4 ✓. Equal group sizes (50). Residuals roughly normal.</p><pre>summary(aov(Sepal.Width ~ Species, iris))   # F = 49.16, p &lt; 2e-16
+TukeyHSD(aov(Sepal.Width ~ Species, iris))
+# versicolor-setosa -0.658, virginica-setosa -0.454, virginica-versicolor 0.204 (p = 0.0088)</pre><p>All three means differ significantly at 5%.</p>`,
+  ans:"All three differ", prov:"Lecture 12/13 example; values checked by Claude in R."},
+ {src:"Practice (Claude)", see:[1], q:R`Could you run the same one-way ANOVA on iris Petal.Width?`,
+  hint:"Compare the largest and smallest group variances.",
+  sol:R`<p>Variances 0.0111 (setosa), 0.0391, 0.0754: ratio ≈ 6.8 &gt; 4, and Levene's test rejects equal variances. Not advisable even with equal group sizes; use Welch's ANOVA (<code>oneway.test(..., var.equal = FALSE)</code>) instead.</p>`,
+  ans:"No: variances too unequal (ratio ≈ 6.8)", prov:"Lecture 12 slides make this point; ratio computed by Claude in R."},
+ {src:"Final (2025) Q8", see:[3,2], q:R`penguins (palmerpenguins): two-way ANOVA of body_mass_g on species + sex, then Tukey HSD for sex. Conclusion?`,
+  hint:"na.omit first; does the Tukey interval include 0?",
+  sol:R`<pre>pg &lt;- na.omit(penguins)
+a2 &lt;- aov(body_mass_g ~ species + sex, data = pg)
+TukeyHSD(a2, "sex")    # male-female 667.5 g, CI (599.2, 735.7), p ≈ 0</pre><p>Males are significantly heavier. (Tukey works fine with two levels.)</p>`, ans:"Male penguins significantly heavier", prov:LOOP+" Marked correct."},
+ {src:"Final (2025) Q10", see:[1], q:R`Radon data: dose D (6 levels) and response RR. Run Levene's test and give Pr(>F) (4 dp).`,
+  hint:"D must be a factor.",
+  sol:R`<pre>leveneTest(RR ~ as.factor(D))   # F = 0.860, Pr(>F) = 0.5261</pre><p>The default <code>center = median</code> gives 0.5261 (mean centring gives 0.3303).</p>`, ans:"0.5261", prov:LOOP+" Marked correct."}
+],
+traps: [
+ "Convert numeric group codes to factors (as.factor) before aov or leveneTest.",
+ "A significant F only says SOME means differ: Tukey says which.",
+ "Don't run all the pairwise t-tests instead of ANOVA.",
+ "Levene/Shapiro: p > 0.05 is the GOOD outcome (assumption holds).",
+ "Large variance ratio (> 4): use Welch's ANOVA, not aov."
+]
+});
+
+T.topics.push({
+id: "nonparam", part: "Inference", title: "Non-Parametric Tests",
+lectures: "Tutorial 10", status: "lectured",
+summary: "Rank-based alternatives when normality fails: Spearman's rank correlation, the Mann–Whitney U (Wilcoxon rank-sum) test for independent samples, the Wilcoxon signed-rank test for paired samples, their confidence intervals, and bootstrapping.",
+theory: R`
+<h3>0. Ranks instead of values</h3>
+<p>Order all values and replace each with its rank. Robust to outliers and skew, no distribution assumed, works across different scales. But when normality holds, <b>parametric tests are more powerful</b> (more likely to detect a real effect, narrower intervals), so prefer them then.</p>
+
+<h3>1. Which test</h3>
+<div class="tbl"><table class="data">
+<tr><th>Parametric</th><th>Non-parametric</th><th>R</th></tr>
+<tr><td>Pearson correlation</td><td>Spearman's ρ (monotonic relationship)</td><td><code>cor.test(x, y, method = "spearman")</code></td></tr>
+<tr><td>Welch two-sample t</td><td>Mann–Whitney U / Wilcoxon rank-sum</td><td><code>wilcox.test(x, y, conf.int = TRUE)</code></td></tr>
+<tr><td>Paired t</td><td>Wilcoxon signed-rank</td><td><code>wilcox.test(x, y, paired = TRUE, conf.int = TRUE)</code></td></tr>
+<tr><td>One-way ANOVA</td><td>Kruskal–Wallis</td><td><code>kruskal.test(y ~ g)</code></td></tr>
+</table></div>
+<p>p &lt; 0.05 ⇒ significant difference (or relationship). The <code>conf.int</code> output estimates the location shift (≈ difference in medians; "pseudo-median" for paired); 0 outside ⇒ significant.</p>
+
+<h3>2. Bootstrapping</h3>
+<p>Resample the data with replacement many times, compute the statistic each time, and read the interval off its distribution. Used for intervals where no formula exists (e.g. Spearman's ρ):</p>
+<pre>library(boot)
+f &lt;- function(d, i) cor(d$x[i], d$y[i], method = "spearman")
+b &lt;- boot(data.frame(x, y), f, R = 1000)
+boot.ci(b, type = "perc")</pre>`,
+formulas: [
+ {name:"Spearman", tex:R`\rho \in [-1, 1]`, note:"monotonic, rank-based"},
+ {name:"Decision", tex:R`p < 0.05 \Rightarrow \text{significant}`}
+],
+questions: [
+ {src:"Tutorial 10 Q1", see:[1], q:R`Girder data (Method 1 x, Method 2 y): Spearman correlation, Mann–Whitney and Wilcoxon signed-rank. Interpret each.`,
+  hint:"Which design is the data really?",
+  sol:R`<p>Spearman: ρ = 0.33, p = 0.39 → no evidence of a monotonic relationship (bootstrap CI (−0.54, 0.95) includes 0).</p><p>Mann–Whitney: W = 80, p = 8.2×10⁻⁵, shift 0.277, CI (0.135, 0.381) → x higher.</p><p>Signed-rank (the right one, since girders are paired): V = 45, p = 0.0039, pseudo-median 0.268, CI (0.159, 0.390) → Method 1 significantly higher.</p>`,
+  ans:"Paired: Method 1 significantly higher", prov:"Tutorial 10 outputs."},
+ {src:"Tutorial 10 Q2", see:[1], q:R`Iris Petal.Length, versicolor vs virginica, non-parametrically: (1) independent data; (2) 50 growers each supplying one flower of each species.`,
+  hint:"(1) rank-sum; (2) signed-rank.",
+  sol:R`<pre>wilcox.test(vs, vg, conf.int = TRUE)                 # W = 44.5, p &lt; 2.2e-16, shift -1.20 (-1.50, -1.00)
+wilcox.test(vs, vg, paired = TRUE, conf.int = TRUE)  # V = 3.5, p = 2.1e-9, pseudo-median -1.30 (-1.55, -1.10)</pre><p>Either way virginica petals are significantly longer, by about 1.2–1.3 cm.</p>`,
+  ans:"Virginica longer by ≈ 1.2–1.3 cm in both cases", prov:"Tutorial 10 challenge; computed by Claude in R (ties make R use the normal approximation)."},
+ {src:"Final (2025) Q6", see:[1], q:R`<code>sleep</code>: the same 10 subjects under two conditions. Use a non-parametric test to compare extra sleep.`,
+  hint:"Same subjects → paired.",
+  sol:R`<pre>wilcox.test(g2, g1, paired = TRUE, conf.int = TRUE)
+# p = 0.0091, pseudo-median 1.40, 95% CI (1.05, 2.95): entirely positive</pre><p>Median extra sleep is significantly higher under condition 2.</p>`, ans:"Condition 2 significantly higher", prov:LOOP+" Marked correct."}
+],
+traps: [
+ "Paired design → signed-rank (paired = TRUE); independent → rank-sum.",
+ "Non-parametric tests compare medians/location, not means.",
+ "If the data ARE normal, the t-test is more powerful: use it."
+]
+});
+})();
+/* MEC1029: tutorial exercises and the 2025 Loop tests; questions live on the topic pages */
+(function(){
+const T = STUDY.content.da = STUDY.content.da || { topics: [] };
+T.tutorials = [
+ { id:"t4", short:"4", title:"Tutorial 4: Subsetting Datasets", note:"Airbnb NYC", fromTopics:"Tutorial 4 ", intro:"Rows, columns and both, in base R." },
+ { id:"t5", short:"5", title:"Tutorial 5: Relationships Between Factors", note:"Answers given in the sheet", fromTopics:"Tutorial 5 ", intro:"Tables, proportions and summaries by factor." },
+ { id:"t6", short:"6", title:"Tutorial 6: Non-Linear Relationships", note:"DNase power law", fromTopics:"Tutorial 6 ", intro:"Log-log regression." },
+ { id:"t9", short:"9", title:"Tutorial 9: Confidence Intervals & Framingham", note:"Answers given in the sheet", fromTopics:"Tutorial 9 ", intro:"Intervals for the mean, the data and the difference." },
+ { id:"t10", short:"10", title:"Tutorial 10: Non-Parametric Tests", note:"Outputs given in the sheet", fromTopics:"Tutorial 10 ", intro:"Spearman, Mann–Whitney and Wilcoxon signed-rank." },
+ { id:"q1", short:"L1", title:"Loop Quiz 1 (2025, week 4)", note:"Water potability · 5%", fromTopics:"Quiz 1 (2025) ", intro:"R basics and summary statistics." },
+ { id:"q2", short:"L2", title:"Loop Quiz 2 (2025, week 7)", note:"Framingham, Changping, airquality · 10%", fromTopics:"Quiz 2 (2025) ", intro:"Subsetting, tables, conditional probability, regression, CIs." },
+ { id:"q3", short:"L3", title:"Loop Quiz 3 (2025, week 10)", note:"Breast cancer, mtcars, time series · 15%", fromTopics:"Quiz 3 (2025) ", intro:"Correlation, CIs, time series and the normal model." },
+ { id:"fx", short:"FX", title:"Final Loop Exam (2025, week 12)", note:"Everything · 70%", fromTopics:"Final (2025) ", intro:"Data intervals, variance tests, regression, ETS, non-parametric tests, ANOVA." }
+];
 })();
 /* EEN1029 Electromechanical Systems — background, Task 1 (inductors and transformers) */
 (function(){
@@ -3218,6 +4115,297 @@ T.tutorials = [
  { id:"t5", short:"5", title:"Tutorial 5: Forced Vibration II", note:"No solution yet: worked by Claude", fromTopics:"Tutorial 5 ", intro:"Road excitation, rotating imbalance and the resonance peak." }
 ];
 })();
+/* MEC1017 Product Design — the FireFighter project, PDS, concept selection, design resources */
+(function(){
+const R = String.raw;
+const T = STUDY.content.pd = STUDY.content.pd || { topics: [] };
+
+T.topics.push({
+id: "brief", part: "The project", title: "The FireFighter Brief, Constraints & Semester Plan",
+lectures: "Lecture 1 – Module Overview & FireFighter Project Introduction; FireFighter Project Brief", status: "lectured",
+summary: "What the ladder-climbing robot must do, the hard constraints (250 mm cube, one 50 mm pneumatic cylinder, 5/2 valve, aluminium plate, limited processes), the questions to ask before designing, the semester-by-semester deliverables and marks, and how to run an engineering team.",
+theory: R`
+<h3>0. The challenge</h3>
+<p>Design (Semester 1) and build (Semester 2) a device that carries a <b>500 mL</b> container of water up a <b>1 m ladder</b>:</p>
+<ul><li>in the fastest possible time,</li><li>losing the minimum amount of water,</li><li>weighing the least,</li><li>using the minimum material.</li></ul>
+<p>These pull against each other: speed vs spillage, light weight vs stiffness and grip. The design is a balance.</p>
+
+<h3>1. Hard constraints</h3>
+<div class="tbl"><table class="data">
+<tr><th>Constraint</th><th>Limit</th></tr>
+<tr><td>Size</td><td>Fits inside a 250 × 250 × 250 mm cube at <b>all</b> stages of operation</td></tr>
+<tr><td>Actuation</td><td>One pneumatic cylinder, 50 mm stroke</td></tr>
+<tr><td>Control</td><td>Extension and retraction switched automatically by a 5/2 solenoid valve (microswitches, relays)</td></tr>
+<tr><td>Materials</td><td>Mainly standard aluminium plate plus limited standard mechanical ("Meccano") parts</td></tr>
+<tr><td>Manufacturing</td><td>Punching, shearing, hacksawing, filing, deburring, bending, forming</td></tr>
+<tr><td>3D printing</td><td>Limited parts, mainly grippers and guides, on DCU printers only (Semester 2)</td></tr>
+</table></div>
+<p>Workshop: SG23–25. Technical contact: Michael Tyrrell (labs, materials, parts board outside SG23/24).</p>
+
+<h3>2. Breaking it down</h3>
+<p>Engineering aspects: <b>locomotion</b> (rung to rung), <b>grip</b> (no slipping), <b>stability</b> (balance and alignment), <b>actuation</b> (force and motion), <b>sensing</b> (position and limits), <b>control</b> (sequencing), <b>water protection</b> (vibration and spill), <b>reliability</b> (repeat without jamming or falling).</p>
+<p>Ask before designing: budget; ladder dimensions and rung spacing; size and weight limits; allowed materials, actuators, sensors and controller; power source; required speed; acceptable spillage; safety requirements; manufacturing facilities.</p>
+
+<h3>3. Semester 1 plan and marks (50% of the module)</h3>
+<div class="tbl"><table class="data">
+<tr><th>Week</th><th>Work</th><th>Marks (of Sem 1)</th></tr>
+<tr><td>1</td><td>Project launch; constraints; start concepts</td><td>—</td></tr>
+<tr><td>2</td><td>PDS and FMEA</td><td>—</td></tr>
+<tr><td>3</td><td>Workshop, parts, design for manufacture</td><td>—</td></tr>
+<tr><td>4</td><td>Climbing, gripper and stabiliser concepts; spring–damper location; start 3D models</td><td>—</td></tr>
+<tr><td>5–6</td><td>Design review presentations</td><td>20%</td></tr>
+<tr><td>7</td><td>Vibration isolation and spring–damper design</td><td>—</td></tr>
+<tr><td>8</td><td>Pneumatic sequence, relay logic, microswitches, circuit</td><td>—</td></tr>
+<tr><td>9</td><td>SolidWorks assembly and exploded-view animation</td><td>15%</td></tr>
+<tr><td>10</td><td>Spring–damper and circuit design review</td><td>10%</td></tr>
+<tr><td>11</td><td>Final design motion simulation (SW motion study)</td><td>15%</td></tr>
+<tr><td>12</td><td>Engineering drawings and order list review</td><td>20%</td></tr>
+<tr><td>13</td><td>Design portfolio submission</td><td>20%</td></tr>
+</table></div>
+<p>Semester 2 (the other 50%): competition, updated portfolio, team video and build quality 60%; competition performance 20%; attendance and participation 20%.</p>
+
+<h3>4. Running the team</h3>
+<ul>
+<li>Common goal, a team leader who tracks actions, clear responsibilities, use of different strengths (CAD, analysis, control, manufacture, testing), open communication, dependability.</li>
+<li>Every meeting: agenda, short, everyone reports progress and problems, decisions agreed, <b>actions with owners and deadlines</b>, recorded, next meeting set. Log meetings and email the actions.</li>
+<li>Avoid: one person doing everything; working separately and "stitching together" at the end; unclear roles; saving problems for meetings; leaving work to the deadline.</li>
+</ul>`,
+formulas: [],
+questions: [
+ {src:"Lecture 1 exercise", see:[2], q:R`You're asked to design a ladder-climbing robot to carry 500 mL of water up a 1 m ladder with minimum spillage. List the key engineering aspects, and the information you'd ask your manager for first.`,
+  hint:"Think subsystems, then the numbers you can't design without.",
+  sol:R`<p><b>Aspects:</b> locomotion, grip, stability, actuation, sensing, control, water protection (vibration), reliability.</p><p><b>Ask for:</b> budget; ladder dimensions and rung spacing; size/weight limits; permitted materials, actuators, sensors and controller; power source; required speed; acceptable spillage; safety requirements; available manufacturing processes.</p>`,
+  ans:"8 aspects; ~12 questions", prov:"Lecture 1 answers."}
+],
+traps: [
+ "The 250 mm cube applies at ALL stages of the motion, including full extension.",
+ "One cylinder, 50 mm stroke: everything moves from that single actuator.",
+ "3D printing is limited (mainly grippers and guides) and only on DCU printers.",
+ "Week 9–13 deliverables are 80% of Semester 1: start CAD early."
+]
+});
+
+T.topics.push({
+id: "pds", part: "Design method", title: "The Design Process & Product Design Specification",
+lectures: "Lecture 2 – Product Design Specifications (part 1)", status: "lectured",
+summary: "The four phases of design, six design philosophies, what a PDS is and where its inputs come from, the twelve PDS headings with the folding e-scooter worked example, testable numbers instead of adjectives, and resolving headings that contradict each other.",
+theory: R`
+<h3>0. Four phases</h3>
+<ol class="steps">
+<li><b>Product planning:</b> identify the need, set the target specification (Semester 1).</li>
+<li><b>Conceptual design:</b> generate concepts, select one, test it (Semester 1).</li>
+<li><b>Embodiment design:</b> final specification, manufacturing plan, economics.</li>
+<li><b>Detail design:</b> modelling, simulation, prototyping (Semester 2).</li>
+</ol>
+<p>Three questions run through it: <i>What exactly is the problem? What are the options? Which one, and why?</i></p>
+
+<h3>1. Six ways to ask "is this a good design?"</h3>
+<ol>
+<li>User/customer-centred: does it solve a real user need?</li>
+<li>Design thinking: have we understood the problem before jumping to a solution?</li>
+<li>Function-first: what must it actually do?</li>
+<li>Design for manufacture and assembly: can we make and assemble it efficiently?</li>
+<li>Design for X: cost, quality, reliability, service, sustainability?</li>
+<li>Sustainable/circular: what happens over the whole life cycle?</li>
+</ol>
+
+<h3>2. What a PDS is</h3>
+<p>The functional, performance, physical, cost, safety, regulatory and other requirements and constraints the product must satisfy. Inputs: the customer/user, market and competitors, standards and regulation, manufacturing capability, service and maintenance, end of life.</p>
+<div class="callout key"><p><b>A brief is not a specification.</b> "Light, portable and legal" can't be tested. A specification is a list of numbers a prototype can pass or fail. If you can't test it, it's an opinion, and opinions can't be defended.</p></div>
+<p>Constraints come before concepts (Irish e-scooter rules from 20 May 2024: 20 km/h, 400 W, 25 kg, 200 mm wheels, age 16; FireFighter: 250 mm cube, 50 mm stroke, 500 mL, 1 m, aluminium plate, punch/shear/saw/file/bend). About 75% of manufacturing cost is committed by the end of the conceptual phase, so the PDS week is the cheapest one in the project.</p>
+
+<h3>3. The twelve headings</h3>
+<div class="tbl"><table class="data">
+<tr><th>#</th><th>Heading</th><th>E-scooter example (testable)</th></tr>
+<tr><td>1</td><td>Introduction</td><td>Folding e-scooter for a 3–8 km Dublin commute, carried onto bus/train</td></tr>
+<tr><td>2</td><td>Functional performance</td><td>≤ 20 km/h, ≤ 400 W, ≥ 20 km range at 75 kg, fold ≤ 5 s one-handed, ≤ 25 kg</td></tr>
+<tr><td>3</td><td>Operating environment</td><td>−5 to +35 °C, rain, IPX5, 60 mm kerbs, tram rails, salt</td></tr>
+<tr><td>4</td><td>Economics</td><td>Retail ≤ €650, BOM ≤ €230, 25,000/yr, spares 7 years</td></tr>
+<tr><td>5</td><td>Geometric limitations</td><td>Folded ≤ 1150 × 520 × 530 mm, wheels ≥ 200 mm</td></tr>
+<tr><td>6</td><td>Maintenance & repair</td><td>Brake pads with one 4 mm hex key in ≤ 10 min</td></tr>
+<tr><td>7</td><td>Reliability</td><td>20,000 fold cycles; frame 100,000 cycles at 100 kg</td></tr>
+<tr><td>8</td><td>Safety</td><td>EN 17128, two brakes, ≤ 4.0 m stop from 20 km/h</td></tr>
+<tr><td>9</td><td>Sustainability / pollution</td><td>≤ 65 dB(A), removable battery, ≥ 80% recyclable</td></tr>
+<tr><td>10</td><td>Ease of use</td><td>One hand, no tools, ≤ 5 s</td></tr>
+<tr><td>11</td><td>Human factors</td><td>Carried mass ≤ 13 kg; grip 30–40 mm; 5th %ile female to 95th %ile male</td></tr>
+<tr><td>12</td><td>Appearance</td><td>Matte anodised, no exposed deck fasteners</td></tr>
+</table></div>
+<p>Every heading gets a number or an explicit "not applicable, because ...". A blank heading is an unmade decision. The PDS says <b>what</b> the device must achieve, never <b>how</b> (no mention of the folding mechanism).</p>
+
+<h3>4. Principle 1: write constraints first, because they contradict</h3>
+<p>Heading 2 allows 25 kg (the legal limit) but heading 11 says 13 kg (HSE guideline ~10 kg held at arm's length, one-handed, up stairs). Writing them down early is how you find the conflict; the design target becomes ~13 kg.</p>`,
+formulas: [],
+questions: [
+ {src:"Practice (Claude)", see:[2,3], q:R`Rewrite these FireFighter "requirements" as testable PDS lines: (a) "it should be fast"; (b) "it shouldn't spill much"; (c) "it must be light"; (d) "it must be small".`,
+  hint:"A number and a test for each. (d) is already fixed by the brief.",
+  sol:R`<ul><li>(a) Functional performance: climbs the 1 m competition ladder in ≤ <i>t</i> s (your team's target), measured from start signal to top rung.</li>
+  <li>(b) Functional performance: loses ≤ <i>V</i> mL of the 500 mL over a full climb (weigh beaker before and after).</li>
+  <li>(c) Functional performance / economics: total mass ≤ <i>m</i> g excluding the water (scales).</li>
+  <li>(d) Geometric limitations: stays within a 250 mm cube at every stage of the cycle (check in the SW motion study).</li></ul><p>The targets are the team's to set and defend; what matters is that each can be passed or failed.</p>`,
+  ans:"A number + a test for each", prov:"Worked by Claude from the Lecture 2 method."},
+ {src:"Practice (Claude)", see:[3], q:R`Is "the gripper uses a spring-loaded hook" a good PDS line? What heading would the underlying need go under?`,
+  hint:"What vs how.",
+  sol:R`<p>No: it says <i>how</i>, which belongs to concept generation. The need is functional performance / reliability: e.g. "holds the device on a 12 mm × 3 mm rung under the full load with zero slip over 20 consecutive cycles".</p>`,
+  ans:"No — it's a solution, not a requirement", prov:"Worked by Claude from Lecture 2."}
+],
+traps: [
+ "A PDS line must be testable: a number, not an adjective.",
+ "A PDS says WHAT, never HOW.",
+ "Don't leave a heading blank: give a number or 'not applicable, because ...'.",
+ "Agree the PDS as a whole team before anyone draws concepts."
+]
+});
+
+T.topics.push({
+id: "selection", part: "Design method", title: "Functions, Morphological Charts & Weighted Matrices",
+lectures: "Lecture 2 – Product Design Specifications (parts 2–3); Design Presentation Rubric", status: "lectured",
+summary: "Decomposing the device into verb-plus-object functions, generating options with a morphological chart, selecting with a weighted matrix whose criteria come from the PDS, sensitivity-checking the weights, and what the week 5–6 design review is marked on.",
+theory: R`
+<h3>0. Principle 2: decompose before you conceptualise</h3>
+<p>Nobody designs "a scooter": you design functions that must cooperate, each written as <b>verb + object</b> (carry the rider, slow the vehicle, lock the fold ...). You can't brainstorm "a robot", but you can brainstorm "how to grip a rung". Aim for six to ten functions. If two team members' lists differ, someone is hiding an assumption.</p>
+
+<h3>1. Morphological chart</h3>
+<p>One row per function, several options per row; read across to build a complete concept. Five functions with four options each give $4^5 = 1024$ combinations: the chart makes sure the three you evaluate are genuinely different.</p>
+<div class="tbl"><table class="data">
+<tr><th>Function</th><th>Option A</th><th>Option B</th><th>Option C</th></tr>
+<tr><td>Lock the fold</td><td>Cam-over lever</td><td>Screw collar</td><td>Spring-loaded pin</td></tr>
+<tr><td>Release the fold</td><td>Squeeze trigger</td><td>Foot lever</td><td>Pull pin</td></tr>
+<tr><td>Be carried</td><td>Stem as handle</td><td>Dedicated handle</td><td>Shoulder strap</td></tr>
+</table></div>
+
+<h3>2. Weighted matrix</h3>
+<p>Criteria come from PDS headings; weights are agreed <b>before</b> anyone scores; scores 1–5; total = Σ score × weight.</p>
+<div class="tbl"><table class="data">
+<tr><th>Criterion (PDS)</th><th>Wt</th><th>Cam-over</th><th>Screw collar</th><th>Spring pin</th></tr>
+<tr><td>Can't release under load (8)</td><td>5</td><td>4 (20)</td><td>5 (25)</td><td>3 (15)</td></tr>
+<tr><td>20,000 cycles (7)</td><td>4</td><td>3 (12)</td><td>5 (20)</td><td>4 (16)</td></tr>
+<tr><td>One hand in 5 s (10)</td><td>3</td><td>5 (15)</td><td>1 (3)</td><td>4 (12)</td></tr>
+<tr><td>≤ 250 g added (11)</td><td>3</td><td>4 (12)</td><td>5 (15)</td><td>3 (9)</td></tr>
+<tr><td>Makeable (4)</td><td>2</td><td>4 (8)</td><td>5 (10)</td><td>3 (6)</td></tr>
+<tr><td><b>Total</b></td><td></td><td>67</td><td><b>73</b></td><td>58</td></tr>
+</table></div>
+
+<h3>3. Principle 3: a choice you can't defend is a choice you didn't make</h3>
+<p>Raise "one hand, in 5 s" from weight 3 to 5 and the totals become 77 / 75 / 66: the winner flips. Run this <b>sensitivity check</b> on every matrix: if one unjustified weight flips the result, you haven't decided, you've guessed. Write the reason for every weight.</p>
+<p>Consequence: in March 2025 Segway recalled 220,000 Ninebot scooters (68 incidents, 20 injuries) because the folding mechanism could collapse. "Lock the fold" had been under-weighted somewhere.</p>
+<p>The thread you'll defend: Brief → PDS → Functions → Concepts → Matrix → Detail → Build.</p>
+
+<h3>4. Design review (weeks 5–6, 20%)</h3>
+<p>12-minute slot (≈ 9 min talk + 3 min questions); PowerPoint submitted on Loop at the start of your presentation week.</p>
+<div class="tbl"><table class="data">
+<tr><th>Criterion</th><th>Marks</th><th>For "excellent"</th></tr>
+<tr><td>Climbing mechanism</td><td>20</td><td>Three clearly different concepts; well-justified matrix; chosen design fits ladder and actuator; in SW CAD</td></tr>
+<tr><td>Gripper</td><td>15</td><td>Three distinct workable designs; justified selection; rung interaction shown in CAD</td></tr>
+<tr><td>Stabilising system</td><td>15</td><td>Two or more concepts; stability and friction explained; compatible with the climbing motion</td></tr>
+<tr><td>Spring & damping</td><td>15</td><td>Two or more arrangements; justified criteria; practically integrated in CAD</td></tr>
+<tr><td>Complete SW assembly</td><td>25</td><td>All subsystems working together; interfaces, motion, clearances and constraints addressed</td></tr>
+<tr><td>Teamwork & questions</td><td>10</td><td>Balanced contribution, on time, confident accurate answers</td></tr>
+</table></div>`,
+formulas: [
+ {name:"Weighted total", tex:R`\text{Total} = \sum_i w_i s_i`},
+ {name:"Combinations", tex:R`N = \prod_i n_i`, note:"options per function multiplied"}
+],
+questions: [
+ {src:"Lecture 2 exercise", see:[0], q:R`Write the FireFighter device's functions as verb + object (six to ten).`,
+  hint:"Think about each moment of a climb cycle, and the water.",
+  sol:R`<p>One possible list: <i>grip the rung</i>; <i>release the rung</i>; <i>lift the body</i> (one pitch per cycle); <i>hold position</i> while the other end moves; <i>keep the device aligned</i> to the ladder; <i>support the beaker</i>; <i>isolate the beaker from vibration</i>; <i>sense end of stroke</i>; <i>switch the valve</i>; <i>stop at the top</i>.</p><p>Compare with a teammate: differences reveal hidden assumptions (e.g. does "lift" happen on extension or retraction?).</p>`,
+  ans:"e.g. grip rung, release rung, lift body, stay aligned, support beaker, isolate vibration, sense stroke end, switch valve", prov:"Lecture 2 exercise; example answer by Claude."},
+ {src:"Lecture 2 example", see:[2,3], q:R`Using the lock-the-fold matrix, recompute the totals with "One hand in 5 s" weighted 5 instead of 3. What does this tell you?`,
+  hint:"Only that row changes: add 2 × its score to each total.",
+  sol:R`<p>Cam-over: 67 + 2(5) = <b>77</b>. Screw collar: 73 + 2(1) = 75. Spring pin: 58 + 2(4) = 66. The winner flips from screw collar to cam-over lever: the decision rests on one weight, so that weight needs a written justification (and a sensitivity check belongs in the portfolio).</p>`,
+  ans:"77 / 75 / 66 — winner flips", prov:"Lecture 2 example."},
+ {src:"Practice (Claude)", see:[2,3], q:R`Three gripper concepts scored 1–5 against: no slip on a 12 mm rung (wt 5), release time (wt 3), mass (wt 2), makeable with our processes (wt 4). Hook: 4, 5, 4, 5. Clamp jaw: 5, 2, 3, 3. Printed latch: 3, 4, 5, 2. Which wins, and is it robust to dropping "makeable" to weight 2?`,
+  hint:"Σ w × s, then repeat with the changed weight.",
+  sol:R`<p>Hook 20 + 15 + 8 + 20 = <b>63</b>; clamp 25 + 6 + 6 + 12 = 49; latch 15 + 12 + 10 + 8 = 45.</p><p>With makeable at 2: hook 53, clamp 43, latch 41. The hook still wins comfortably, so the choice is robust to that weight.</p>`,
+  ans:"Hook (63); still wins (53)", prov:"Made-up scores by Claude to practise the method."}
+],
+traps: [
+ "Agree criteria and weights BEFORE scoring.",
+ "Criteria should trace back to PDS headings.",
+ "Always sensitivity-check: if one weight flips the winner, justify it.",
+ "Three concepts must be genuinely different, not variations of one idea."
+]
+});
+
+T.topics.push({
+id: "resources", part: "Design method", title: "Ladder, Cylinder, Beaker & Spring–Damper Constraints",
+lectures: "Week 3 Student Guide; ladder, beaker, damper, cylinder and spring data", status: "partial",
+summary: "The real geometry and hardware the design must fit: ladder and rung dimensions, the beaker envelope, cylinder forces at 6 bar, the spring catalogue and the fixed dashpot with its piston options, plus a calculation sequence for the suspension. The week 7 spring–damper notes will add the damping method.",
+theory: R`
+<h3>0. Fixed vs yours</h3>
+<div class="tbl"><table class="data">
+<tr><th>Supplied / fixed</th><th>Your team designs</th></tr>
+<tr><td>Ladder and test frame</td><td>Climbing mechanism and rung interaction</td></tr>
+<tr><td>500 mL beaker</td><td>Beaker holder and support</td></tr>
+<tr><td>Pneumatic cylinder (stroke, force)</td><td>Linkage turning cylinder motion into climbing</td></tr>
+<tr><td>Spring catalogue</td><td>Number, type, stiffness and arrangement of springs</td></tr>
+<tr><td>Dashpot pot</td><td>Piston option and its integration</td></tr>
+<tr><td>Permitted microswitches</td><td>Switch locations, triggers and the automatic sequence</td></tr>
+</table></div>
+<p>Never change a reference dimension to make a concept fit: redesign the concept.</p>
+
+<h3>1. Geometry</h3>
+<ul>
+<li><b>Ladder:</b> 1000 mm long, 170 mm wide (140 mm inside), 3 mm stainless plate, <b>12 mm rungs with 40 mm clear gaps → 52 mm rung pitch</b>.</li>
+<li><b>Beaker:</b> ≈ 107 mm high, 92 mm top Ø, 82 mm bottom Ø.</li>
+<li><b>Dashpot pot:</b> 25 mm internal Ø, ≈ 35 mm usable depth. Piston lengths 8, 10, 12 or 14 mm; clearance 0.3 mm. Travel available = 35 mm − piston length.</li>
+</ul>
+<p>Note that one 50 mm stroke is slightly <b>less</b> than the 52 mm pitch: the linkage has to amplify displacement, or the mechanism must climb more than one pitch over several strokes.</p>
+
+<h3>2. Cylinder (Series 522 mini cylinders)</h3>
+<div class="tbl"><table class="data">
+<tr><th>Bore (mm)</th><th>10</th><th>12</th><th>16</th><th>20</th><th>25</th></tr>
+<tr><td>Push at 6 bar (N)</td><td>46</td><td>67</td><td>118</td><td>185</td><td>289</td></tr>
+<tr><td>Pull at 6 bar, double-acting (N)</td><td>39</td><td>50</td><td>102</td><td>155</td><td>243</td></tr>
+<tr><td>Rod thread</td><td>M4</td><td>M6</td><td>M6</td><td>M8</td><td>M10×1.25</td></tr>
+</table></div>
+<p>$F = pA$: push uses the full bore, pull the annulus $\frac{\pi}{4}(D^2 - d^2)$. A linkage that multiplies displacement by $k$ divides the available force by $k$ (work is conserved, ignoring friction).</p>
+
+<h3>3. Suspension: calculation sequence</h3>
+<ol class="steps">
+<li>Suspended mass: beaker + 0.5 kg water + holder + anything moving with it.</li>
+<li>Choose the number and arrangement of springs; find the equivalent stiffness needed (parallel: $k = k_1 + k_2$; series: $1/k = 1/k_1 + 1/k_2$).</li>
+<li>Pick the nearest catalogue spring(s) (music-wire compression and extension springs; rate in N/mm) and check the working-length/extension limits.</li>
+<li>Calculate the damping needed using the method in the week 7 notes.</li>
+<li>Apply the fixed dashpot and 0.3 mm clearance; compare 8, 10, 12, 14 mm pistons.</li>
+<li>Check the piston stays inside the pot over the full movement; record assumptions and reasons in the portfolio.</li>
+</ol>
+<p>Useful single-degree-of-freedom results (from Mechanics of Machines): static deflection $\delta = mg/k$, $\omega_n = \sqrt{k/m}$, $\zeta = c/(2\sqrt{km})$. A softer spring lowers $\omega_n$ (better isolation from the climbing jolts) but sags more.</p>
+
+<h3>4. Using the SolidWorks reference package</h3>
+<p>Extract the whole ZIP; copy it into your group workspace; open <code>All Parts.SLDASM</code> and bring only what you need into your own assembly. Use <code>ladder.SLDPRT</code> for gripper and stabiliser checks, the cylinder/clevis/foot models for mounting, the switch assemblies for trigger positions. Run interference and full-motion checks before drawings.</p>`,
+formulas: [
+ {name:"Cylinder force", tex:R`F = pA,\ A_{push} = \frac{\pi D^2}{4},\ A_{pull} = \frac{\pi(D^2-d^2)}{4}`},
+ {name:"Springs", tex:R`k_{par} = k_1 + k_2,\quad \frac{1}{k_{ser}} = \frac{1}{k_1} + \frac{1}{k_2}`},
+ {name:"Static deflection", tex:R`\delta = \frac{mg}{k}`},
+ {name:"Natural frequency", tex:R`\omega_n = \sqrt{k/m}`},
+ {name:"Damping ratio", tex:R`\zeta = \frac{c}{2\sqrt{km}}`},
+ {name:"Rung pitch", tex:R`12 + 40 = 52\ \text{mm}`}
+],
+questions: [
+ {src:"Practice (Claude)", fig:"pd_ladder", see:[1], q:R`From the ladder drawing: what is the rung pitch, roughly how many pitches are there in the 1 m climb, and what does this mean for a 50 mm stroke?`,
+  hint:"Rung thickness + clear gap.",
+  sol:R`<p>Pitch = 12 + 40 = 52 mm. (1000 − 12)/52 ≈ 19 pitches.</p><p>A direct 50 mm stroke is 2 mm short of one pitch, so either the linkage amplifies displacement (ratio ≥ 52/50 ≈ 1.04, plus margin for gripper engagement) or the mechanism advances more than one pitch over several strokes. ~19 or more cycles per climb sets how fast each cycle must be.</p>`,
+  ans:"52 mm; ≈ 19 pitches; stroke alone falls 2 mm short", prov:"Worked by Claude from the supplied ladder drawing."},
+ {src:"Practice (Claude)", see:[2], q:R`Check the pull force of a 25 mm bore cylinder with a 10 mm rod at 6 bar against the table, and find the force available after a linkage that doubles the displacement.`,
+  hint:"Annulus area.",
+  sol:R`<p>$A = \frac{\pi}{4}(25^2 - 10^2) = 412$ mm²; $F = 0.6\ \text{N/mm}^2 \times 412 = 247$ N (table: 243 N).</p><p>Doubling displacement halves the force: ≈ 120 N, still far more than the weight of a ~2 kg device (≈ 20 N), so a smaller bore may save weight.</p>`,
+  ans:"≈ 247 N (table 243 N); ≈ 120 N after a 2:1 linkage", prov:"Worked by Claude from the cylinder data sheet."},
+ {src:"Practice (Claude)", see:[3], q:R`The suspended mass (beaker, water and holder) is 0.70 kg, carried on two identical springs in parallel. You want a static deflection of 10 mm. What rate should each spring have, and what is the natural frequency?`,
+  hint:"k = mg/δ for the pair, then share it.",
+  sol:R`<p>$k = mg/\delta = 0.70(9.81)/0.010 = 687$ N/m = 0.69 N/mm for the pair ⇒ ≈ 0.34 N/mm each. Then pick the nearest catalogue spring and check its working-length limit.</p><p>$\omega_n = \sqrt{687/0.70} = 31.3$ rad/s ≈ 5.0 Hz.</p>`,
+  ans:"≈ 0.34 N/mm each; ≈ 5 Hz", prov:"Made-up numbers by Claude to practise the sequence; the damping step waits for the week 7 notes."}
+],
+traps: [
+ "Rung pitch is 52 mm, not 40 mm: include the rung thickness.",
+ "Pull force is lower than push (rod area).",
+ "Piston travel in the dashpot = 35 mm minus piston length.",
+ "Don't edit supplied reference parts to make a concept fit."
+]
+});
+})();
+/* MEC1017 figures */
+STUDY.figs = Object.assign(STUDY.figs||{}, {"pd_ladder": "data:image/png;base64,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"});
 /* EEN1020 Introduction to Systems, Signals & Control — transform theory and modelling */
 (function(){
 const R = String.raw;
