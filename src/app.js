@@ -15,7 +15,7 @@ function typeset(el){
   if (window.MathJax && MathJax.typesetPromise){ MathJax.typesetClear && MathJax.typesetClear([el]); MathJax.typesetPromise([el]).then(()=>fitMath(el)).catch(()=>{}); }
   else { window.__pendingTypeset = el; }
 }
-function fitMath(root){ root.querySelectorAll("mjx-container").forEach(m => { const p = m.parentElement; if (m.getBoundingClientRect().width > p.clientWidth + 1) m.classList.add("wide"); }); }
+function fitMath(root){ root.querySelectorAll("mjx-container").forEach(m => { const p = m.parentElement; const r = m.getBoundingClientRect(), pr = p.getBoundingClientRect(); if (r.width > p.clientWidth + 1 || r.right > pr.right + 1) m.classList.add("wide"); }); }
 window.addEventListener("resize", () => fitMath(app));
 window.__onMathReady = () => { if (window.__pendingTypeset) typeset(window.__pendingTypeset); };
 
@@ -219,7 +219,9 @@ function tutQuestions(mid, tut){
   const c = S.content[mid]; let qs = [];
   if (tut.fromTopics){
     c.topics.forEach(t => t.questions.forEach(q => {
-      const mm = /^Tutorial (Q[\d\s&,Q]+)/.exec(q.src); if(!mm) return;
+      const pre = typeof tut.fromTopics === "string" ? tut.fromTopics : "Tutorial ";
+      if (q.src.indexOf(pre) !== 0) return;
+      const mm = /^(Q[\d\s&,Q]+)/.exec(q.src.slice(pre.length)); if(!mm) return;
       const nums = (mm[1].match(/\d+/g)||[]).map(Number);
       qs.push(Object.assign({}, q, {nums, topic:t.id}));
     }));
@@ -266,7 +268,7 @@ function tutorial(mid, id){
   qs.forEach((q,i) => {
     const t = c.topics.find(x=>x.id===q.topic);
     if (t && t.part !== lastPart){ lastPart = t.part; h += `<h2 class="tsec">${esc(t.part)}</h2>`; }
-    const figs = q.nums.map(n=>tut.figs&&tut.figs[n]).filter(Boolean);
+    const figs = [].concat(q.fig||[], q.nums.map(n=>tut.figs&&tut.figs[n]).filter(Boolean));
     h += `<article class="q ${done[q.nums[0]]?"is-done":""}" id="tq${q.nums[0]}"><div class="qh"><span class="qn">${label(q)}</span>${t?`<a class="src" href="#${mid}.${t.id}" style="text-decoration:none">Topic: ${esc(t.title)}</a>`:""}
       <label class="tick"><input type="checkbox" data-done="${q.nums[0]}" ${done[q.nums[0]]?"checked":""}> Done</label></div>
       <div class="qt">${q.q}</div>
@@ -310,6 +312,7 @@ function topic(mid, tid){
   <section class="block" id="practice"><h2>Practice <small>field tests · tutorial &amp; past papers</small></h2><div class="qlist">${t.questions.map((q,i)=>`
     <article class="q" id="pq${i}"><div class="qh"><span class="qn">Q${i+1}</span><span class="src">${esc(q.src)}</span></div>
     <div class="qt">${q.q}</div>
+    ${[].concat(q.fig||[]).map(f=>`<figure class="tfig"><img src="${S.figs[f]}" alt="Figure for Q${i+1}"></figure>`).join("")}
     ${hintBlock(mid, t, q, {hash: mid+"."+tid, id: "pq"+i, label: "Q"+(i+1)})}
     <details><summary>Worked solution</summary><div class="sol">${q.sol}${q.ans?`<div class="ans">Answer: ${esc(q.ans)}</div>`:""}<p class="prov">${esc(q.prov||provenance(q.src))}</p></div></details>
     <div class="tools"><button class="btn small" data-copy="${i}">Copy question for Claude</button></div></article>`).join("")}</div>
