@@ -102,7 +102,7 @@ formulas: [
 ],
 questions: [
  {src:"Tutorial Q15", q:R`A 12-bit A/D converts the output of a load cell (sensitivity 0.2 mV/N) over a 5 V range. Find the resolution in volts and in newtons. If the minimum time between samples is 0.01 ms, what's the maximum frequency that can be analysed?`,
-  sol:R`<ol class="steps"><li>$5/2^{12} = 5/4096 = 1.22$ mV.</li><li>$1.22\ \text{mV} / 0.2\ \text{mV/N} = 6.1$ N.</li><li>$f_s = 1/0.01\ \text{ms} = 100$ kHz → max frequency $f_s/2 = 50$ kHz.</li></ol>`, ans:"1.22 mV, 6.1 N, 50 kHz"},
+  sol:R`<ol class="steps"><li>$5/2^{12} = 5/4096 = 1.22$ mV.</li><li>$1.22\ \text{mV} / 0.2\ \text{mV/N} = 6.1$ N.</li><li>$f_s = 1/0.01\ \text{ms} = 100$ kHz → max frequency $f_s/2 = 50$ kHz.</li></ol>`, ans:"1.22 mV, 6.1 N, 50 kHz", prov:"Follows the posted solution."},
  {src:"MCQ · several years", q:R`What is the voltage resolution of a 12-bit A/D converter operating over a 10 V range? 2.44 mV / 0.833 V / 4.88 mV / 20 mV`, sol:R`$10/4096 = 2.44$ mV. (4.88 mV is 10/2048, the 11-bit trap.)`, ans:"2.44 mV"},
  {src:"MCQ · 2025", q:R`Why are current loops used in signal transmission?`, sol:"To avoid problems with voltage drops along the line and to minimise the effect of noise.", ans:"Voltage drops & noise"},
  {src:"MCQ · 2025 Resit", q:R`A signal is sampled every 20 ms. What is the Nyquist frequency? 50 / 100 / 25 / 10 Hz`, sol:R`$f_s = 1/0.02 = 50$ Hz; Nyquist $= f_s/2 = 25$ Hz.`, ans:"25 Hz"},
@@ -132,7 +132,7 @@ $$x(t) = A\cos(\omega t + \varphi)$$
 <h3>3. Time shift ↔ phase</h3>
 <p>Replacing $t$ by $t - t_s$ <b>delays</b> any signal by $t_s$ (moves it right). For a cosine:</p>
 $$A\cos(\omega(t-t_s)) = A\cos(\omega t - \omega t_s) \quad\Rightarrow\quad \varphi = -\omega t_s$$
-<p>Lecture example: $x(t) = 2t$ for $0<t<\tfrac12$ and $(4-2t)/3$ for $\tfrac12<t<2$. Delayed by 2 s: replace $t$ with $t-2$ everywhere, including the limits: $2(t-2)$ for $2<t<2\tfrac12$, $(8-2t)/3$ for $2\tfrac12 < t < 4$. Advanced by 1 s: replace $t$ with $t+1$.</p>
+<p>Lecture example: $x(t) = 2t$ for $0\lt t\lt \tfrac12$ and $(4-2t)/3$ for $\tfrac12\lt t\lt 2$. Delayed by 2 s: replace $t$ with $t-2$ everywhere, including the limits: $2(t-2)$ for $2\lt t\lt 2\tfrac12$, $(8-2t)/3$ for $2\tfrac12 < t < 4$. Advanced by 1 s: replace $t$ with $t+1$.</p>
 <div class="callout">MCQ: $x(t) = 4 - t^2$ delayed by 2 s → $4-(t-2)^2 = 4t - t^2$.</div>
 
 <h3>4. Combining a cos + b sin</h3>
@@ -164,13 +164,13 @@ formulas: [
 ],
 questions: [
  {src:"Tutorial Q16", q:R`High tide in Dublin is at 11:30 am and the following low tide at 5:40 pm. What is the frequency of the tidal stream in rad/s?`,
-  sol:R`High to low is half a period: 6 h 10 min = 370 min. $T = 740$ min = 44 400 s. $\omega = 2\pi/44400 = 1.42\times10^{-4}$ rad/s.`, ans:"0.142×10⁻³ rad/s"},
+  sol:R`High to low is half a period: 6 h 10 min = 370 min. $T = 740$ min = 44 400 s. $\omega = 2\pi/44400 = 1.42\times10^{-4}$ rad/s.`, ans:"0.142×10⁻³ rad/s", prov:"Follows the posted solution."},
  {src:"Tutorial Q17", q:R`High tide in Schull is at 4:40 am. What is the phase difference between Schull and Dublin in radians? Lag or lead?`,
-  sol:R`Schull's high is 6 h 50 min = 24 600 s earlier. $\varphi = \omega t = 1.415\times10^{-4}\times24600 = 3.48 \approx 3.5$ rad. Earlier means it's ahead: a <b>phase lead</b>.`, ans:"≈ 3.5 rad lead"},
+  sol:R`<p>Schull's high is 6 h 50 min = 24 600 s earlier. $\varphi = \omega t = 1.415\times10^{-4}\times24600 = 3.48 \approx 3.5$ rad. Earlier means it's ahead: a <b>phase lead</b>.</p><p class="small">3.5 rad is more than π, so it could also be called a lag of $2\pi - 3.5 = 2.78$ rad; the posted solution keeps "lead" because we know Schull's tide arrives first.</p>`, ans:"≈ 3.5 rad lead", prov:"Follows the posted solution."},
  {src:"Tutorial Q18", q:R`Low-to-high range is 4 m in Dublin and 3.2 m in Schull. Describe the tidal streams in complex polar form relative to Dublin's time base. What are the phasors?`,
-  sol:R`Amplitudes are half the range: 2 m and 1.6 m. Dublin: $2e^{j\omega t}$ (phasor $2$, i.e. $2e^{j0}$). Schull: $1.6e^{j(\omega t + 3.5)}$ (phasor $1.6e^{j3.5}$).`, ans:"2 and 1.6e^{j3.5}"},
+  sol:R`Amplitudes are half the range: 2 m and 1.6 m. Dublin: $2e^{j\omega t}$ (phasor $2$, i.e. $2e^{j0}$). Schull: $1.6e^{j(\omega t + 3.5)}$ (phasor $1.6e^{j3.5}$).`, ans:"2 and 1.6e^{j3.5}", prov:"Follows the posted solution."},
  {src:"Tutorial Q19", q:R`If both tidal streams were added together, what would result? Give it in complex polar form.`,
-  sol:R`$2 + 1.6e^{j3.5} = 2 + 1.6(\cos3.5 + j\sin3.5) = 2 - 1.498 - j0.561 = 0.502 - j0.561$. Magnitude 0.753, angle $-0.84$ rad. Result: $\text{Re}[0.75e^{j(\omega t-0.84)}]$.`, ans:"Re[0.75 e^{j(ωt−0.84)}]"},
+  sol:R`$2 + 1.6e^{j3.5} = 2 + 1.6(\cos3.5 + j\sin3.5) = 2 - 1.498 - j0.561 = 0.502 - j0.561$. Magnitude 0.753, angle $-0.84$ rad. Result: $\text{Re}[0.75e^{j(\omega t-0.84)}]$.`, ans:"Re[0.75 e^{j(ωt−0.84)}]", prov:"Follows the posted solution."},
  {src:"Tutorial Q21", q:R`Write $f(t) = 4\sin\omega t - \cos\omega t$ in the form $C\cos(\omega t+\varphi)$.`,
   hint:"a = −1 (cos coefficient), b = 4 (sin coefficient). Watch the quadrant.",
   sol:R`<p>$C = \sqrt{(-1)^2+4^2} = \sqrt{17}$. Need $\cos\varphi = -1/\sqrt{17}$ and $\sin\varphi = -4/\sqrt{17}$: both negative → third quadrant: $\varphi = -(\pi - \tan^{-1}4) = -1.816$ rad.</p>
@@ -186,11 +186,11 @@ traps: ["Phase = −ω × delay. A delay gives negative phase.", "Peak-to-peak i
 
 T.topics.push({
 id: "fourier-series", part: "Signal processing", title: "Fourier Series",
-lectures: "Not yet lectured · built from tutorial sheet & past papers", status: "pending",
-summary: "Representing any periodic signal as a sum of harmonics: the coefficient integrals, symmetry shortcuts, the three ways to draw a spectrum, the complex coefficients Dₙ and Gibbs phenomenon.",
+lectures: "Lectures 13.1–14.3", status: "lectured",
+summary: "Representing any periodic signal as a sum of harmonics: orthogonality and the least-squares origin of the coefficients, the sawtooth and square-wave examples, symmetry shortcuts, the three ways to draw a spectrum, the complex coefficients Dₙ, what a phase shift does, Dirichlet's conditions and Gibbs phenomenon.",
 theory: R`
-<div class="callout warn">The lectures for this topic haven't been released yet. This page is built from the tutorial sheet (Q20–Q24) and the past papers, using the same formulas the exam prints. Check it against the notes when they come out.</div>
 <h3>1. The series</h3>
+<p>Why build signals from sinusoids (Lecture 13.1): many physical systems respond harmonically; a linear system answers a sinusoid with a sinusoid of the same frequency, so its behaviour shows up as a gain and a phase shift; the maths is well developed in the frequency domain; and a sinusoid and its harmonics form an <b>orthogonal set</b>.</p>
 <p>Any periodic signal with period $T$ (fundamental $\omega = 2\pi/T$) can be written as</p>
 $$f(t) = A_0 + \sum_{n=1}^{\infty}\left(A_n\cos n\omega t + B_n\sin n\omega t\right)$$
 $$A_0 = \frac1T\int_{-T/2}^{T/2}f(t)\,dt\qquad A_n = \frac2T\int_{-T/2}^{T/2}f(t)\cos n\omega t\,dt\qquad B_n = \frac2T\int_{-T/2}^{T/2}f(t)\sin n\omega t\,dt$$
@@ -199,6 +199,11 @@ $$A_0 = \frac1T\int_{-T/2}^{T/2}f(t)\,dt\qquad A_n = \frac2T\int_{-T/2}^{T/2}f(t
 
 <h3>2. Why it works: orthogonality</h3>
 <p>Over one period, $\int \cos m\omega t\cos n\omega t\,dt = 0$ unless $m = n$ (same for sin·sin, and sin·cos is always 0). The harmonics are independent of each other, like perpendicular axes. Multiplying $f(t)$ by $\cos n\omega t$ and integrating kills every term except the $n$th, which is why each coefficient can be found separately and adding more terms never changes the ones you already have.</p>
+<p><b>Where the formulas come from (Lecture 13.1).</b> Model $f(t)$ as $a\,f_1(t)$. The error is $f - af_1$; choose $a$ to minimise the time-averaged squared error over $t_1$ to $t_2$:</p>
+$$\frac{d}{da}\left[\frac{1}{t_2-t_1}\int_{t_1}^{t_2}\big(f(t)-af_1(t)\big)^2dt\right]=0\quad\Rightarrow\quad a=\frac{\int_{t_1}^{t_2}f\,f_1\,dt}{\int_{t_1}^{t_2}f_1^2\,dt}$$
+<p>Try to model $\sin mt$ with $\sin nt$ ($n \ne m$): the numerator is $\int \sin mt\sin nt\,dt = \tfrac12\int[\cos(n-m)t - \cos(n+m)t]\,dt = 0$ over a full period, so the best $a$ is <b>0</b>. A sine wave can't be represented by any of its harmonics.</p>
+<p>Now fit two terms, $f \approx af_1 + bf_2$ with $f_1 = \sin t$, $f_2 = \sin nt$. Differentiating with respect to $a$, the cross term $\int f_1f_2\,dt$ vanishes over the fundamental period, leaving exactly the same $a$ as the one-term fit. That's the practical meaning of orthogonality: <b>adding a term never changes the coefficients already found.</b></p>
+<p>Applying the same least-squares result with $f_1 = 1$, $\cos n\omega t$ or $\sin n\omega t$ gives the three coefficient formulas, because $\int_{-T/2}^{T/2}1\,dt = T$ and $\int_{-T/2}^{T/2}\cos^2 n\omega t\,dt = \int\sin^2 n\omega t\,dt = T/2$ (use $\cos^2 x = \tfrac12[1+\cos2x]$). That's where the $1/T$ and $2/T$ come from.</p>
 
 <h3>3. Symmetry rules (save most of the work)</h3>
 <table class="data"><tr><th>If the signal is…</th><th>then…</th></tr>
@@ -206,14 +211,22 @@ $$A_0 = \frac1T\int_{-T/2}^{T/2}f(t)\,dt\qquad A_n = \frac2T\int_{-T/2}^{T/2}f(t
 <tr><td><b>Odd</b>: $f(-t) = -f(t)$</td><td>$A_0 = A_n = 0$: sines only. $B_n = \frac4T\int_0^{T/2}f\sin n\omega t\,dt$</td></tr>
 <tr><td>Zero mean</td><td>$A_0 = 0$</td></tr>
 <tr><td>Half-wave symmetric: $f(t+T/2) = -f(t)$</td><td>Only odd harmonics</td></tr></table>
-<p>Choose the time origin to create symmetry where you can. MCQ: "even with zero mean" → $3\cos5t$ (not $4\cos(2t+1)$, which isn't even, nor $2+\cos2t$, which has a mean).</p>
+<p>If the function is even or odd, the $A_n$ or $B_n$ integral only needs evaluating over half the period, then doubling. Choose the time origin to create symmetry where you can. MCQ: "even with zero mean" → $3\cos5t$ (not $4\cos(2t+1)$, which isn't even, nor $2+\cos2t$, which has a mean).</p>
 
 <h3>4. Three ways to show the spectrum</h3>
 <ol class="steps"><li><b>$A_n$ and $B_n$</b> plotted against $n\omega$ (one-sided).</li><li><b>Amplitude and phase</b>: $C_n = \sqrt{A_n^2+B_n^2}$ and $\varphi_n$, from $A_n\cos + B_n\sin = C_n\cos(n\omega t + \varphi_n)$.</li><li><b>Complex (two-sided)</b>: $f(t) = \sum_{n=-\infty}^{\infty}D_ne^{jn\omega t}$ with $D_n = \frac1T\int f(t)e^{-jn\omega t}dt = \frac{A_n - jB_n}{2}$, $D_{-n} = D_n^*$, $D_0 = A_0$. Lines at ±nω of height $|D_n| = C_n/2$.</li></ol>
 <p>A time shift changes the phases but not $C_n = \sqrt{A_n^2+B_n^2}$, so it only changes the angles of the $D_n$, not their magnitudes.</p>
+<p><b>Amplitude–phase form (Lecture 14.1).</b> $A\cos\omega t + B\sin\omega t = \sqrt{A^2+B^2}\cos\left(\omega t - \tan^{-1}\frac BA\right)$, so</p>
+$$f(t) = A_0 + \sum_{n=1}^{\infty}C_n\cos(n\omega t - \varphi_n),\qquad C_n=\sqrt{A_n^2+B_n^2},\ \ \varphi_n=\tan^{-1}\frac{B_n}{A_n}$$
+<p>Plotting $C_n$ and $\varphi_n$ against frequency is the "Bode plot" of the signal. For the sawtooth: $\sin\omega t = \cos(\omega t - \pi/2)$, $-\tfrac12\sin2\omega t = \tfrac12\cos(2\omega t + \pi/2)$, $\tfrac13\sin3\omega t = \tfrac13\cos(3\omega t-\pi/2)$, … so the amplitudes are $1, \tfrac12, \tfrac13, \tfrac14$ and the phases alternate $-\pi/2, +\pi/2, \dots$ (with $A_n = 0$, take the quadrant from the sign of $B_n$, not from $\tan^{-1}(B/0)$).</p>
+<p><b>Complex form (Lecture 14.2).</b> Substitute $\cos x = \frac12(e^{jx}+e^{-jx})$ and $\sin x = \frac1{2j}(e^{jx}-e^{-jx})$:</p>
+$$f(t)=A_0+\sum_{n=1}^{\infty}\left(\frac{A_n-jB_n}{2}e^{jn\omega t}+\frac{A_n+jB_n}{2}e^{-jn\omega t}\right)$$
+<p>Since $A_{-n} = A_n$ and $B_{-n} = -B_n$, the second sum is the first one run over negative $n$, which gives $f(t) = \sum_{-\infty}^{\infty}D_ne^{jn\omega t}$ with $D_n = \frac1T\int_{-T/2}^{T/2}f(t)e^{-jn\omega t}dt$ and $D_0 = A_0$. Real parts of $D_n$ come from the cosine terms, imaginary parts from the sine terms. The spectrum now runs over negative as well as positive frequencies.</p>
 
-<h3>5. Gibbs phenomenon</h3>
-<p>Rebuilding a signal with a jump (discontinuity) from a finite number of harmonics gives an overshoot of about 9% of the jump right next to it. Adding more terms makes the ripple narrower but doesn't remove the overshoot.</p>
+<h3>5. Convergence, Dirichlet and Gibbs phenomenon</h3>
+<p>Rapidly changing signals need many high-frequency terms: only fast harmonics can follow fast changes. Compare the $D_n$ of $\sin10t + 3\sin20t$ (four imaginary lines at ±10 and ±20 rad/s) with a fluctuating signal (lines spread out to high frequency, real and imaginary). Smooth signals give a series that dies away quickly; a <b>piecewise smooth</b> signal (finitely many discontinuities, like the sawtooth or square wave) still converges.</p>
+<p><b>Dirichlet conditions</b> for the series to converge: the signal is absolutely integrable, and has a finite number of maxima, minima and discontinuities in a period. The series equals $f(t)$ where $f$ is continuous; at a jump it converges to the <b>midpoint</b> $\tfrac12[f(t^+) + f(t^-)]$.</p>
+<p><b>Gibbs phenomenon:</b> rebuilding a signal with a jump from a finite number of harmonics gives ringing and an overshoot next to the jump. With 5, 25 and 125 terms the ripple gets narrower and squeezes towards the jump, but the overshoot never drops below about <b>0.0895 × the jump</b> (≈ 9%).</p>
 
 <h3>Worked: triangle wave (Tutorial Q20)</h3>
 <p>Period 2π, peak 1 at t = 0, −1 at ±π: $f(t) = 1 - 2|t|/\pi$ on $(-\pi,\pi)$, $\omega = 1$.</p>
@@ -222,13 +235,51 @@ $$A_0 = \frac1T\int_{-T/2}^{T/2}f(t)\,dt\qquad A_n = \frac2T\int_{-T/2}^{T/2}f(t
 <li>Remaining: $A_n = -\frac{4}{\pi^2}\int_0^\pi t\cos nt\,dt = -\frac{4}{\pi^2}\cdot\frac{1}{n^2}\Big[\cos nt + nt\sin nt\Big]_0^\pi = \frac{4}{\pi^2n^2}(1-\cos n\pi)$.</li>
 <li>$1-\cos n\pi = 2$ for odd n, 0 for even n: $A_n = \dfrac{8}{\pi^2n^2}$ (odd n only).</li></ol>
 $$f(t) = \frac{8}{\pi^2}\left(\cos t + \frac19\cos3t+\frac1{25}\cos5t+\dots\right)$$
-<p class="small">The tutorial sheet prints cos 2t and cos 3t in the bracket; it should be cos 3t and cos 5t (odd harmonics only, the 1/9 and 1/25 give it away).</p>`,
+<p class="small">The tutorial sheet prints cos 2t and cos 3t in the bracket; it should be cos 3t and cos 5t (odd harmonics only, the 1/9 and 1/25 give it away).</p>
+
+<h3>Worked: sawtooth (Lecture 13.2)</h3>
+<p>Period $T$, rising linearly through the origin to $\pi/2$ at $t = T/2$, then dropping to $-\pi/2$. Slope $= \frac{\pi/2}{T/2} = \frac{\pi}{T} = \frac{\omega}{2}$, so $f(t) = \frac{\omega t}{2}$ on $(-T/2, T/2)$.</p>
+<ol class="steps"><li>$A_0 = \frac1T\int_{-T/2}^{T/2}\frac{\omega}{2}t\,dt = \frac1T\left[\frac\omega4t^2\right]_{-T/2}^{T/2} = 0$: average value zero.</li>
+<li>Odd function, so $A_n = 0$ (the $t\cos n\omega t$ integrand is odd).</li>
+<li>$B_n = \frac2T\int_{-T/2}^{T/2}\frac\omega2t\sin n\omega t\,dt = \frac{\omega^2}{2\pi}\left[-\frac{t\cos n\omega t}{n\omega}+\frac{\sin n\omega t}{(n\omega)^2}\right]_{-T/2}^{T/2}$. With $T/2 = \pi/\omega$: $B_n = -\frac{\cos n\pi}{n} = \frac{(-1)^{n+1}}{n}$.</li></ol>
+$$\text{sawtooth} = \sin\omega t - \tfrac12\sin2\omega t + \tfrac13\sin3\omega t - \tfrac14\sin4\omega t + \dots$$
+<p>Because it's odd you could integrate from 0 to $T/2$ and double. The lecture builds it up term by term: each extra harmonic sharpens the fit, and the coefficients already found don't change (orthogonality).</p>
+
+<h3>Worked: square wave (Lecture 13.3)</h3>
+<p>Amplitude ±1, period $T$: $+1$ for $|t| < T/4$, $-1$ for $T/4 < |t| < T/2$.</p>
+<ol class="steps"><li>Even → $B_n = 0$. Equal areas above and below → $A_0 = 0$.</li>
+<li>Evaluate from $-T/4$ to $T/4$ and double: $A_n = \frac{4}{n\pi}\sin\frac{n\pi}{2}$.</li>
+<li>$A_1 = \frac4\pi$, $A_2 = 0$, $A_3 = -\frac{4}{3\pi}$, $A_4 = 0$, $A_5 = \frac{4}{5\pi}$. It is also half-wave symmetric, which is why the even harmonics vanish.</li></ol>
+$$f(t) = \frac4\pi\left(\cos\omega t - \tfrac13\cos3\omega t + \tfrac15\cos5\omega t - \dots\right)$$
+<p><b>Shifting it (Lecture 14.3).</b> Delay the same wave by a quarter period ($\pi/2$ when $T = 2\pi$) and it becomes odd: $+1$ on $(0, T/2)$. Now only $B_n$ terms exist: $B_n = \frac{2}{T}\cdot2\int_0^{T/2}\sin n\omega t\,dt = \frac{2(1-\cos n\pi)}{n\pi} = \frac{4}{n\pi}$ for odd $n$:</p>
+$$f(t) = \frac4\pi\left(\sin\omega t + \tfrac13\sin3\omega t + \tfrac15\sin5\omega t + \dots\right)$$
+<p>A delay anywhere between gives a mix of $A_n$ and $B_n$ terms. The amplitudes $\frac{4}{n\pi}$ are the same in every case; only the phases move.</p>
+<p class="small">The slide writes the sine-series coefficients as $\frac{4}{n\pi}\sin\frac{n\pi}{2}$ (alternating signs, carried over from the cosine case) and calls the shift "half a period". Integrating directly gives all-positive $\frac{4}{n\pi}$, and the plotted shift is a quarter period ($\pi/2$ of $2\pi$); a half-period delay would just turn the wave upside down.</p>
+
+<h3>Worked: Dₙ for sin ωt (Lecture 14.2)</h3>
+$$D_n = \frac1T\int_{-T/2}^{T/2}\sin\omega t\,e^{-jn\omega t}dt = \frac1T\int_{-T/2}^{T/2}\frac{e^{j(1-n)\omega t}-e^{-j(1+n)\omega t}}{2j}dt$$
+<p>With $T/2 = \pi/\omega$ this works out to</p>
+$$D_n = -\frac j2\left[\frac{\sin(1-n)\pi}{(1-n)\pi} - \frac{\sin(1+n)\pi}{(1+n)\pi}\right]$$
+<p>Every term is zero except where a denominator is zero, and $\frac{\sin x}{x} \to 1$ as $x \to 0$: $D_1 = -\frac j2$, $D_{-1} = +\frac j2$, all others 0. Check: $\sin\omega t = \frac{1}{2j}e^{j\omega t} - \frac{1}{2j}e^{-j\omega t}$ and $\frac1{2j} = -\frac j2$. A sine gives two <b>imaginary</b> lines of opposite sign at ±ω; a cosine gives two <b>real</b> lines of $+\frac12$ (Tutorial Q22).</p>
+<p>Relating back: $D_0 = A_0$, $D_n = \frac12(A_n - jB_n)$, $D_{-n} = \frac12(A_n + jB_n)$ (with $n$ positive on the right).</p>
+
+<h3>Phase shifts keep A² + B² constant (Lecture 14.3)</h3>
+<p>Shifting a wave doesn't change its shape, so something about the coefficients must stay fixed. Take $f = A\cos\omega t + B\sin\omega t$ and average $f^2$ over a period (squaring stops negative area cancelling positive):</p>
+$$\frac1T\int_{-T/2}^{T/2}f^2dt = \frac1T\int\left(A^2\cos^2\omega t + 2AB\cos\omega t\sin\omega t + B^2\sin^2\omega t\right)dt = \tfrac12\left(A^2+B^2\right)$$
+<p>The cross term integrates to zero (orthogonality again). The mean square doesn't change when the curve is shifted, so <b>$A_n^2 + B_n^2$ is constant under a phase change</b>, for every harmonic.</p>
+<div class="callout key"><b>Lecture example.</b> $f(t) = 2\cos\omega t + 5\sin\omega t$. The phase changes so the cosine (real) amplitude rises by 50% to 3. $A^2 + B^2 = 4 + 25 = 29$, so $9 + B^2 = 29$, $B = \pm\sqrt{20} = \pm4.47$: $f(t) = 3\cos\omega t \pm \sqrt{20}\sin\omega t$.</div>`,
 formulas: [
  {name:"Fourier series", tex:R`f(t)=A_0+\sum_{n=1}^\infty(A_n\cos n\omega t+B_n\sin n\omega t)`},
  {name:"Mean term", tex:R`A_0=\frac1T\int_{-T/2}^{T/2}f\,dt`},
  {name:"Cosine coefficients", tex:R`A_n=\frac2T\int_{-T/2}^{T/2}f\cos n\omega t\,dt`},
  {name:"Sine coefficients", tex:R`B_n=\frac2T\int_{-T/2}^{T/2}f\sin n\omega t\,dt`},
+ {name:"Amplitude–phase form", tex:R`f(t)=A_0+\sum C_n\cos(n\omega t-\varphi_n),\ \ C_n=\sqrt{A_n^2+B_n^2},\ \ \varphi_n=\tan^{-1}\frac{B_n}{A_n}`},
+ {name:"Complex series", tex:R`f(t)=\sum_{n=-\infty}^{\infty}D_ne^{jn\omega t},\quad D_n=\frac1T\int_{-T/2}^{T/2}f(t)e^{-jn\omega t}dt`},
  {name:"Complex coefficients", tex:R`D_n=\frac{A_n-jB_n}{2},\quad |D_n|=\tfrac12\sqrt{A_n^2+B_n^2}`},
+ {name:"Mean square (phase-invariant)", tex:R`\frac1T\int_{-T/2}^{T/2}(A\cos\omega t+B\sin\omega t)^2dt=\tfrac12(A^2+B^2)`},
+ {name:"Square wave (±1, even)", tex:R`f(t)=\frac4\pi\left(\cos\omega t-\tfrac13\cos3\omega t+\tfrac15\cos5\omega t-\dots\right)`},
+ {name:"Sawtooth (peak π/2)", tex:R`f(t)=\sin\omega t-\tfrac12\sin2\omega t+\tfrac13\sin3\omega t-\dots`},
+ {name:"At a discontinuity", tex:R`\text{series}\to\tfrac12\left[f(t^+)+f(t^-)\right]`},
  {name:"Integration by parts results", tex:R`\int x\cos ax\,dx=\frac{\cos ax+ax\sin ax}{a^2},\ \ \int x\sin ax\,dx=\frac{\sin ax-ax\cos ax}{a^2}`},
  {name:"Useful values", tex:R`\sin n\pi=0,\quad \cos n\pi=(-1)^n`}
 ],
@@ -253,9 +304,26 @@ questions: [
   Using the printed integral: first part $= \frac{4}{\pi n^2}\left(\cos\frac{n\pi}4 - 1\right) + \frac1n\sin\frac{n\pi}{4}$; second $= \frac1n\left(\sin\frac{n\pi}2 - \sin\frac{n\pi}4\right)$.
   $$A_n = \frac2\pi\left[\frac{4}{\pi n^2}\left(\cos\frac{n\pi}{4}-1\right) + \frac{1}{n}\sin\frac{n\pi}{2}\right],\qquad A_0 = \frac{3}{8}$$</p>
   <p class="small">The figure on the paper is small; this reading (ramp to π/4) is my best reading of it. The method is what matters.</p>`},
- {src:"MCQ · several years", q:R`(i) Why is the Fourier series an orthogonal basis for periodic signals? (ii) Which is even with zero mean: 3cos5t, 4cos(2t+1), 2sin2t, 2+cos2t?`, sol:"(i) The sinusoids are a set of independent harmonic functions. (ii) 3cos5t.", ans:"(i) independent harmonics (ii) 3cos5t"}
+ {src:"MCQ · several years", q:R`(i) Why is the Fourier series an orthogonal basis for periodic signals? (ii) Which is even with zero mean: 3cos5t, 4cos(2t+1), 2sin2t, 2+cos2t?`, sol:"(i) The sinusoids are a set of independent harmonic functions. (ii) 3cos5t.", ans:"(i) independent harmonics (ii) 3cos5t"},
+ {src:"Lecture 14 notes example", q:R`A signal is $f(t) = 2\cos\omega t + 5\sin\omega t$. Its phase changes so that the real (cosine) component's amplitude increases by 50%. How is the new signal described?`,
+  hint:"A shift leaves A² + B² unchanged.",
+  sol:R`<p>$A^2 + B^2 = 2^2 + 5^2 = 29$ is fixed by the shape. New $A = 1.5 \times 2 = 3$, so $3^2 + B^2 = 29$, $B^2 = 20$, $B = \pm\sqrt{20} = \pm4.47$.</p><p>$$f(t) = 3\cos\omega t \pm \sqrt{20}\sin\omega t$$</p><p class="small">The notes' last line reads "3cos ωt ±5 ±√20 sin ωt"; the "±5" is a leftover typo.</p>`,
+  ans:"3cos ωt ± √20 sin ωt", prov:"From the worked example in the Lecture 14 additional notes."},
+ {src:"Lecture 13.3 / 14.3", q:R`A square wave of amplitude 1 and period $2\pi$ is $+1$ for $|t| < \pi/2$ and $-1$ elsewhere in the period. (a) Find its Fourier series. (b) Find the series after the wave is delayed by $\pi/2$. (c) What stays the same?`,
+  hint:"(a) Even and zero mean. (b) The delayed wave is odd: +1 on (0, π).",
+  sol:R`<p><b>(a)</b> Even → $B_n = 0$; zero mean → $A_0 = 0$. $A_n = \frac{2}{\pi}\int_0^{\pi/2}\cos nt\,dt - \frac2\pi\int_{\pi/2}^{\pi}\cos nt\,dt = \frac{4}{n\pi}\sin\frac{n\pi}{2}$, so $f = \frac4\pi(\cos t - \frac13\cos3t + \frac15\cos5t - \dots)$.</p>
+  <p><b>(b)</b> Odd → $A_n = 0$. $B_n = \frac2\pi\int_0^\pi\sin nt\,dt = \frac{2(1-\cos n\pi)}{n\pi} = \frac{4}{n\pi}$ (odd $n$): $f = \frac4\pi(\sin t + \frac13\sin3t + \frac15\sin5t + \dots)$.</p>
+  <p><b>(c)</b> $\sqrt{A_n^2 + B_n^2} = \frac{4}{n\pi}$ for each odd $n$ in both cases: the amplitude spectrum is unchanged, only the phases move. Only odd harmonics appear in both (half-wave symmetry).</p>`,
+  ans:"(4/π)Σ cos terms → (4/π)Σ sin(nt)/n, n odd", prov:"From the worked examples in Lectures 13.3 and 14.3; the sine-series signs were checked by direct integration (see the note in the theory)."},
+ {src:"Lecture 14.2", q:R`Find the complex Fourier coefficients $D_n$ of $f(t) = \sin\omega t$ and sketch the two-sided spectrum.`,
+  hint:"Either integrate D_n = (1/T)∫ f e^{−jnωt} dt, or just write sin with the inverse Euler formula.",
+  sol:R`<p>$\sin\omega t = \frac{e^{j\omega t} - e^{-j\omega t}}{2j} = -\frac j2e^{j\omega t} + \frac j2e^{-j\omega t}$.</p><p>So $D_1 = -\frac j2$, $D_{-1} = +\frac j2$, all others zero. The real-part plot is empty; the imaginary-part plot has a line of $-\frac12$ at $+\omega$ and $+\frac12$ at $-\omega$. (Integrating gives the same: every $\frac{\sin x}{x}$ term is zero except at $n = \pm1$, where it is 1.)</p>`,
+  ans:"D₁ = −j/2, D₋₁ = +j/2", prov:"From the worked example in Lecture 14.2 and its additional notes."},
+ {src:"Lecture 14.3", q:R`(a) State Dirichlet's conditions for a Fourier series to converge. (b) What value does the series take at a discontinuity? (c) Describe Gibbs phenomenon.`,
+  sol:R`<p><b>(a)</b> The signal must be absolutely integrable and have a finite number of maxima, minima and discontinuities in a period.</p><p><b>(b)</b> The midpoint of the jump: $\tfrac12[f(t^+) + f(t^-)]$.</p><p><b>(c)</b> A finite series rebuilding a jump rings and overshoots next to it. More terms make the ringing narrower and push it towards the jump, but the overshoot stays at about 0.0895 × the jump height (≈ 9%).</p>`,
+  prov:"From Lecture 14.3."}
 ],
-traps: ["Check symmetry before integrating; it often kills half the coefficients.", "A₀ has 1/T in front; Aₙ and Bₙ have 2/T.", "cos nπ = (−1)ⁿ and sin nπ = 0: write these in early."]
+traps: ["Check symmetry before integrating; it often kills half the coefficients.", "A₀ has 1/T in front; Aₙ and Bₙ have 2/T.", "cos nπ = (−1)ⁿ and sin nπ = 0: write these in early.", "When Aₙ = 0, tan⁻¹(Bₙ/Aₙ) is ±π/2 depending on the sign of Bₙ; don't just write tan⁻¹(∞).", "Dₙ for a sine is imaginary (−j/2 at +ω); for a cosine it's real (½ at ±ω).", "A shift changes Aₙ and Bₙ individually but never Aₙ² + Bₙ²."]
 });
 
 T.topics.push({

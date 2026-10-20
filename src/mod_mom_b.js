@@ -109,7 +109,7 @@ questions: [
   <p>$M_{max} = \dfrac{1}{2(0.01265)\sqrt{1-0.01265^2}} = 39.5$.</p>
   <p>$X_{static} = 5/39.5 = 0.127$ cm $\approx 1.26$ mm.</p>
   <p>(Damping this light means $M_{max} \approx 1/2\zeta$; the peak is at $\omega = \omega_n\sqrt{1-2\zeta^2} \approx 6.32$ rad/s.)</p>`,
-  ans:"≈ 1.26 mm", prov:"Worked by Claude. No solution has been posted for Tutorial 5."}
+  ans:"≈ 1.26 mm", prov:"Follows the posted solution."}
 ],
 traps: [
  "Apply the initial conditions to x_h + x_p, not just to x_h.",
@@ -197,15 +197,16 @@ questions: [
   sol:R`<p>$f = 52/2.5 = 20.8$ Hz, $\omega = 130.7$ rad/s.</p>
   <p>$\omega_n = \sqrt{400000/500} = 28.28$ rad/s, $r = 4.62$; $\zeta = 3000/(2\sqrt{400000 \times 500}) = 0.106$, $2\zeta r = 0.980$.</p>
   <p>$\dfrac{X}{Y} = \sqrt{\dfrac{1 + 0.980^2}{(1-4.62^2)^2 + 0.980^2}} = \sqrt{\dfrac{1.960}{415.2}} = 0.0687$</p>
-  <p>$X = 0.0687(0.01) = 0.687$ mm; acceleration amplitude $= \omega^2X = 130.7^2(0.000687) = 11.7$ m/s² (about 1.2 g).</p>`,
-  ans:"≈ 11.7 m/s²", prov:"Worked by Claude. No solution has been posted for Tutorial 5. (The sheet gives the stiffness in N·s/m; it's treated as N/m.)"},
+  <p>$X = 0.0687(0.01) = 0.687$ mm; acceleration amplitude $= \omega^2X = 130.7^2(0.000687) = 11.7$ m/s² (about 1.2 g).</p>
+  <p class="small">The posted solution uses this exact method and the same $r = 4.62$, $\zeta = 0.1061$, but writes $X/Y \approx 0.0588$ and gets 10.04 m/s². Putting its own numbers through the formula gives 0.0687 and 11.7 m/s², so the 0.0588 looks like an arithmetic slip. If your answer is 11.7 your method matches theirs.</p>`,
+  ans:"≈ 11.7 m/s² (posted: 10.0)", prov:"Worked by Claude; follows the posted method, but the posted X/Y = 0.0588 doesn't follow from its own numbers (recomputed: 0.0687). The sheet gives the stiffness in N·s/m; it's treated as N/m, as the solution does."},
  {src:"Tutorial 5 Q2", fig:"mom_wash", see:[0,1], q:R`A washing machine has total mass 15 kg. A 0.8 kg lump of clothes sits at the drum radius of 200 mm; the drum turns at 1200 rpm. The spring stiffness is 350 N/mm and damping is neglected. Find the force in the spring.`,
   hint:"F = m_e r_e ω², X = F/(k − mω²) (undamped), spring force = kX.",
   sol:R`<p>$\omega = 1200(2\pi/60) = 125.7$ rad/s; $F = 0.8(0.2)(125.7)^2 = 2527$ N.</p>
   <p>$k = 350\,000$ N/m, $\omega_n = \sqrt{350000/15} = 152.8$ rad/s, $r = 0.823$ (below resonance, in phase).</p>
   <p>$X = \dfrac{2527}{350000 - 15(125.7)^2} = \dfrac{2527}{113\,130} = 22.3$ mm.</p>
   <p>Spring force amplitude $= kX = 350\,000(0.0223) \approx 7.8$ kN.</p>`,
-  ans:"≈ 7.8 kN (X ≈ 22.3 mm)", prov:"Worked by Claude. No solution has been posted for Tutorial 5."}
+  ans:"≈ 7.8 kN (X ≈ 22.3 mm)", prov:"Follows the posted solution (X = 0.0223 m, F = 7805 N)."}
 ],
 traps: [
  "Imbalance force grows with ω², so the response tends to m_e r_e/m at high speed instead of zero.",
@@ -375,7 +376,34 @@ questions: [
   sol:R`<p>$\omega_r = -(40/100)(500) = -200$ rpm (opposite direction).</p>
   <p>$T_s = 38.2$ N·m; $T_r = -T_s\omega_s/\omega_r = 38.2/0.4 = 95.5$ N·m.</p>
   <p>$T_c = -(T_s + T_r) = -133.7$ N·m (reaction on the fixed carrier).</p>`,
-  ans:"ω_r = −200 rpm; T_r = 95.5 N·m, T_c = −133.7 N·m", prov:"From the worked example in Lecture 3."}
+  ans:"ω_r = −200 rpm; T_r = 95.5 N·m, T_c = −133.7 N·m", prov:"From the worked example in Lecture 3."},
+ {src:"Tutorial 6 Q1", see:[0,2,4,1], q:R`An epicyclic gear train has a 50-tooth sun and three 30-tooth planets meshing with a fixed internal ring. The input shaft carries the sun and transmits 3 kW at 360 rpm; the output is the planet carrier (link). (a) Find the output speed and torque. (b) If the ring can be driven independently, what speed must it have for the carrier to turn at 15 rpm?`,
+  hint:"N_r = N_s + 2N_p. Ring fixed: ω_s/ω_c = 1 + N_r/N_s. For (b) use the Willis equation with ω_c = 15.",
+  sol:R`<p>$N_r = 50 + 2(30) = 110$ teeth.</p>
+  <p><b>(a)</b> $\omega_s/\omega_c = 1 + 110/50 = 3.2 \Rightarrow \omega_c = 360/3.2 = 112.5$ rpm $= 11.78$ rad/s. Lossless, so $T_{out} = 3000/11.78 = 254.6$ N·m (3.2 × the input torque of 79.6 N·m).</p>
+  <p><b>(b)</b> $\dfrac{\omega_s - \omega_c}{\omega_r - \omega_c} = -\dfrac{N_r}{N_s} = -2.2 \Rightarrow \dfrac{360 - 15}{\omega_r - 15} = -2.2 \Rightarrow \omega_r - 15 = -156.8$</p>
+  <p>$\omega_r = -141.8$ rpm: the ring must turn at about 142 rpm <b>opposite</b> to the sun.</p>`,
+  ans:"112.5 rpm, 254.6 N·m; ring −141.8 rpm", prov:"Follows the posted solution."},
+ {src:"Tutorial 6 Q2", see:[1,2], q:R`The carrier is the input to an epicyclic train. The ring is fixed and has 110 teeth, the planet has 40 teeth, and the 30-tooth sun is the output. Find the speeds of all members when the input turns at 1200 rpm.`,
+  hint:"Ring fixed: ω_s = (1 + N_r/N_s)ω_c. Then the planet from ω_p = ω_c − (N_s/N_p)(ω_s − ω_c).",
+  sol:R`<p>Check: $N_s + 2N_p = 30 + 80 = 110$ ✓.</p>
+  <p>Ring fixed: $\omega_s = \left(1 + \dfrac{110}{30}\right)1200 = 4.667 \times 1200 = 5600$ rpm (same direction as the carrier: a 4.67× step-up).</p>
+  <p>Planet: $\omega_p = \omega_c - \dfrac{N_s}{N_p}(\omega_s - \omega_c) = 1200 - \tfrac34(5600 - 1200) = -2100$ rpm (absolute, opposite direction).</p>
+  <p>Ring: 0 (fixed).</p>`,
+  ans:"Carrier 1200, sun 5600, planet −2100, ring 0 rpm", prov:"Follows the posted solution."},
+ {src:"Tutorial 6 Q3", see:[4,0], q:R`A sun gear takes an input torque of 540 N·m. The sun pitch radius is 60 mm and the planets are 45 mm radius; the ring is fixed. The tangential contact force at any single tooth mesh must not exceed 2500 N. What is the minimum number of planets?`,
+  hint:"The sun torque is shared equally between n sun–planet meshes, each at radius r_s.",
+  sol:R`<p>Each of the $n$ meshes carries $F_s = \dfrac{T_s}{n\,r_s} \le 2500$ N.</p>
+  <p>$n \ge \dfrac{540}{0.06 \times 2500} = 3.6$, so round <b>up</b>: $n = 4$ (each mesh then carries $540/(4 \times 0.06) = 2250$ N).</p>
+  <p>The planet radius isn't needed: the sun-side force sets the limit (and for a planet in equilibrium the ring-side force is the same).</p>`,
+  ans:"4 planets", prov:"Follows the posted solution."},
+ {src:"Tutorial 6 Q4", fig:"mom_compound", see:[5,1], q:R`In the compound epicyclic train shown, suns S1 and S2 are on the input shaft, which turns at 1000 rpm clockwise. Ring R2 is driven at 500 rpm the opposite way. Ring R1 is joined to the carrier of the second stage, and carrier L (holding the first-stage planets) is the output. Teeth: S1 = 24, S2 = 40, R1 = 100, R2 = 120. Find the output speed and direction.`,
+  hint:"Rearrange Willis: N_s ω_s + N_r ω_r = (N_s + N_r) ω_c. Solve stage 2 first for its carrier (= R1), then stage 1.",
+  sol:R`<p>Willis rearranged: $N_s(\omega_s - \omega_c) = N_r(\omega_c - \omega_r) \Rightarrow N_s\omega_s + N_r\omega_r = (N_s + N_r)\omega_c$. Take clockwise as positive.</p>
+  <p><b>Stage 2</b> (S2, R2, carrier = R1): $40(1000) + 120(-500) = 160\,\omega_{R1} \Rightarrow \omega_{R1} = -20\,000/160 = -125$ rpm.</p>
+  <p><b>Stage 1</b> (S1, R1, carrier L): $24(1000) + 100(-125) = 124\,\omega_L \Rightarrow \omega_L = 11\,500/124 = +92.7$ rpm.</p>
+  <p>Output: <b>92.7 rpm clockwise</b> (same direction as the input).</p>`,
+  ans:"≈ 92.7 rpm, clockwise", prov:"Follows the posted solution."}
 ],
 traps: [
  "Willis equation sign: relative to the carrier, sun and ring turn in opposite directions, hence the minus sign.",
