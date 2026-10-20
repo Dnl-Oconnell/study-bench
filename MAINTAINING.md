@@ -113,6 +113,20 @@ T.topics.push({
 
 **MCQs** (`STUDY.content.<id>.mcq`): `{t:"<topicId>", s:"<source>", q:"...", o:["a","b","c","d"], a:<index>, w:"why"}`. Only add these from real past papers or class tests, and name the source in `s`.
 
+## Formula-sheet drawer
+
+Every module page has a pull-out "Formula sheet" tab on the right. It has two tabs:
+- **Exam sheets** come from `src/sheets.js`. Each item has a `kind`, a `title`, a `note` and `pages` (image keys). The kinds are:
+  - `exam`: issued in the exam or class tests.
+  - `lecture`: tables shown in lectures.
+  - `own`: Daniel's own sheet.
+- **Compiled from topics** is generated automatically from every topic's `formulas`. Nothing to maintain.
+
+To add a sheet:
+1. Render each page to a JPEG about 1240–1400px wide, then save it as `img/sheets/<module>_<name>-<n>.jpg`.
+2. Regenerate `src/sheets_art.js` (data URIs) and `src/sheets_art_web.js` (paths) so both list every file in `img/sheets/`.
+3. Add the item to that module's entry in `sheets.js`. Keep the module's `intro` truthful about what the exam actually provides.
+
 ## Don'ts
 
 - Don't edit, move, rename or delete anything in `Modules` except `.study-bench-processed.json` and the `Study Bench app/` copy.

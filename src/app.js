@@ -491,6 +491,50 @@ function renderPages(mid, sub){
   if (sc){ if (showScrim) sc.onclick = () => { PANE.open = false; renderPages(mid, sub); }; else sc.remove(); }
 }
 
+
+/* ---------- formula-sheet drawer (pull-out from the right) ---------- */
+const DRAWER = { open: false, tab: "sheets", mid: null, zoom: {} };
+function renderDrawer(mid){
+  let host = document.getElementById("fsheet");
+  if (!host){ host = document.createElement("div"); host.id = "fsheet"; document.body.appendChild(host);
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && DRAWER.open){ DRAWER.open = false; renderDrawer(DRAWER.mid); } }); }
+  const m = mid && S.modules[mid];
+  if (!m){ host.innerHTML = ""; host.className = ""; DRAWER.open = false; DRAWER.mid = null; return; }
+  if (DRAWER.mid !== mid){ DRAWER.mid = mid; DRAWER.zoom = {}; DRAWER.tab = "sheets"; }
+  const sh = (S.sheets && S.sheets[mid]) || { intro: "", items: [] };
+  const c = S.content[mid];
+  if (!sh.items.length && DRAWER.tab === "sheets") DRAWER.tab = "compiled";
+  const kindLbl = { exam: "Exam issue", lecture: "Lecture", own: "Your sheet" };
+  let body = "";
+  if (DRAWER.tab === "sheets"){
+    body = `<p class="fs-intro">${esc(sh.intro)}</p>` + (sh.items.length ? sh.items.map(it => `<section class="fs-item"><div class="fs-ih"><span class="fs-kind k-${it.kind}">${kindLbl[it.kind]||""}</span><h3>${esc(it.title)}</h3><span class="fs-note">${esc(it.note||"")}</span></div>` +
+      it.pages.map(k => `<button class="fs-page ${DRAWER.zoom[k]?"zoomed":""}" data-zoom="${k}" aria-label="${DRAWER.zoom[k]?"Shrink":"Enlarge"} ${esc(it.title)}"><img src="${S.sheetImg[k]}" alt="${esc(it.title)}" loading="lazy"></button>`).join("") + `</section>`).join("")
+      : `<p class="fs-empty">No exam formula sheet for ${m.code}. The Compiled tab gathers every formula from this module's topics.</p>`);
+  } else {
+    const parts = c ? [...new Set(c.topics.map(t=>t.part))] : [];
+    body = `<p class="fs-intro">Every formula card from the ${m.code} topic pages in one list, compiled by Claude. It is not an official handout.</p>` +
+      (c ? parts.map(p => `<h3 class="fs-part">${esc(p)}</h3>` + c.topics.filter(t=>t.part===p && t.formulas && t.formulas.length).map(t =>
+        `<section class="fs-topic"><a class="fs-tl" href="#${mid}.${t.id}">${esc(t.title)}</a>` + t.formulas.map(f => `<div class="fs-f"><div class="fs-fn">${esc(f.name)}</div><div class="fs-fx">$$${f.tex}$$</div>${f.note?`<div class="fs-fnote">${esc(f.note)}</div>`:""}</div>`).join("") + `</section>`).join("")).join("")
+        : `<p class="fs-empty">No topics yet.</p>`);
+  }
+  host.className = "fsheet" + (DRAWER.open ? " open" : "");
+  host.style.setProperty("--mc", `var(${m.color})`);
+  host.innerHTML = `<button class="fs-tab" id="fs-tab" aria-expanded="${DRAWER.open}" aria-controls="fs-panel"><span>Formula sheet</span></button>
+    <div class="fs-scrim" id="fs-scrim" ${DRAWER.open?"":"hidden"}></div>
+    <aside class="fs-panel" id="fs-panel" aria-label="${m.code} formula sheet" ${DRAWER.open?"":"inert"}>
+      <div class="fs-head"><span class="fs-code">${m.code}</span><span class="fs-title">Formula sheet</span><button class="fs-close" id="fs-close" aria-label="Close formula sheet">✕</button></div>
+      <div class="fs-tabs" role="tablist"><button role="tab" aria-selected="${DRAWER.tab==="sheets"}" data-ftab="sheets">Exam sheets${sh.items.length?` · ${sh.items.length}`:""}</button><button role="tab" aria-selected="${DRAWER.tab==="compiled"}" data-ftab="compiled">Compiled from topics</button></div>
+      <div class="fs-body" id="fs-body">${body}</div>
+    </aside>`;
+  const toggle = v => { DRAWER.open = v; renderDrawer(mid); if (v) setTimeout(()=>{ const b=document.getElementById("fs-close"); b && b.focus({preventScroll:true}); }, 50); else { const t=document.getElementById("fs-tab"); t && t.focus({preventScroll:true}); } };
+  document.getElementById("fs-tab").onclick = () => toggle(!DRAWER.open);
+  document.getElementById("fs-close").onclick = () => toggle(false);
+  document.getElementById("fs-scrim").onclick = () => toggle(false);
+  host.querySelectorAll("[data-ftab]").forEach(b => b.onclick = () => { DRAWER.tab = b.dataset.ftab; renderDrawer(mid); });
+  host.querySelectorAll("[data-zoom]").forEach(b => b.onclick = () => { const k = b.dataset.zoom; DRAWER.zoom[k] = !DRAWER.zoom[k]; b.classList.toggle("zoomed", DRAWER.zoom[k]); b.setAttribute("aria-label", (DRAWER.zoom[k]?"Shrink ":"Enlarge ")); });
+  if (DRAWER.open && DRAWER.tab === "compiled") typeset(document.getElementById("fs-body"));
+}
+
 /* ---------- router ---------- */
 function route(){
   const h = (location.hash||"#home").slice(1);
@@ -500,6 +544,7 @@ function route(){
   if (mid && S.modules[mid]) PANE.open = isTopic ? false : narrow ? !sub : true;
   PANE.mobileMods = false;
   renderShell(S.modules[mid] ? mid : null, sub);
+  renderDrawer(S.modules[mid] ? mid : null);
   if (!mid || mid==="home" || !S.modules[mid]) home();
   else if (!sub) module(mid);
   else if (sub==="mcq") drill(mid);

@@ -5,9 +5,9 @@
 set -e
 cd "$(dirname "$0")"
 MODE=${1:-artifact}
-ART=art.js; [ "$MODE" = web ] && ART=art_web.js
+ART="art.js sheets_art.js"; [ "$MODE" = web ] && ART="art_web.js sheets_art_web.js"
 # Content order: registry, figures, MSP files, then every mod_*.js (alphabetical), then art and the app.
-CONTENT="registry.js figs.js msp_a.js msp_b.js msp_mcq.js msp_tut.js msp_see.js $(ls mod_*.js 2>/dev/null | sort | tr '\n' ' ') $ART app.js"
+CONTENT="registry.js figs.js msp_a.js msp_b.js msp_mcq.js msp_tut.js msp_see.js $(ls mod_*.js 2>/dev/null | sort | tr '\n' ' ') sheets.js $ART app.js"
 body(){
 cat shell_head.html
 cat <<'H'
