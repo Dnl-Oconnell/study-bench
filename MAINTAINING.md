@@ -115,17 +115,18 @@ T.topics.push({
 
 ## Formula-sheet drawer
 
-Every module page has a pull-out "Formula sheet" tab on the right. It has two tabs:
-- **Exam sheets** come from `src/sheets.js`. Each item has a `kind`, a `title`, a `note` and `pages` (image keys). The kinds are:
-  - `exam`: issued in the exam or class tests.
-  - `lecture`: tables shown in lectures.
-  - `own`: Daniel's own sheet.
-- **Compiled from topics** is generated automatically from every topic's `formulas`. Nothing to maintain.
+Every module page has a pull-out "Formula sheet" tab on the right. It shows **only exact copies** of the formula or table sheet that is issued with that module's exam or class tests (for example, the sheet stapled to the end of the paper, or separate tables handed out in the test). It must never hold:
+- anything compiled or summarised;
+- anything from lectures or tutorials;
+- the general Log Tables booklet;
+- anything home-made.
 
-To add a sheet:
-1. Render each page to a JPEG about 1240–1400px wide, then save it as `img/sheets/<module>_<name>-<n>.jpg`.
+If no sheet is issued, the module's `items` stay empty and the drawer is blank.
+
+To add one:
+1. Render each page of the issued sheet to a JPEG about 1240px wide and save it as `img/sheets/<module>_<name>-<n>.jpg`.
 2. Regenerate `src/sheets_art.js` (data URIs) and `src/sheets_art_web.js` (paths) so both list every file in `img/sheets/`.
-3. Add the item to that module's entry in `sheets.js`. Keep the module's `intro` truthful about what the exam actually provides.
+3. Add the item to `src/sheets.js` with a `note` naming the paper or test it came with.
 
 ## Don'ts
 

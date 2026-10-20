@@ -653,7 +653,8 @@ h3.subhead{font-family:var(--f-display);font-weight:650;font-size:21px;margin:34
 .fs-tabs{display:flex;gap:6px;padding:12px 16px 4px}
 .fs-tabs button{flex:1;font:700 13px/1.2 var(--f-cond,sans-serif);letter-spacing:.08em;text-transform:uppercase;padding:9px 8px;border-radius:3px;border:1px solid #4a463d;background:#0d0d0c;color:#cfc8b5;cursor:pointer}
 .fs-tabs button[aria-selected="true"]{background:#f5c518;color:#121110;border-color:#121110;box-shadow:0 2px 0 #7a6100}
-.fs-body{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:10px 16px 40px}
+.fs-body{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:16px 16px 40px}
+.fs-blank{min-height:60vh}
 .fs-intro{font-size:14.5px;color:#cfc8b5;margin:6px 0 14px;line-height:1.5}
 .fs-empty{border:2px dashed #6b5506;border-radius:3px;padding:14px;color:#d6cfbc;font-size:15px}
 .fs-item{margin:0 0 22px}
@@ -5431,37 +5432,22 @@ T.tutorials = [
  { id:"ct1", short:"CT1", title:"Class Test 1 (with solutions)", note:"Review of Laplace and Z transforms", fromTopics:"Class Test 1 ", intro:"The week 3 Loop quiz questions with their posted solutions." }
 ];
 })();
-/* Formula-sheet drawer content, per module.
-   items[].pages are keys into STUDY.sheetImg (sheets_art.js / sheets_art_web.js, images in img/sheets/).
-   "kind": "exam" = issued in the exam or class tests; "lecture" = tables as shown in lectures; "own" = Daniel's own sheet. */
+/* Formula-sheet drawer: ONLY exact copies of the formula/table sheets issued with the exam or class tests.
+   Nothing compiled, nothing from lectures, nothing home-made. A module with no issued sheet shows a blank drawer.
+   items[].pages are keys into STUDY.sheetImg (sheets_art.js / sheets_art_web.js; images in img/sheets/). */
 STUDY.sheets = {
-  msp: {
-    intro: "The exam gives you the standard Log Tables booklet, not a module formula sheet. These are the pages from it this module uses, as reproduced in the lectures.",
-    items: [
-      { kind: "exam", title: "Standard normal distribution", note: "Log Tables p. 36–37 · Lecture 5.2", pages: ["msp_normal1", "msp_normal2"] },
-      { kind: "exam", title: "Student's t-distribution", note: "Log Tables p. 40–41 · Lecture 6.2", pages: ["msp_t1", "msp_t2"] },
-      { kind: "exam", title: "Chi-squared distribution", note: "Log Tables · ν = 1–13 as shown in Lecture 7.1", pages: ["msp_chi"] },
-      { kind: "lecture", title: "Chauvenet's criterion", note: "Lecture 6.3 · not in the Log Tables", pages: ["msp_chauvenet"] }
-    ]
-  },
-  ssc: {
-    intro: "The lecturer's transform tables, handed out with both class tests, plus the module's partial-fraction cheat sheet.",
-    items: [
-      { kind: "exam", title: "Laplace transform table", note: "Issued with Class Tests 1 and 2", pages: ["ssc_laplace-1"] },
-      { kind: "exam", title: "Z-transform table", note: "Issued with Class Tests 1 and 2", pages: ["ssc_z-1"] },
-      { kind: "lecture", title: "Partial fraction & transform cheat sheet", note: "Course handout", pages: ["ssc_pf-1", "ssc_pf-2", "ssc_pf-3"] }
-    ]
-  },
-  ems: { intro: "The exam gives Log Tables only. There's no module formula sheet in the 2025 or 2026 papers.", items: [] },
-  mom: { intro: "There's no past exam or formula sheet for this module in your folder yet. It'll appear here once one is added.", items: [] },
-  da: {
-    intro: "Loop tests have no official formula sheet. This is your own Test 2 cheat sheet.",
-    items: [ { kind: "own", title: "Test 2 cheat sheet", note: "Your own sheet, not a course handout", pages: ["da_cheat-1", "da_cheat-2"] } ]
-  },
-  pd: { intro: "Project-assessed, so there's no exam formula sheet.", items: [] }
+  msp: { items: [] },
+  ssc: { items: [
+    { title: "Laplace Transform Reference Table", note: "Issued with Class Tests 1 and 2", pages: ["ssc_laplace-1"] },
+    { title: "Z-Transform Reference Table", note: "Issued with Class Tests 1 and 2", pages: ["ssc_z-1"] }
+  ] },
+  ems: { items: [] },
+  mom: { items: [] },
+  da:  { items: [] },
+  pd:  { items: [] }
 };
 STUDY.art = {"bay": "img/bay.jpg", "head": "img/head.jpg", "docket": "img/docket.jpg", "tile": "img/tile.jpg"};
-STUDY.sheetImg = {"da_cheat-1": "img/sheets/da_cheat-1.jpg", "da_cheat-2": "img/sheets/da_cheat-2.jpg", "msp_chauvenet": "img/sheets/msp_chauvenet.jpg", "msp_chi": "img/sheets/msp_chi.jpg", "msp_normal1": "img/sheets/msp_normal1.jpg", "msp_normal2": "img/sheets/msp_normal2.jpg", "msp_t1": "img/sheets/msp_t1.jpg", "msp_t2": "img/sheets/msp_t2.jpg", "ssc_laplace-1": "img/sheets/ssc_laplace-1.jpg", "ssc_pf-1": "img/sheets/ssc_pf-1.jpg", "ssc_pf-2": "img/sheets/ssc_pf-2.jpg", "ssc_pf-3": "img/sheets/ssc_pf-3.jpg", "ssc_z-1": "img/sheets/ssc_z-1.jpg"};
+STUDY.sheetImg = {"ssc_laplace-1": "img/sheets/ssc_laplace-1.jpg", "ssc_z-1": "img/sheets/ssc_z-1.jpg"};
 (function(){
 const S = window.STUDY;
 const root = document.getElementById("app");
@@ -5957,46 +5943,31 @@ function renderPages(mid, sub){
 
 
 /* ---------- formula-sheet drawer (pull-out from the right) ---------- */
-const DRAWER = { open: false, tab: "sheets", mid: null, zoom: {} };
+const DRAWER = { open: false, mid: null, zoom: {} };
 function renderDrawer(mid){
   let host = document.getElementById("fsheet");
   if (!host){ host = document.createElement("div"); host.id = "fsheet"; document.body.appendChild(host);
     document.addEventListener("keydown", e => { if (e.key === "Escape" && DRAWER.open){ DRAWER.open = false; renderDrawer(DRAWER.mid); } }); }
   const m = mid && S.modules[mid];
   if (!m){ host.innerHTML = ""; host.className = ""; DRAWER.open = false; DRAWER.mid = null; return; }
-  if (DRAWER.mid !== mid){ DRAWER.mid = mid; DRAWER.zoom = {}; DRAWER.tab = "sheets"; }
-  const sh = (S.sheets && S.sheets[mid]) || { intro: "", items: [] };
-  const c = S.content[mid];
-  if (!sh.items.length && DRAWER.tab === "sheets") DRAWER.tab = "compiled";
-  const kindLbl = { exam: "Exam issue", lecture: "Lecture", own: "Your sheet" };
-  let body = "";
-  if (DRAWER.tab === "sheets"){
-    body = `<p class="fs-intro">${esc(sh.intro)}</p>` + (sh.items.length ? sh.items.map(it => `<section class="fs-item"><div class="fs-ih"><span class="fs-kind k-${it.kind}">${kindLbl[it.kind]||""}</span><h3>${esc(it.title)}</h3><span class="fs-note">${esc(it.note||"")}</span></div>` +
-      it.pages.map(k => `<button class="fs-page ${DRAWER.zoom[k]?"zoomed":""}" data-zoom="${k}" aria-label="${DRAWER.zoom[k]?"Shrink":"Enlarge"} ${esc(it.title)}"><img src="${S.sheetImg[k]}" alt="${esc(it.title)}" loading="lazy"></button>`).join("") + `</section>`).join("")
-      : `<p class="fs-empty">No exam formula sheet for ${m.code}. The Compiled tab gathers every formula from this module's topics.</p>`);
-  } else {
-    const parts = c ? [...new Set(c.topics.map(t=>t.part))] : [];
-    body = `<p class="fs-intro">Every formula card from the ${m.code} topic pages in one list, compiled by Claude. It is not an official handout.</p>` +
-      (c ? parts.map(p => `<h3 class="fs-part">${esc(p)}</h3>` + c.topics.filter(t=>t.part===p && t.formulas && t.formulas.length).map(t =>
-        `<section class="fs-topic"><a class="fs-tl" href="#${mid}.${t.id}">${esc(t.title)}</a>` + t.formulas.map(f => `<div class="fs-f"><div class="fs-fn">${esc(f.name)}</div><div class="fs-fx">$$${f.tex}$$</div>${f.note?`<div class="fs-fnote">${esc(f.note)}</div>`:""}</div>`).join("") + `</section>`).join("")).join("")
-        : `<p class="fs-empty">No topics yet.</p>`);
-  }
+  if (DRAWER.mid !== mid){ DRAWER.mid = mid; DRAWER.zoom = {}; }
+  const sh = (S.sheets && S.sheets[mid]) || { items: [] };
+  const body = sh.items.length ? sh.items.map(it => `<section class="fs-item"><div class="fs-ih"><h3>${esc(it.title)}</h3><span class="fs-note">${esc(it.note||"")}</span></div>` +
+      it.pages.map(k => `<button class="fs-page ${DRAWER.zoom[k]?"zoomed":""}" data-zoom="${k}" aria-label="Enlarge or shrink ${esc(it.title)}"><img src="${S.sheetImg[k]}" alt="${esc(it.title)}" loading="lazy"></button>`).join("") + `</section>`).join("")
+    : `<div class="fs-blank" aria-label="No formula sheet issued for ${m.code}"></div>`;
   host.className = "fsheet" + (DRAWER.open ? " open" : "");
   host.style.setProperty("--mc", `var(${m.color})`);
   host.innerHTML = `<button class="fs-tab" id="fs-tab" aria-expanded="${DRAWER.open}" aria-controls="fs-panel"><span>Formula sheet</span></button>
     <div class="fs-scrim" id="fs-scrim" ${DRAWER.open?"":"hidden"}></div>
     <aside class="fs-panel" id="fs-panel" aria-label="${m.code} formula sheet" ${DRAWER.open?"":"inert"}>
       <div class="fs-head"><span class="fs-code">${m.code}</span><span class="fs-title">Formula sheet</span><button class="fs-close" id="fs-close" aria-label="Close formula sheet">✕</button></div>
-      <div class="fs-tabs" role="tablist"><button role="tab" aria-selected="${DRAWER.tab==="sheets"}" data-ftab="sheets">Exam sheets${sh.items.length?` · ${sh.items.length}`:""}</button><button role="tab" aria-selected="${DRAWER.tab==="compiled"}" data-ftab="compiled">Compiled from topics</button></div>
       <div class="fs-body" id="fs-body">${body}</div>
     </aside>`;
   const toggle = v => { DRAWER.open = v; renderDrawer(mid); if (v) setTimeout(()=>{ const b=document.getElementById("fs-close"); b && b.focus({preventScroll:true}); }, 50); else { const t=document.getElementById("fs-tab"); t && t.focus({preventScroll:true}); } };
   document.getElementById("fs-tab").onclick = () => toggle(!DRAWER.open);
   document.getElementById("fs-close").onclick = () => toggle(false);
   document.getElementById("fs-scrim").onclick = () => toggle(false);
-  host.querySelectorAll("[data-ftab]").forEach(b => b.onclick = () => { DRAWER.tab = b.dataset.ftab; renderDrawer(mid); });
-  host.querySelectorAll("[data-zoom]").forEach(b => b.onclick = () => { const k = b.dataset.zoom; DRAWER.zoom[k] = !DRAWER.zoom[k]; b.classList.toggle("zoomed", DRAWER.zoom[k]); b.setAttribute("aria-label", (DRAWER.zoom[k]?"Shrink ":"Enlarge ")); });
-  if (DRAWER.open && DRAWER.tab === "compiled") typeset(document.getElementById("fs-body"));
+  host.querySelectorAll("[data-zoom]").forEach(b => b.onclick = () => { const k = b.dataset.zoom; DRAWER.zoom[k] = !DRAWER.zoom[k]; b.classList.toggle("zoomed", DRAWER.zoom[k]); });
 }
 
 /* ---------- router ---------- */
