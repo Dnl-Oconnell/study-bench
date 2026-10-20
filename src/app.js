@@ -504,7 +504,7 @@ function renderDrawer(mid){
   const sh = (S.sheets && S.sheets[mid]) || { items: [] };
   const body = sh.items.length ? sh.items.map(it => `<section class="fs-item"><div class="fs-ih"><h3>${esc(it.title)}</h3><span class="fs-note">${esc(it.note||"")}</span></div>` +
       it.pages.map(k => `<button class="fs-page ${DRAWER.zoom[k]?"zoomed":""}" data-zoom="${k}" aria-label="Enlarge or shrink ${esc(it.title)}"><img src="${S.sheetImg[k]}" alt="${esc(it.title)}" loading="lazy"></button>`).join("") + `</section>`).join("")
-    : `<div class="fs-blank" aria-label="No formula sheet issued for ${m.code}"></div>`;
+    : `<div class="fs-blank"><div class="fs-warn"><span class="fs-tri" aria-hidden="true"></span><div><b>No formula sheet issued</b><span>${m.code} exam</span></div></div>${sh.blank?`<p class="fs-quip">${esc(sh.blank)}</p>`:""}</div>`;
   host.className = "fsheet" + (DRAWER.open ? " open" : "");
   host.style.setProperty("--mc", `var(${m.color})`);
   host.innerHTML = `<button class="fs-tab" id="fs-tab" aria-expanded="${DRAWER.open}" aria-controls="fs-panel"><span>Formula sheet</span></button>

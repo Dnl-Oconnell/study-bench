@@ -654,7 +654,15 @@ h3.subhead{font-family:var(--f-display);font-weight:650;font-size:21px;margin:34
 .fs-tabs button{flex:1;font:700 13px/1.2 var(--f-cond,sans-serif);letter-spacing:.08em;text-transform:uppercase;padding:9px 8px;border-radius:3px;border:1px solid #4a463d;background:#0d0d0c;color:#cfc8b5;cursor:pointer}
 .fs-tabs button[aria-selected="true"]{background:#f5c518;color:#121110;border-color:#121110;box-shadow:0 2px 0 #7a6100}
 .fs-body{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:16px 16px 40px}
-.fs-blank{min-height:60vh}
+.fs-blank{min-height:60vh;padding-top:8vh;display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center}
+.fs-warn{display:flex;align-items:stretch;max-width:420px;width:100%;border:3px solid #0d0d0c;border-radius:4px;overflow:hidden;box-shadow:0 0 0 3px #c99a12,0 10px 24px rgba(0,0,0,.6);background:#f5c518;color:#0d0d0c;transform:rotate(-1.2deg)}
+.fs-tri{flex:none;width:64px;background:#0d0d0c;position:relative}
+.fs-tri::before{content:"!";position:absolute;left:50%;top:50%;transform:translate(-50%,-46%);width:40px;height:36px;background:#f5c518;color:#0d0d0c;clip-path:polygon(50% 0,100% 100%,0 100%);font:800 20px/42px var(--f-body,sans-serif);text-align:center}
+.fs-warn > div{display:flex;flex-direction:column;justify-content:center;gap:4px;padding:12px 14px;text-align:left}
+.fs-warn b{font:700 20px/1.1 var(--f-cond,sans-serif);letter-spacing:.12em;text-transform:uppercase}
+.fs-warn span{font:700 12.5px/1 var(--f-mono,monospace);letter-spacing:.14em;text-transform:uppercase}
+.fs-quip{max-width:400px;margin:6px 0 0;font:500 17px/1.5 var(--f-body,sans-serif);color:#e2dbc7}
+.fs-quip::before{content:"// ";color:#f5c518;font-family:var(--f-mono,monospace)}
 .fs-intro{font-size:14.5px;color:#cfc8b5;margin:6px 0 14px;line-height:1.5}
 .fs-empty{border:2px dashed #6b5506;border-radius:3px;padding:14px;color:#d6cfbc;font-size:15px}
 .fs-item{margin:0 0 22px}
@@ -5436,15 +5444,15 @@ T.tutorials = [
    Nothing compiled, nothing from lectures, nothing home-made. A module with no issued sheet shows a blank drawer.
    items[].pages are keys into STUDY.sheetImg (sheets_art.js / sheets_art_web.js; images in img/sheets/). */
 STUDY.sheets = {
-  msp: { items: [] },
+  msp: { items: [], blank: "Command issues one Log Tables booklet and a firm handshake. Everything else is stored in your head. Hope the backup drive is working." },
   ssc: { items: [
     { title: "Laplace Transform Reference Table", note: "Issued with Class Tests 1 and 2", pages: ["ssc_laplace-1"] },
     { title: "Z-Transform Reference Table", note: "Issued with Class Tests 1 and 2", pages: ["ssc_z-1"] }
   ] },
-  ems: { items: [] },
-  mom: { items: [] },
-  da:  { items: [] },
-  pd:  { items: [] }
+  ems: { items: [], blank: "Reactance, power triangles, firing angles: all memory-resident. In this bay the pilot is the datasheet." },
+  mom: { items: [], blank: "No past paper on file, so no sheet either. Natural frequency, damping ratio, gear ratios: load them into long-term memory before deployment." },
+  da:  { items: [], blank: "Your only sidearm is RStudio. It does not accept excuses, and neither does Loop." },
+  pd:  { items: [], blank: "This bay builds firefighting robots, not cheat sheets. Grab a spanner." }
 };
 STUDY.art = {"bay": "img/bay.jpg", "head": "img/head.jpg", "docket": "img/docket.jpg", "tile": "img/tile.jpg"};
 STUDY.sheetImg = {"ssc_laplace-1": "img/sheets/ssc_laplace-1.jpg", "ssc_z-1": "img/sheets/ssc_z-1.jpg"};
@@ -5954,7 +5962,7 @@ function renderDrawer(mid){
   const sh = (S.sheets && S.sheets[mid]) || { items: [] };
   const body = sh.items.length ? sh.items.map(it => `<section class="fs-item"><div class="fs-ih"><h3>${esc(it.title)}</h3><span class="fs-note">${esc(it.note||"")}</span></div>` +
       it.pages.map(k => `<button class="fs-page ${DRAWER.zoom[k]?"zoomed":""}" data-zoom="${k}" aria-label="Enlarge or shrink ${esc(it.title)}"><img src="${S.sheetImg[k]}" alt="${esc(it.title)}" loading="lazy"></button>`).join("") + `</section>`).join("")
-    : `<div class="fs-blank" aria-label="No formula sheet issued for ${m.code}"></div>`;
+    : `<div class="fs-blank"><div class="fs-warn"><span class="fs-tri" aria-hidden="true"></span><div><b>No formula sheet issued</b><span>${m.code} exam</span></div></div>${sh.blank?`<p class="fs-quip">${esc(sh.blank)}</p>`:""}</div>`;
   host.className = "fsheet" + (DRAWER.open ? " open" : "");
   host.style.setProperty("--mc", `var(${m.color})`);
   host.innerHTML = `<button class="fs-tab" id="fs-tab" aria-expanded="${DRAWER.open}" aria-controls="fs-panel"><span>Formula sheet</span></button>
