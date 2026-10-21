@@ -7,6 +7,7 @@ T.tutorials = [
  { id:"t2", short:"2", title:"Tutorial 2: Mathematical Models", note:"Solution posted (Q12 worked by Claude)", fromTopics:"Tutorial 2 ", intro:"Transfer functions from ODEs, circuits, translational and rotational systems, and gears." },
  { id:"t4", short:"4", title:"Tutorial 4: Stability and Transient Response", note:"Solution posted", fromTopics:"Tutorial 4 ", intro:"Pole locations, second-order metrics, and finding transfer functions from specs and plots." },
  { id:"st", short:"S", title:"Tutorial: Stability, Transient Response & Z-Domain Dynamics", note:"Full solutions manual posted", fromTopics:"Stability Tutorial ", intro:"Continuous and discrete stability, IVT/FVT, parameter design and digital feedback." },
- { id:"ct1", short:"CT1", title:"Class Test 1 (with solutions)", note:"Review of Laplace and Z transforms", fromTopics:"Class Test 1 ", intro:"The week 3 Loop quiz questions with their posted solutions." }
+ { id:"ct1", short:"CT1", title:"Class Test 1 (with solutions)", note:"Review of Laplace and Z transforms", fromTopics:"Class Test 1 ", intro:"The week 3 Loop quiz questions with their posted solutions." },
+ { id:"ssx", short:"SS", title:"State-Space Modified Exam Questions", note:"Solutions posted", fromTopics:"State-Space Sheet ", intro:"Past exam Question 1s reworked for state space, numbered here in sheet order: Q1–3 the 2021 variation (mass–spring–damper), Q4–5 exam 2024 Q1, Q6–7 exam 2023 Q1 (RLC circuits). Covers matching parameters, canonical and parallel forms, state-transition matrices, and step, free and impulse responses." }
 ];
 })();

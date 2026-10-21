@@ -10,7 +10,7 @@ window.STUDY = {
       blurb:"Sensors, measurement error and statistics, signal conditioning, and the frequency domain." },
     ssc: { code:"EEN1020", name:"Introduction to Systems, Signals & Control", color:"--m-ssc", ready:true,
       assess:"Exam 80% (2 h) · CA 20%: four Loop quizzes, best three count (wk 3 transforms, wk 6 block diagrams, wk 8 stability & transient, wk 11 state space)",
-      blurb:"Laplace and Z transforms, modelling circuits and mechanical systems, stability and first/second-order response." },
+      blurb:"Laplace and Z transforms, modelling circuits and mechanical systems, stability and first/second-order response, and state-space models." },
     ems: { code:"EEN1029", name:"Electromechanical Systems", color:"--m-ems", ready:true,
       assess:"Exam 50% (2 h, answer 4 of 5) · CA 50%: weekly quizzes 5%, demos 10%, reports 25%, peer/self-assessment 10%",
       blurb:"Phasors and AC power, op-amp signal conditioning, inductors and transformers, DC motors, H-bridges, steppers, encoders and TRIAC switching." },
@@ -22,7 +22,7 @@ window.STUDY = {
       blurb:"Statistics in R: summaries, tables and probability, the normal model, regression, time series, confidence intervals, t-tests, ANOVA and non-parametric tests." },
     pd: { code:"MEC1017", name:"Product Design", color:"--m-pd", ready:true,
       assess:"Semester 1 = 50%: design review presentation (wk 5–6) 20%, SW assembly & animation (wk 9) 15%, spring–damper & circuit review (wk 10) 10%, motion simulation (wk 11) 15%, drawings & order list (wk 12) 20%, design portfolio (wk 13) 20%. Semester 2 build & competition = 50%",
-      blurb:"The FireFighter ladder-climbing robot: brief and constraints, product design specifications, concept selection with weighted matrices, and the real hardware limits." }
+      blurb:"The FireFighter ladder-climbing robot: brief and constraints, product design specifications, concept selection with weighted matrices, the real hardware limits, and vibration theory for sizing the beaker suspension." }
   },
   content: {}
 };

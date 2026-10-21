@@ -213,7 +213,7 @@ traps: [
 T.topics.push({
 id: "resources", part: "Design method", title: "Ladder, Cylinder, Beaker & Spring–Damper Constraints",
 lectures: "Week 3 Student Guide; ladder, beaker, damper, cylinder and spring data", status: "partial",
-summary: "The real geometry and hardware the design must fit: ladder and rung dimensions, the beaker envelope, cylinder forces at 6 bar, the spring catalogue and the fixed dashpot with its piston options, plus a calculation sequence for the suspension. The week 7 spring–damper notes will add the damping method.",
+summary: "The real geometry and hardware the design must fit: ladder and rung dimensions, the beaker envelope, cylinder forces at 6 bar, the spring catalogue and the fixed dashpot with its piston options, plus a calculation sequence for the suspension. The damping method and isolation check are in the Lecture 7 vibrations topic.",
 theory: R`
 <h3>0. Fixed vs yours</h3>
 <div class="tbl"><table class="data">
@@ -249,7 +249,7 @@ theory: R`
 <li>Suspended mass: beaker + 0.5 kg water + holder + anything moving with it.</li>
 <li>Choose the number and arrangement of springs; find the equivalent stiffness needed (parallel: $k = k_1 + k_2$; series: $1/k = 1/k_1 + 1/k_2$).</li>
 <li>Pick the nearest catalogue spring(s) (music-wire compression and extension springs; rate in N/mm) and check the working-length/extension limits.</li>
-<li>Calculate the damping needed using the method in the week 7 notes.</li>
+<li>Estimate the dashpot damping and check isolation with the Lecture 7 method (see "Mechanical Vibrations &amp; Sizing the Beaker Suspension").</li>
 <li>Apply the fixed dashpot and 0.3 mm clearance; compare 8, 10, 12, 14 mm pistons.</li>
 <li>Check the piston stays inside the pot over the full movement; record assumptions and reasons in the portfolio.</li>
 </ol>
@@ -277,7 +277,7 @@ questions: [
  {src:"Practice (Claude)", see:[3], q:R`The suspended mass (beaker, water and holder) is 0.70 kg, carried on two identical springs in parallel. You want a static deflection of 10 mm. What rate should each spring have, and what is the natural frequency?`,
   hint:"k = mg/δ for the pair, then share it.",
   sol:R`<p>$k = mg/\delta = 0.70(9.81)/0.010 = 687$ N/m = 0.69 N/mm for the pair ⇒ ≈ 0.34 N/mm each. Then pick the nearest catalogue spring and check its working-length limit.</p><p>$\omega_n = \sqrt{687/0.70} = 31.3$ rad/s ≈ 5.0 Hz.</p>`,
-  ans:"≈ 0.34 N/mm each; ≈ 5 Hz", prov:"Made-up numbers by Claude to practise the sequence; the damping step waits for the week 7 notes."}
+  ans:"≈ 0.34 N/mm each; ≈ 5 Hz", prov:"Made-up numbers by Claude to practise the sequence; the damping step is worked in the Lecture 7 vibrations topic."}
 ],
 traps: [
  "Rung pitch is 52 mm, not 40 mm: include the rung thickness.",
