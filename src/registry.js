@@ -10,7 +10,7 @@ window.STUDY = {
       blurb:"Sensors, measurement error and statistics, signal conditioning, and the frequency domain." },
     ssc: { code:"EEN1020", name:"Introduction to Systems, Signals & Control", color:"--m-ssc", ready:true,
       assess:"Exam 80% (2 h) · CA 20%: four Loop quizzes, best three count (wk 3 transforms, wk 6 block diagrams, wk 8 stability & transient, wk 11 state space)",
-      blurb:"Laplace and Z transforms, modelling circuits and mechanical systems, stability and first/second-order response, and state-space models." },
+      blurb:"Laplace and Z transforms, modelling circuits and mechanical systems, stability and first/second-order response, state-space models, and state-space response and stability." },
     ems: { code:"EEN1029", name:"Electromechanical Systems", color:"--m-ems", ready:true,
       assess:"Exam 50% (2 h, answer 4 of 5) · CA 50%: weekly quizzes 5%, demos 10%, reports 25%, peer/self-assessment 10%",
       blurb:"Phasors and AC power, op-amp signal conditioning, inductors and transformers, DC motors, H-bridges, steppers, encoders and TRIAC switching." },

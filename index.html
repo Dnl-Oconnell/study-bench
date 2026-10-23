@@ -708,7 +708,7 @@ window.STUDY = {
       blurb:"Sensors, measurement error and statistics, signal conditioning, and the frequency domain." },
     ssc: { code:"EEN1020", name:"Introduction to Systems, Signals & Control", color:"--m-ssc", ready:true,
       assess:"Exam 80% (2 h) · CA 20%: four Loop quizzes, best three count (wk 3 transforms, wk 6 block diagrams, wk 8 stability & transient, wk 11 state space)",
-      blurb:"Laplace and Z transforms, modelling circuits and mechanical systems, stability and first/second-order response, and state-space models." },
+      blurb:"Laplace and Z transforms, modelling circuits and mechanical systems, stability and first/second-order response, state-space models, and state-space response and stability." },
     ems: { code:"EEN1029", name:"Electromechanical Systems", color:"--m-ems", ready:true,
       assess:"Exam 50% (2 h, answer 4 of 5) · CA 50%: weekly quizzes 5%, demos 10%, reports 25%, peer/self-assessment 10%",
       blurb:"Phasors and AC power, op-amp signal conditioning, inductors and transformers, DC motors, H-bridges, steppers, encoders and TRIAC switching." },
@@ -5560,7 +5560,7 @@ traps: [
 ]
 });
 })();
-/* EEN1020 — state-space representations (Lecture 3, Section 3) and the state-space modified exam questions */
+/* EEN1020 — state-space representations, response and stability (Lecture 3, Section 3) and the state-space modified exam questions */
 (function(){
 const R = String.raw;
 const T = STUDY.content.ssc = STUDY.content.ssc || { topics: [] };
@@ -5684,9 +5684,134 @@ traps: [
 });
 
 T.topics.push({
+id: "ssresp", part: "State space", title: "State-Space Response, Stability & the State-Transition Matrix",
+lectures: "Lecture 3 – State-Space Response and Stability; Eigenvalues and Eigenvectors Refresher", status: "lectured",
+summary: "Eigenvalues and eigenvectors (cofactor method), poles = eigenvalues of A and the state-space stability test, deriving the total response x(t) = Φ(t)x(0) + ∫Φ(t−τ)Bu dτ, finding Φ(t) = e^(At) by diagonalisation, and the zero-input, zero-state and total responses of the lecture example.",
+theory: R`
+<h3>0. Eigenvalues and eigenvectors (EEG1008 refresher)</h3>
+<p>An <b>eigenvector</b> $\mathbf x \neq 0$ of $A$ satisfies $A\mathbf x = \lambda\mathbf x$; the scalar $\lambda$ is its <b>eigenvalue</b>. Rearranged: $(\lambda I - A)\mathbf x = 0$. For a non-zero solution, $\lambda I - A$ must have no inverse, so</p>
+<div class="callout key">$$\det(\lambda I - A) = 0\qquad\text{(characteristic polynomial)}$$</div>
+<p><b>Standard method</b>: solve for each $\lambda$, substitute into $(\lambda I - A)\mathbf x = 0$ and read off the ratio of the entries. Any non-zero multiple of an eigenvector is also an eigenvector.</p>
+<p><b>Cofactor method</b> (quicker for 2×2). Write $\lambda I - A = \begin{bmatrix}a&b\\c&d\end{bmatrix}$ with sign pattern $\begin{bmatrix}+&-\\-&+\end{bmatrix}$ and take the cofactors of <b>one row</b> as a column:</p>
+<ol class="steps">
+<li>Using row 1, first entry: delete row 1 and column 1 → $+d$.</li>
+<li>Same row, second entry: delete row 1 and column 2 → $-c$.</li>
+<li>General eigenvector $v = \begin{bmatrix}d\\-c\end{bmatrix}$ (still in terms of $\lambda$). Substitute each eigenvalue.</li>
+</ol>
+<p>Example: $A = \begin{bmatrix}1&1\\-3&5\end{bmatrix}$. $\det\begin{bmatrix}\lambda-1&-1\\3&\lambda-5\end{bmatrix} = \lambda^2 - 6\lambda + 8 = (\lambda-4)(\lambda-2)$. Cofactors of row 1: $v = \begin{bmatrix}\lambda-5\\-3\end{bmatrix}$, so $\lambda=4$: $[-1\ \ -3]^T$; $\lambda=2$: $[-3\ \ -3]^T$. These are multiples of $[1\ \ 3]^T$ and $[1\ \ 1]^T$ from the standard method. <b>Always check</b> $Av = \lambda v$.</p>
+
+<h3>1. Poles, eigenvalues and stability</h3>
+<p>Transfer-function poles solve $\det(sI - A) = 0$; the eigenvalues of $A$ solve $\det(\lambda I - A) = 0$. Same polynomial, so:</p>
+<div class="callout key"><b>System poles $s_i$ ≡ eigenvalues $\lambda_i$ of A.</b> An LTI state-space system is <b>asymptotically stable</b> if and only if every eigenvalue lies in the open left half-plane: $\text{Re}(\lambda_i) < 0$ for all $i$.</div>
+<ul>
+<li><b>Eigenvalues</b> are the <b>natural dynamic modes</b> (time constants, oscillation frequencies). The response is built from terms $e^{\lambda_i t}$.</li>
+<li><b>Eigenvectors</b> are the <b>mode shapes</b>: how each mode is shared out across the states $x_1, \dots, x_n$.</li>
+<li>Lecture example ($A = \begin{bmatrix}0&1\\-3&-4\end{bmatrix}$): $\lambda_1 = -1$ is the slow mode $e^{-t}$, $\lambda_2 = -3$ the fast mode $e^{-3t}$.</li>
+</ul>
+
+<h3>2. Deriving the total state response</h3>
+<ol class="steps">
+<li>Start from $\dot x = Ax + Bu$ and isolate the input: $\dot x - Ax = Bu$.</li>
+<li>Multiply by the integrating factor $e^{-At}$: $e^{-At}\dot x - e^{-At}Ax = e^{-At}Bu$.</li>
+<li>Product rule in reverse: the left side is $\dfrac{d}{dt}\left[e^{-At}x(t)\right]$.</li>
+<li>Integrate from 0 to $t$: $e^{-At}x(t) - x(0) = \displaystyle\int_0^t e^{-A\tau}Bu(\tau)\,d\tau$.</li>
+<li>Pre-multiply by $e^{At}$ (using $e^{At}e^{-At} = I$, $e^{At}e^{-A\tau} = e^{A(t-\tau)}$).</li>
+</ol>
+<div class="callout key">$$x(t) = \underbrace{\Phi(t)x(0)}_{\text{zero-input (natural)}} + \underbrace{\int_0^t \Phi(t-\tau)Bu(\tau)\,d\tau}_{\text{zero-state (forced)}},\qquad y(t) = Cx(t)$$</div>
+<ul>
+<li><b>Natural / zero-input response (ZIR)</b>: the only part that depends on $x(0)$. Set $u = 0$.</li>
+<li><b>Forced / zero-state response (ZSR)</b>: the only part that depends on $u$. Set $x(0) = 0$.</li>
+<li>Total response = ZIR + ZSR (superposition).</li>
+</ul>
+
+<h3>3. The state-transition matrix Φ(t) = e^{At}</h3>
+<p>$\Phi(t)$ "transitions" the state from one time to another with no input: it describes the system's natural motion. By definition $e^{At} = I + At + \dfrac{A^2t^2}{2!} + \dfrac{A^3t^3}{3!} + \cdots$, which is impractical by hand for a coupled $A$.</p>
+<p><b>Key idea:</b> if $A$ is diagonal, $e^{At}$ is just the exponentials of the diagonal: $e^{\text{diag}(\lambda_1,\lambda_2)t} = \text{diag}(e^{\lambda_1 t}, e^{\lambda_2 t})$. So diagonalise. With the <b>modal matrix</b> $P = [v_1\ v_2\ \cdots\ v_n]$ (eigenvectors as columns) and $\Lambda = \text{diag}(\lambda_1, \dots, \lambda_n)$:</p>
+$$A = P\Lambda P^{-1}\ \Rightarrow\ A^n = P\Lambda^nP^{-1}\ \text{(the inner } P^{-1}P \text{ cancel)}\ \Rightarrow\ e^{At} = Pe^{\Lambda t}P^{-1}$$
+<p><b>3-step method:</b></p>
+<ol class="steps">
+<li>Eigenvalues from $\det(\lambda I - A) = 0$; eigenvectors from $(\lambda_i I - A)v_i = 0$ (cofactor method).</li>
+<li>Modal matrix $P = [v_1\ v_2]$ and its inverse: $\begin{bmatrix}a&b\\c&d\end{bmatrix}^{-1} = \dfrac{1}{ad-bc}\begin{bmatrix}d&-b\\-c&a\end{bmatrix}$.</li>
+<li>$\Phi(t) = P\begin{bmatrix}e^{\lambda_1 t}&0\\0&e^{\lambda_2 t}\end{bmatrix}P^{-1}$.</li>
+</ol>
+<div class="callout">The order of $\lambda_1, \lambda_2$ in $\Lambda$ must match the order of $v_1, v_2$ in $P$. Check: $P\Lambda P^{-1}$ gives back $A$, and $\Phi(0) = I$.</div>
+
+<h3>4. Lecture example: Φ, ZIR, ZSR and total</h3>
+<p>$\dot x = \begin{bmatrix}0&1\\-3&-4\end{bmatrix}x + \begin{bmatrix}0\\2\end{bmatrix}u$, $y = \begin{bmatrix}1&0\end{bmatrix}x$ (transfer function $2/(s^2+4s+3)$).</p>
+<div class="tbl"><table class="data">
+<tr><th>Quantity</th><th>Result</th></tr>
+<tr><td>Eigenvalues</td><td>$-1, -3$ (stable)</td></tr>
+<tr><td>$P$, $P^{-1}$</td><td>$\begin{bmatrix}3&1\\-3&-3\end{bmatrix}$, $\begin{bmatrix}\frac12&\frac16\\-\frac12&-\frac12\end{bmatrix}$</td></tr>
+<tr><td>$\Phi(t)$</td><td>$\begin{bmatrix}\frac32e^{-t}-\frac12e^{-3t} & \frac12e^{-t}-\frac12e^{-3t}\\ -\frac32e^{-t}+\frac32e^{-3t} & -\frac12e^{-t}+\frac32e^{-3t}\end{bmatrix}$</td></tr>
+<tr><td>ZIR, $x(0) = [2\ 0]^T$</td><td>$y_{ZIR} = 3e^{-t} - e^{-3t}$</td></tr>
+<tr><td>ZSR, unit step</td><td>$y_{ZSR} = \frac23 - e^{-t} + \frac13e^{-3t}$</td></tr>
+<tr><td>Total</td><td>$y = \frac23 + 2e^{-t} - \frac23e^{-3t}$</td></tr>
+</table></div>
+<p>Sanity checks: the ZSR settles at $\frac23$, the DC gain $G(0) = 2/3$; the ZIR starts at $y(0) = x_1(0) = 2$ and the ZSR starts at 0.</p>`,
+formulas: [
+ {name:"Characteristic equation", tex:R`\det(\lambda I - A) = 0`},
+ {name:"Eigenvector (cofactors of row 1)", tex:R`\lambda I - A = \begin{bmatrix}a&b\\c&d\end{bmatrix}\ \Rightarrow\ v = \begin{bmatrix}d\\-c\end{bmatrix}`},
+ {name:"Stability", tex:R`\text{Re}(\lambda_i) < 0\ \ \forall i`},
+ {name:"Total response", tex:R`x(t) = \Phi(t)x(0) + \int_0^t\Phi(t-\tau)Bu(\tau)\,d\tau`},
+ {name:"State-transition matrix", tex:R`\Phi(t) = e^{At} = Pe^{\Lambda t}P^{-1}`},
+ {name:"Modal matrix", tex:R`P = [v_1\ v_2\ \cdots\ v_n],\ \ \Lambda = P^{-1}AP`},
+ {name:"Matrix exponential series", tex:R`e^{At} = I + At + \frac{A^2t^2}{2!} + \cdots`}
+],
+questions: [
+ {src:"Eigenvalues Refresher example", see:[0], q:R`Find the eigenvalues and eigenvectors of $A = \begin{bmatrix}1&1\\-3&5\end{bmatrix}$, first by substitution and then by the cofactor method. Check your answers.`,
+  hint:"det(λI − A) = λ² − 6λ + 8. For the cofactor method use row 1 of λI − A.",
+  sol:R`<p>$\det\begin{bmatrix}\lambda-1&-1\\3&\lambda-5\end{bmatrix} = (\lambda-1)(\lambda-5)+3 = \lambda^2-6\lambda+8 = (\lambda-4)(\lambda-2)$: $\lambda = 2, 4$.</p>
+  <p><b>Substitution.</b> $\lambda=2$: $\begin{bmatrix}1&-1\\3&-3\end{bmatrix}x = 0 \Rightarrow x_2 = x_1$, $v_1 = [1\ \ 1]^T$. $\lambda=4$: $\begin{bmatrix}3&-1\\3&-1\end{bmatrix}x = 0 \Rightarrow x_2 = 3x_1$, $v_2 = [1\ \ 3]^T$.</p>
+  <p><b>Cofactors of row 1.</b> Delete row 1, column 1 → $+(\lambda-5)$; delete row 1, column 2 → $-3$. So $v = [\lambda-5\ \ -3]^T$: $\lambda=4$ gives $[-1\ -3]^T$, $\lambda=2$ gives $[-3\ -3]^T$. Same directions as before.</p>
+  <p>Check: $A[1\ 1]^T = [2\ 2]^T = 2[1\ 1]^T$ ✓; $A[1\ 3]^T = [4\ 12]^T = 4[1\ 3]^T$ ✓.</p>`,
+  ans:"λ = 2: v = [1 1]ᵀ; λ = 4: v = [1 3]ᵀ (any multiple)", prov:"From the worked example in the Eigenvalues and Eigenvectors Refresher."},
+ {src:"Lecture 3 (response) modes", see:[1], q:R`For $A = \begin{bmatrix}0&1\\-3&-4\end{bmatrix}$, is the system asymptotically stable? Name its dynamic modes and say which dominates the long-term response.`,
+  hint:"Poles are the eigenvalues of A.",
+  sol:R`<p>$\det(\lambda I - A) = \lambda(\lambda+4) + 3 = \lambda^2 + 4\lambda + 3 = (\lambda+1)(\lambda+3)$: $\lambda = -1, -3$.</p>
+  <p>Both real parts are negative, so it is asymptotically stable. Modes: $e^{-t}$ (slow) and $e^{-3t}$ (fast). The slow mode $e^{-t}$ dominates once the fast one has died away.</p>`,
+  ans:"Stable; modes e^{−t} (slow, dominant) and e^{−3t} (fast)", prov:"From the worked example in Lecture 3 – State-Space Response and Stability."},
+ {src:"Lecture 3 (response) worked example 1", see:[0,3], q:R`Find the state-transition matrix of $\dot x = \begin{bmatrix}0&1\\-3&-4\end{bmatrix}x + \begin{bmatrix}0\\2\end{bmatrix}u$, $y = \begin{bmatrix}1&0\end{bmatrix}x$.`,
+  hint:"Eigenvalues −1, −3. Cofactors of row 1 of λI − A give v = [λ + 4, −3]ᵀ.",
+  sol:R`<p><b>Step 1.</b> $\det\begin{bmatrix}\lambda&-1\\3&\lambda+4\end{bmatrix} = \lambda^2+4\lambda+3 = 0$: $\lambda_1=-1$, $\lambda_2=-3$. Cofactors of row 1: $v = [\lambda+4\ \ -3]^T$, so $v_1 = [3\ -3]^T$, $v_2 = [1\ -3]^T$.</p>
+  <p><b>Step 2.</b> $P = \begin{bmatrix}3&1\\-3&-3\end{bmatrix}$, $\det P = -9+3 = -6$, $P^{-1} = \dfrac{1}{-6}\begin{bmatrix}-3&-1\\3&3\end{bmatrix} = \begin{bmatrix}\frac12&\frac16\\-\frac12&-\frac12\end{bmatrix}$, $\Lambda = \text{diag}(-1,-3)$.</p>
+  <p><b>Step 3.</b> $Pe^{\Lambda t} = \begin{bmatrix}3e^{-t}&e^{-3t}\\-3e^{-t}&-3e^{-3t}\end{bmatrix}$, then</p>
+  $$\Phi(t) = \begin{bmatrix}\frac32e^{-t}-\frac12e^{-3t} & \frac12e^{-t}-\frac12e^{-3t}\\ -\frac32e^{-t}+\frac32e^{-3t} & -\frac12e^{-t}+\frac32e^{-3t}\end{bmatrix}$$
+  <p>Check $\Phi(0) = I$ ✓.</p>`,
+  ans:"Φ = [1.5e^{−t} − 0.5e^{−3t}, 0.5e^{−t} − 0.5e^{−3t}; −1.5e^{−t} + 1.5e^{−3t}, −0.5e^{−t} + 1.5e^{−3t}]", prov:"From the worked example in Lecture 3 – State-Space Response and Stability."},
+ {src:"Lecture 3 (response) worked example 1 – ZIR", see:[2,4], q:R`Same system, initial state $x(0) = [2\ \ 0]^T$, no input. Find the zero-input state response $x_{ZIR}(t)$ and output $y_{ZIR}(t)$.`,
+  hint:"x_ZIR = Φ(t)x(0): with x(0) = [2 0]ᵀ that is twice the first column of Φ.",
+  sol:R`<p>$x_{ZIR} = \Phi(t)x(0) = 2\begin{bmatrix}\frac32e^{-t}-\frac12e^{-3t}\\ -\frac32e^{-t}+\frac32e^{-3t}\end{bmatrix} = \begin{bmatrix}3e^{-t}-e^{-3t}\\ -3e^{-t}+3e^{-3t}\end{bmatrix}$.</p>
+  <p>$y_{ZIR} = Cx_{ZIR} = 3e^{-t} - e^{-3t}$. (Check: $y(0) = 2 = x_1(0)$.)</p>`,
+  ans:"y_ZIR = 3e^{−t} − e^{−3t}", prov:"From the worked example in Lecture 3 – State-Space Response and Stability."},
+ {src:"Lecture 3 (response) worked example 1 – ZSR", see:[2,4], q:R`Same system, $x(0) = 0$, unit-step input $u(\tau) = 1$ for $\tau \ge 0$. Find the forced response $x_{ZSR}(t)$ and $y_{ZSR}(t)$.`,
+  hint:"First form Φ(t − τ)B (twice the second column of Φ), then integrate each row over τ from 0 to t.",
+  sol:R`<p><b>Step 1.</b> $\Phi(t-\tau)B = 2\times$ column 2 $= \begin{bmatrix}e^{-(t-\tau)} - e^{-3(t-\tau)}\\ -e^{-(t-\tau)} + 3e^{-3(t-\tau)}\end{bmatrix}$.</p>
+  <p><b>Step 2.</b> Integrate row by row:</p>
+  <p>$x_1$: $\displaystyle\int_0^t\left(e^{-(t-\tau)} - e^{-3(t-\tau)}\right)d\tau = \left[e^{-(t-\tau)} - \tfrac13e^{-3(t-\tau)}\right]_0^t = \tfrac23 - e^{-t} + \tfrac13e^{-3t}$.</p>
+  <p>$x_2$: $\displaystyle\int_0^t\left(-e^{-(t-\tau)} + 3e^{-3(t-\tau)}\right)d\tau = \left[-e^{-(t-\tau)} + e^{-3(t-\tau)}\right]_0^t = e^{-t} - e^{-3t}$.</p>
+  <p>$y_{ZSR} = x_1 = \tfrac23 - e^{-t} + \tfrac13e^{-3t}$ for $t \ge 0$. (Check: starts at 0 and settles at $G(0) = 2/3$.)</p>`,
+  ans:"y_ZSR = 2/3 − e^{−t} + (1/3)e^{−3t}", prov:"From the worked example in Lecture 3 – State-Space Response and Stability."},
+ {src:"Lecture 3 (response) worked example 1 – total", see:[2,4], q:R`Same system with $x(0) = [2\ \ 0]^T$ and a unit-step input. Find the total state and output response.`,
+  hint:"Add the zero-input and zero-state results.",
+  sol:R`$$x(t) = \begin{bmatrix}3e^{-t}-e^{-3t}\\ -3e^{-t}+3e^{-3t}\end{bmatrix} + \begin{bmatrix}\frac23-e^{-t}+\frac13e^{-3t}\\ e^{-t}-e^{-3t}\end{bmatrix} = \begin{bmatrix}\frac23+2e^{-t}-\frac23e^{-3t}\\ -2e^{-t}+2e^{-3t}\end{bmatrix}$$
+  <p>$y(t) = \tfrac23 + 2e^{-t} - \tfrac23e^{-3t}$ for $t \ge 0$.</p>`,
+  ans:"y(t) = 2/3 + 2e^{−t} − (2/3)e^{−3t}", prov:"From the worked example in Lecture 3 – State-Space Response and Stability."}
+],
+traps: [
+ "Poles of G(s) and eigenvalues of A are the same numbers. Stability needs every Re(λ) < 0.",
+ "The cofactor eigenvector uses the cofactors of one row (with signs +, −), which come from the other row's entries: [d, −c]ᵀ for row 1.",
+ "Keep λ₁, λ₂ in Λ in the same order as v₁, v₂ in P.",
+ "e^{At} is not the matrix of e^{a_ij t} unless A is diagonal.",
+ "In the ZSR integral the variable is τ: Φ(t − τ), integrated from 0 to t. Don't integrate over t.",
+ "ZIR uses x(0) and ignores u; ZSR uses u with x(0) = 0. Add them for the total.",
+ "Check: Φ(0) = I, and a stable step response settles at the DC gain G(0)."
+]
+});
+
+T.topics.push({
 id: "sstrans", part: "State space", title: "Canonical Forms, Parallel Form & the State-Transition Matrix",
-lectures: "State-Space Modified Exam Questions (2021 variation, 2023 Q1, 2024 Q1) and their posted solutions; not yet lectured", status: "partial",
-summary: "What the posted exam solutions use beyond Lecture 3: the controller canonical form, the parallel (diagonal) form from partial fractions, the state-transition matrix Φ(t) = e^{At} via eigenvalues and eigenvectors, and using Φ for free and impulse responses.",
+lectures: "State-Space Modified Exam Questions (2021 variation, 2023 Q1, 2024 Q1) and their posted solutions; Φ(t) now lectured in Lecture 3 – State-Space Response and Stability, canonical and parallel forms not yet lectured", status: "partial",
+summary: "What the posted exam solutions use beyond the lectures so far: the controller canonical form, the parallel (diagonal) form from partial fractions, the state-transition matrix Φ(t) = e^{At} via eigenvalues and eigenvectors, and using Φ for free and impulse responses.",
 theory: R`
 <h3>0. Controller canonical form (CCF)</h3>
 <p>For $\dfrac{Y(s)}{U(s)} = \dfrac{K}{s^2 + a_1 s + a_0}$, take $x_1 = y$, $x_2 = \dot y$:</p>
@@ -5700,7 +5825,7 @@ $$\frac{Y}{U} = \frac{c_1}{s-p_1} + \frac{c_2}{s-p_2}\ \Rightarrow\ \dot x = \be
 <p><b>Why it helps:</b> $A$ is diagonal, so $e^{At}$ is just $e^{p_i t}$ on the diagonal. No eigenvectors needed; each state's time response can be written down directly.</p>
 
 <h3>2. State-transition matrix</h3>
-<p>The solution of $\dot x = Ax + Bu$ is</p>
+<p>(Derived in full in the topic <i>State-Space Response, Stability &amp; the State-Transition Matrix</i>.) The solution of $\dot x = Ax + Bu$ is</p>
 $$x(t) = \Phi(t)x(0) + \int_0^t \Phi(t-\tau)Bu(\tau)\,d\tau,\qquad \Phi(t) = e^{At}$$
 <p>For non-diagonal $A$, diagonalise:</p>
 <ol class="steps">
