@@ -15,6 +15,8 @@ This file is the procedure for the scheduled "Study Bench: check Modules for new
 
 ## The daily run, step by step
 
+**Once a day only.** The task fires hourly, but a full check runs at most once per calendar day (Europe/Dublin time). `Modules/.study-bench-last-check` holds the date (YYYY-MM-DD) of the last check. If it holds today's date, stop at once. Otherwise write today's date into it as soon as the file listing succeeds, before anything else, whether or not anything new turns up.
+
 1. **Find new or changed files.** Use the device shell to list every file under `Modules` with its size and mtime. Ignore:
    - `Study Bench app/`
    - Office lock files (`~$*`)
@@ -130,7 +132,7 @@ To add one:
 
 ## Don'ts
 
-- Don't edit, move, rename or delete anything in `Modules` except `.study-bench-processed.json` and the `Study Bench app/` copy.
+- Don't edit, move, rename or delete anything in `Modules` except `.study-bench-processed.json`, `.study-bench-last-check` and the `Study Bench app/` copy.
 - Don't change the theme, layout, images or `app.js` behaviour as part of a content run.
 - Don't add work orders or touch the artifact's stored data.
 - Don't put anything into the repo except the app and its source. It is public.
