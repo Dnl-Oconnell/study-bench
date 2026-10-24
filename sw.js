@@ -1,5 +1,5 @@
 /* Study Bench service worker: app files cached for offline use, CDN fonts/maths cached as they load. */
-const VERSION = "sb-v10";
+const VERSION = "sb-v11";
 const CORE = ["./", "index.html", "manifest.webmanifest", "img/bay.jpg", "img/head.jpg", "img/docket.jpg", "img/tile.jpg",
   "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-512.png", "icons/apple-touch-icon.png", "icons/favicon-32.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
