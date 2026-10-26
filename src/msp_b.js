@@ -328,38 +328,81 @@ traps: ["Check symmetry before integrating; it often kills half the coefficients
 
 T.topics.push({
 id: "fourier-transform", part: "Signal processing", title: "Fourier Transform of Aperiodic Signals",
-lectures: "Not yet lectured · built from tutorial sheet & past papers", status: "pending",
-summary: "From lines to a continuous spectrum: the Fourier transform integral, the rectangular pulse and sinc function, and the shift, differentiation and integration properties the MCQs test.",
+lectures: "Lectures 15.1–15.3", status: "lectured",
+summary: "From lines to a continuous spectrum: deriving the Fourier transform, the rectangular pulse and sinc function, the unit impulse and its flat spectrum, Parseval's energy theorem, and what a time shift does to the spectrum.",
 theory: R`
-<div class="callout warn">Lectures not yet released. Built from tutorial Q25 and past papers.</div>
-<h3>1. From series to transform</h3>
-<p>Take a periodic signal and let the period $T\to\infty$: the line spacing $\omega = 2\pi/T$ shrinks to zero and the lines merge into a continuous curve. A one-off (aperiodic) signal therefore has a <b>continuous spectrum</b>:</p>
-$$F(\omega) = \int_{-\infty}^{\infty}f(t)e^{-j\omega t}\,dt \qquad f(t) = \frac{1}{2\pi}\int_{-\infty}^{\infty}F(\omega)e^{j\omega t}\,d\omega$$
-<p>$F(\omega)$ is complex: show it as magnitude $|F|$ and phase $\angle F$ against ω, or as real and imaginary parts.</p>
+<h3>0. From series to transform</h3>
+<p>Many signals are not periodic, so they can't be analysed over one period as harmonics of a fundamental. Instead look at the whole signal from $t=-\infty$ to $t=+\infty$. Start from the Fourier series:</p>
+$$f(t) = \sum_{n=-\infty}^{\infty}D_ne^{jn\omega t} = \sum_{n=-\infty}^{\infty}\frac1T\int_{-T/2}^{T/2}f(t)e^{-jn\omega t}dt\;e^{jn\omega t}$$
+<p>For an aperiodic signal the effective period $T\to\infty$. Since $\omega = 2\pi/T$, the harmonic spacing becomes very small, written $d\omega$, so $\frac1T = \frac{d\omega}{2\pi}$. The gaps between harmonics vanish, the discrete lines merge into a <b>continuous spectrum</b>, and the sum becomes an integral:</p>
+$$f(t) = \frac1{2\pi}\int_{-\infty}^{\infty}\left(\int_{-\infty}^{\infty}f(t)e^{-j\omega t}dt\right)e^{j\omega t}d\omega = \frac1{2\pi}\int_{-\infty}^{\infty}F(\omega)e^{j\omega t}d\omega$$
+$$F(\omega) = \int_{-\infty}^{\infty}f(t)e^{-j\omega t}dt$$
+<table class="data"><tr><th>Signal</th><th>Tool</th><th>Spectrum</th></tr>
+<tr><td>Periodic</td><td>Fourier series: $D_n = \frac1T\int_{-T/2}^{T/2}f(t)e^{-jn\omega t}dt$</td><td>Discrete lines</td></tr>
+<tr><td>Aperiodic</td><td>Fourier transform: $F(\omega)$ above</td><td>Continuous</td></tr></table>
+<p>$F(\omega)$ is complex: show it as real and imaginary parts, or magnitude $|F|$ and phase $\angle F$, against ω.</p>
 
-<h3>2. Properties the exam uses</h3>
+<h3>1. Example: a truncated cosine</h3>
+<p>A unit cosine that runs forever has a spectrum of just two real lines at $\pm\omega_0$ (no imaginary part). Truncate it so only part of the record holds the cosine and the rest is zero, and it becomes aperiodic: the two lines spread into peaks with ripples either side, and imaginary components appear (the truncated signal is no longer even about $t=0$). Truncating in time smears the spectrum in frequency.</p>
+
+<h3>2. Rectangular pulse and the sinc function</h3>
+<p>Unit pulse, height 1 from $-\tau$ to $+\tau$:</p>
+$$F(\omega) = \int_{-\tau}^{\tau}e^{-j\omega t}dt = \left[\frac{e^{-j\omega t}}{-j\omega}\right]_{-\tau}^{\tau} = \frac{e^{j\omega\tau}-e^{-j\omega\tau}}{j\omega} = \frac2\omega\sin\omega\tau = 2\tau\frac{\sin\omega\tau}{\omega\tau} = 2\tau\,\text{sinc}\,\omega\tau$$
+<p>with $\text{sinc}\,x = \sin x/x$ (no π inside in this course). Real, because the pulse is even. Height $2\tau$ (the pulse area) at ω = 0; zeros at $\omega = k\pi/\tau$. A narrower pulse spreads the spectrum wider.</p>
+<div class="plot" data-plot="sinc"></div>
+
+<h3>3. The unit impulse δ(t)</h3>
+<p>Keep the pulse area fixed and shrink its duration: the amplitude must rise. In the limit $\tau\to0$ the amplitude goes to infinity and we get the unit impulse, defined by its area:</p>
+$$\int_{-\infty}^{\infty}\delta(t)\,dt = 1,\qquad \delta(t) = 0 \text{ for } t\ne0$$
+<p>Its spectrum, using the pulse result:</p>
+$$\delta(\omega) = \lim_{\tau\to0}\int_{-\tau}^{\tau}\delta(\tau)e^{-j\omega t}dt = \lim_{\tau\to0}2\tau\,\delta(\tau)\cdot\frac{\sin\omega\tau}{\omega\tau}$$
+<p>$2\tau\,\delta(\tau)$ is the area of the pulse, which is 1 by definition, and $\lim_{x\to0}\sin x/x = 1$. So $\delta(\omega) = 1\times1 = 1$: <b>an impulse contains all frequencies equally</b> (a flat spectrum).</p>
+
+<h3>4. Common transform pairs</h3>
+<p>The lecture's chart of signals and spectra. Note the duality: a pulse gives a sinc, and a sinc gives a pulse.</p>
+<table class="data"><tr><th>f(t)</th><th>F(ω)</th></tr>
+<tr><td>Rectangular pulse, width τ</td><td>sinc-shaped, zeros at multiples of $2\pi/\tau$</td></tr>
+<tr><td>sinc-shaped pulse</td><td>Rectangle (band-limited)</td></tr>
+<tr><td>Triangle, base $-\tau$ to $\tau$</td><td>sinc², zeros at multiples of $2\pi/\tau$, small side lobes</td></tr>
+<tr><td>Impulse $\delta(t)$</td><td>Constant 1 at all ω</td></tr>
+<tr><td>Constant (DC)</td><td>Impulse at ω = 0</td></tr>
+<tr><td>Impulse train</td><td>Impulse train</td></tr>
+<tr><td>Cosine at $\omega_0$ (forever)</td><td>Impulses at $\pm\omega_0$</td></tr>
+<tr><td>Cosine burst of length T</td><td>sinc-shaped peaks at $\pm\omega_0$, width set by $2\pi/T$</td></tr></table>
+
+<h3>5. Parseval's theorem (energy)</h3>
+<p>Treat the signal as a voltage across a resistor: $P = VI = V^2/R$ and energy $E = \int P\,dt = \int \frac{V^2}{R}dt$. With $V = f(t)$, a measure proportional to the energy is $E\propto\int f(t)^2dt$. It can be shown that</p>
+$$E = \int_{-\infty}^{\infty}f(t)^2dt = \int_{-\infty}^{\infty}|F(f)|^2df$$
+<p>This is <b>Parseval's theorem</b> (Rayleigh's energy theorem): the total energy in a signal equals the sum of the energies of its frequency components. It is the aperiodic version of the Fourier-series result that the mean square depends only on the squared magnitudes of the coefficients.</p>
+<p><b>Proof (additional notes):</b> substitute the inverse transform for one $f(t)$ and swap the order of integration:</p>
+$$E = \int f(t)\frac1{2\pi}\int F(\omega)e^{j\omega t}d\omega\,dt = \frac1{2\pi}\int F(\omega)\left(\int f(t)e^{j\omega t}dt\right)d\omega = \frac1{2\pi}\int F(\omega)F(-\omega)\,d\omega$$
+<ol class="steps"><li>For a real signal, if $F(\omega) = a+bj$ then $F(-\omega) = a-bj$, so $F(\omega)F(-\omega) = a^2+b^2 = |F(\omega)|^2$.</li>
+<li>$\omega = 2\pi f$ gives $d\omega/2\pi = df$, so $E = \frac1{2\pi}\int|F(\omega)|^2d\omega = \int|F(f)|^2df$.</li></ol>
+
+<h3>6. Time shift</h3>
+<p>Delay the unit pulse by $t_d$, so it runs from $-\tau+t_d$ to $\tau+t_d$:</p>
+$$F(\omega) = \int_{-\tau+t_d}^{\tau+t_d}e^{-j\omega t}dt = \frac{e^{-j\omega(\tau+t_d)}}{-j\omega} - \frac{e^{j\omega(\tau-t_d)}}{-j\omega} = \left[\frac{e^{j\omega\tau}-e^{-j\omega\tau}}{j\omega}\right]e^{-j\omega t_d} = 2\tau\frac{\sin\omega\tau}{\omega\tau}e^{-j\omega t_d}$$
+<div class="callout key">Multiplying by $e^{-j\omega t_d}$ in the frequency domain is the same as a time lag $t_d$ in the time domain. The magnitude $|F|$ is unchanged; only a phase $-\omega t_d$ is added. So the energy (Parseval) is unchanged too.</div>
+
+<h3>7. Other properties the exam uses</h3>
+<p>Not derived in these lectures, but asked in past MCQs:</p>
 <table class="data"><tr><th>Time domain</th><th>Frequency domain</th></tr>
-<tr><td>$f(t-t_0)$ (delay)</td><td>$F(\omega)e^{-j\omega t_0}$: magnitude unchanged, phase $-\omega t_0$ added</td></tr>
+<tr><td>$f(t-t_0)$ (delay)</td><td>$F(\omega)e^{-j\omega t_0}$</td></tr>
 <tr><td>$\dfrac{df}{dt}$</td><td>$j\omega F(\omega)$</td></tr>
 <tr><td>$\int f\,dt$</td><td>$\dfrac{F(\omega)}{j\omega}$</td></tr>
 <tr><td>$af+bg$</td><td>$aF + bG$ (linear)</td></tr>
 <tr><td>Real and even</td><td>Real spectrum (no imaginary part)</td></tr>
-<tr><td>Real and odd</td><td>Purely imaginary spectrum</td></tr>
-<tr><td>Impulse $\delta(t)$</td><td>$1$: all frequencies equally</td></tr></table>
-<p>The derivative rule is why an ODE turns into algebra: each $d/dt$ becomes $j\omega$ (used in the Systems topic).</p>
-
-<h3>3. Rectangular pulse</h3>
-<p>Height 1 from $-\tau$ to $+\tau$:</p>
-$$F(\omega) = \int_{-\tau}^{\tau}e^{-j\omega t}dt = \frac{e^{j\omega\tau}-e^{-j\omega\tau}}{j\omega} = \frac{2\sin\omega\tau}{\omega} = 2\tau\,\frac{\sin\omega\tau}{\omega\tau} = 2\tau\,\text{sinc}(\omega\tau)$$
-<p>with $\text{sinc}(x) = \sin x/x$. Real, because the pulse is even. Zeros at $\omega = k\pi/\tau$. A narrower pulse spreads the spectrum wider.</p>
-<div class="plot" data-plot="sinc"></div>`,
+<tr><td>Real and odd</td><td>Purely imaginary spectrum</td></tr></table>
+<p>The derivative rule is why an ODE turns into algebra: each $d/dt$ becomes $j\omega$ (used in the Systems topic).</p>`,
 formulas: [
  {name:"Fourier transform", tex:R`F(\omega)=\int_{-\infty}^{\infty}f(t)e^{-j\omega t}dt`},
  {name:"Inverse", tex:R`f(t)=\frac1{2\pi}\int_{-\infty}^\infty F(\omega)e^{j\omega t}d\omega`},
- {name:"Time shift", tex:R`f(t-t_0)\ \leftrightarrow\ F(\omega)e^{-j\omega t_0}`},
- {name:"Derivative / integral", tex:R`\frac{df}{dt}\leftrightarrow j\omega F,\qquad \int f\,dt\leftrightarrow\frac{F}{j\omega}`},
- {name:"Rectangular pulse (±τ, height 1)", tex:R`F(\omega)=\frac{2\sin\omega\tau}{\omega}=2\tau\,\text{sinc}(\omega\tau)`},
- {name:"Sinc", tex:R`\text{sinc}(x)=\frac{\sin x}{x},\quad \lim_{x\to0}\text{sinc}(x)=1`}
+ {name:"Rectangular pulse (±τ, height 1)", tex:R`F(\omega)=\frac{2\sin\omega\tau}{\omega}=2\tau\,\text{sinc}\,\omega\tau`},
+ {name:"Sinc", tex:R`\text{sinc}\,x=\frac{\sin x}{x},\quad \lim_{x\to0}\text{sinc}\,x=1`},
+ {name:"Unit impulse", tex:R`\int_{-\infty}^{\infty}\delta(t)dt=1,\qquad \delta(\omega)=1`},
+ {name:"Parseval's theorem", tex:R`E=\int_{-\infty}^{\infty}f(t)^2dt=\int_{-\infty}^{\infty}|F(f)|^2df=\frac1{2\pi}\int_{-\infty}^{\infty}|F(\omega)|^2d\omega`},
+ {name:"Time shift", tex:R`f(t-t_d)\ \leftrightarrow\ F(\omega)e^{-j\omega t_d}`},
+ {name:"Derivative / integral", tex:R`\frac{df}{dt}\leftrightarrow j\omega F,\qquad \int f\,dt\leftrightarrow\frac{F}{j\omega}`}
 ],
 questions: [
  {src:"2025 Resit, Q2 (30 marks)", q:R`(a) When is the Fourier series used and when the Fourier transform? (b) Fourier transform of the rectangular pulse (height 1, from −τ to +τ). (c) How does the spectrum change if the pulse is delayed by τ? (d) Express (b) with sinc. (e) Does the spectrum have imaginary components? Explain from the shape. (f) As the pulse duration → 0 for a signal of fixed strength, what happens to the spectrum? Prove it.`,
@@ -374,55 +417,92 @@ questions: [
   <li>$= \frac{2 - (e^{j\omega\tau}+e^{-j\omega\tau})}{j\omega} = \frac{2(1-\cos\omega\tau)}{j\omega} = \frac{4\sin^2(\omega\tau/2)}{j\omega}$.</li>
   <li>Multiply top and bottom to match the sheet: $F(\omega) = -j\omega\tau^2\,\dfrac{\sin^2(\omega\tau/2)}{(\omega\tau/2)^2}$.</li></ol>
   <p>Purely imaginary, as expected for an odd signal.</p>`, ans:"−jωτ² sin²(ωτ/2)/(ωτ/2)²"},
- {src:"MCQ · several years", q:R`(i) $X(\omega)$ is delayed by 3 s: new description? (ii) Spectrum of the signal integrated with respect to time? (iii) Spectrum of the signal differentiated?`, sol:R`(i) $X(\omega)e^{-3j\omega}$. (ii) $X(\omega)/(j\omega)$. (iii) $j\omega X(\omega)$.`}
+ {src:"MCQ · several years", q:R`(i) $X(\omega)$ is delayed by 3 s: new description? (ii) Spectrum of the signal integrated with respect to time? (iii) Spectrum of the signal differentiated?`, sol:R`(i) $X(\omega)e^{-3j\omega}$. (ii) $X(\omega)/(j\omega)$. (iii) $j\omega X(\omega)$.`},
+ {src:"Lecture 15.3 practice", q:R`Use Parseval's theorem to check the energy of the unit pulse (height 1 from −τ to +τ) in both domains. You may use $\int_{-\infty}^{\infty}\frac{\sin^2 a\omega}{\omega^2}d\omega = \pi a$.`,
+  sol:R`<ol class="steps"><li>Time domain: $E = \int_{-\tau}^{\tau}1^2dt = 2\tau$.</li>
+  <li>Frequency domain: $|F(\omega)|^2 = \frac{4\sin^2\omega\tau}{\omega^2}$, so $E = \frac1{2\pi}\int\frac{4\sin^2\omega\tau}{\omega^2}d\omega = \frac{4}{2\pi}\cdot\pi\tau = 2\tau$.</li></ol><p>The two agree, as Parseval requires.</p>`,
+  ans:"2τ both ways", prov:"Worked by Claude; no solution is available. Checked numerically."},
+ {src:"Lecture 15.3 practice", q:R`The unit pulse from −τ to +τ is delayed by $t_d$. What happens to (a) the magnitude spectrum, (b) the phase spectrum, (c) the signal energy?`,
+  sol:R`<p>$F_d(\omega) = 2\tau\,\text{sinc}(\omega\tau)\,e^{-j\omega t_d}$.</p><p><b>(a)</b> Unchanged: $|e^{-j\omega t_d}| = 1$. <b>(b)</b> A phase $-\omega t_d$ is added, a straight line through the origin with slope $-t_d$. <b>(c)</b> Unchanged: by Parseval the energy depends only on $|F|^2$ (and delaying a pulse obviously doesn't change $\int f^2dt$).</p>`,
+  ans:"|F| same, phase −ωt_d added, energy same", prov:"From the time-shift derivation in Lecture 15.3."}
 ],
-traps: ["Delay gives e^(−jωt₀): negative exponent, with j. X(ω − 3) is a frequency shift, not a delay.", "Even signal → real spectrum; odd → imaginary.", "sinc(x) = sin x / x in this course (no π inside)."]
+traps: ["Delay gives e^(−jωt₀): negative exponent, with j. X(ω − 3) is a frequency shift, not a delay.", "Even signal → real spectrum; odd → imaginary.", "sinc x = sin x / x in this course (no π inside).", "The pulse spectrum's peak is 2τ (the pulse area), not 1.", "Parseval with ω needs the 1/2π; with f (Hz) it doesn't.", "δ(t) is defined by its area (1), not its height."]
 });
 
 T.topics.push({
-id: "sampling", part: "Signal processing", title: "Sampling, Aliasing, DFT & FFT",
-lectures: "Not yet lectured · built from tutorial sheet & past papers", status: "pending",
-summary: "What sampling does to a spectrum, aliasing and the anti-aliasing filter, reading sampled spectra, computing a small DFT by hand, and counting multiplications for the DFT vs the Cooley–Tukey FFT.",
+id: "sampling", part: "Signal processing", title: "Discrete Signals, DFT & Sampling",
+lectures: "Lectures 16.1–16.3", status: "lectured",
+summary: "Describing a sampled signal with Dirac functions, taking its Fourier transform to get the DFT, why only frequencies up to ωs/2 matter, how sampling repeats the spectrum at multiples of ωs (and causes aliasing), plus anti-aliasing and DFT vs FFT cost.",
 theory: R`
-<div class="callout warn">Lectures not yet released. Built from tutorial Q26–Q30, Lecture 10.1 and past papers.</div>
-<h3>1. Why sample</h3>
-<p>Computers can only store and process numbers at discrete instants, so continuous signals are sampled (and quantised by an A/D) for digital storage, processing, transmission and analysis such as the FFT.</p>
-<p>An analogue signal is defined at every instant; its sampled counterpart only at $t = 0, t_s, 2t_s, \dots$ (a train of weighted impulses):</p>
-$$x^*(t) = \sum_k x(kt_s)\,\delta(t-kt_s), \qquad x(2) = \int_0^\infty \delta(t-2)\,x(t)\,dt$$
+<h3>0. Why sample</h3>
+<p>Most signal processing is done by digital computers, so continuous (analogue) signals are converted to discrete form by sampling at a fixed interval $t_s$, giving values $x_0, x_1, \dots$ at $t_0, t_1, \dots$. If $t_s$ is small enough that straight lines between points represent the original signal reasonably, the samples carry its information. An analogue signal is defined at every instant; the sampled one only at $t = 0, t_s, 2t_s, \dots$.</p>
 
-<h3>2. What sampling does to the spectrum</h3>
-<p>Sampling at $\omega_s = 2\pi/t_s$ <b>replicates</b> the original spectrum around every multiple of $\omega_s$. A cosine at $\omega_0$ shows lines at</p>
+<h3>1. The Dirac function and a sampled signal</h3>
+$$\delta(t)\ne0 \text{ when } t=0,\qquad \delta(t)=0 \text{ when } t\ne0,\qquad \int\delta(t)\,dt = 1$$
+<p>Its exact shape is undefined; only its area (1) matters. A unit pulse at $t = T$ is $\delta(t-T)$. The sampled value of $g(t)$ at $t=T$ is</p>
+$$g^*(T) = \delta(t-T)\,g(t),\qquad\text{e.g. } x(2) = \int_0^\infty\delta(t-2)\,x(t)\,dt$$
+<p>So with $t_1 = t_0+t_s$, $t_2 = t_0+2t_s$, … and setting $t_0 = 0$, ten samples are</p>
+$$f^*(t) = \delta(t)x_0 + \delta(t-t_s)x_1 + \delta(t-2t_s)x_2 + \dots + \delta(t-9t_s)x_9$$
+
+<h3>2. Fourier transform of the sampled signal</h3>
+$$F^*(\omega) = \int_{-\infty}^{\infty}\big(\delta(t)x_0 + \delta(t-t_s)x_1 + \dots + \delta(t-9t_s)x_9\big)e^{-j\omega t}dt$$
+<p>Each term only has a value at its own instant: the first gives $x_0e^{-j\omega0} = x_0$, the second $x_1e^{-j\omega t_s}$ (the transform of a delay of $t_s$), and so on:</p>
+$$F^*(\omega) = x_0 + x_1e^{-j\omega t_s} + x_2e^{-j\omega2t_s} + \dots + x_9e^{-j\omega9t_s} = \sum_{i=0}^{n-1}x_ie^{-j\omega it_s}$$
+<p>$F^*(\omega)$ is continuous in ω, so you can evaluate it at any frequency you're asked for.</p>
+
+<h3>3. The DFT: evaluating at discrete frequencies</h3>
+<p>A computer evaluates $F^*$ only at multiples of a basic frequency, set as 2π over the record length $(n-1)t_s$:</p>
+$$\Omega = \frac{2\pi}{(n-1)t_s} = \frac{\omega_s}{n-1}$$
+<p>For 10 samples ($n-1 = 9$) the points are $0, \omega_s/9, 2\omega_s/9, \dots, \omega_s$. Since $\omega_st_s = 2\pi$:</p>
+$$F^*(0) = \sum x_i,\qquad F^*(\omega_s/9) = x_0 + x_1e^{-j2\pi/9} + x_2e^{-j4\pi/9} + \dots + x_9e^{-j2\pi}$$
+$$F^*(k\omega_s/9) = x_0 + x_1e^{-j2\pi k/9} + x_2e^{-j4\pi k/9} + \dots$$
+<div class="callout">Most textbooks space the points at $\omega_s/n$ (i.e. $2\pi/nt_s$) instead. The lecture uses $\omega_s/(n-1)$; follow the lecture in the exam, and if a question names the frequencies, just evaluate $F^*(\omega)$ there.</div>
+<p>For 4 samples evaluated at multiples of $\pi/2t_s$, $e^{-j\omega it_s}$ is just $1, -j, -1, j$, so small cases are quick by hand.</p>
+
+<h3>4. Conjugate symmetry: only up to ωs/2</h3>
+<p>Compare the 5th and 6th points ($4\omega_s/9$ and $5\omega_s/9$). The $x_1$ term:</p>
+$$x_1e^{-j10\pi/9} = x_1\big(\cos(10\pi/9) - j\sin(10\pi/9)\big) = x_1\big(\cos(8\pi/9) + j\sin(8\pi/9)\big) = \overline{x_1e^{-j8\pi/9}}$$
+<p>Every term pairs up like this, so $F^*(4\omega_s/9)$ is the complex conjugate of $F^*(5\omega_s/9)$, $F^*(3\omega_s/9)$ of $F^*(6\omega_s/9)$, and so on. (The first and last points, $F^*(0)$ and $F^*(\omega_s)$, are real and equal.) Points $k$ and $n-1-k$ are conjugates.</p>
+<div class="callout key">Beyond $\omega_s/2$ the spectrum only repeats conjugated information, so it only makes sense to consider frequencies up to $\omega_s/2$. Example: $\sin100t$ sampled at 1000 rad/s shows an imaginary line at 100 rad/s and its conjugate mirror at 900 rad/s.</div>
+<p>So the DFT is written over $k = 0$ to $n/2$:</p>
+$$F(\omega_k) = \sum_{i=0}^{n-1}x_ie^{-j\omega_kit_s}$$
+<p><b>Inverse DFT</b> (back to the sample at $t_i$):</p>
+$$f^*(t_i) = \frac1n\sum_{m=0}^{n-1}F^*(m\Omega)e^{j\,i\,m\Omega t_s},\qquad \Omega = \frac{\omega_s}{n-1}$$
+
+<h3>5. Effect of sampling on the spectrum</h3>
+<p>Sampling multiplies the signal by a train of unit impulses spaced $t_s$ apart. That impulse train is periodic (period $t_s$) and even, so it has a Fourier series at harmonics of $\omega_s$. Over one period $-t_s/2$ to $t_s/2$ the only pulse is at $t=0$:</p>
+$$D_n = \frac1{t_s}\int_{-t_s/2}^{t_s/2}\delta(0)e^{-jn\omega_st}dt = \frac1{t_s}e^0\int_{-t_s/2}^{t_s/2}\delta(0)\,dt = \frac1{t_s}$$
+<p>Every harmonic $n = 0, 1, 2, \dots$ has the same amplitude, so <b>sampling introduces an infinite spectrum that repeats at intervals of $\omega_s$</b>. A component at $\omega_0$ shows up at</p>
 $$\omega_0,\ \ \omega_s\pm\omega_0,\ \ 2\omega_s\pm\omega_0,\ \dots$$
-<p>If $\omega_0 > \omega_s/2$, the image at $\omega_s - \omega_0$ lands below the Nyquist frequency and is indistinguishable from a real component: <b>aliasing</b> (the frequency "folds back").</p>
+<p>Lecture example: $2\sin200t$ sampled at 1000 rad/s has imaginary lines at 200, 800, 1200, 1800, 2200, … rad/s (opposite signs in each pair, since they're conjugates).</p>
+<p>If $\omega_0 > \omega_s/2$, the image at $\omega_s - \omega_0$ lands below the Nyquist frequency and can't be told apart from a real component: <b>aliasing</b> (the frequency "folds back").</p>
 <div class="plot" data-plot="alias"></div>
 <div class="callout key"><b>Two effects in a sampled spectrum:</b> (1) images/replicas around multiples of the sampling frequency; (2) aliasing, where replicas overlap the baseband because the sampling rate was too low and high frequencies appear at false low frequencies.</div>
 <p><b>Reading a sampled spectrum backwards:</b> lines at 20, 80, 120, 180, 220… rad/s → pairs $(\omega_s - \omega_0, \omega_s+\omega_0)$ = (80, 120) → $\omega_s = 100$, $\omega_0 = 20$: a cosine at 20 rad/s.</p>
 
-<h3>3. Anti-aliasing filter</h3>
-<p>An analogue low-pass filter placed <i>before</i> the A/D removes everything above half the sampling frequency, so nothing can fold back. Because real filters roll off gradually, sample comfortably above twice the cut-off. For signals of interest in 0–100 Hz: low-pass at about 100 Hz and sample at several times that (e.g. 500 Hz–1 kHz), so the filter has fully attenuated anything above $f_s/2$.</p>
+<h3>6. Anti-aliasing filter</h3>
+<p>Not in Lectures 16.1–16.3, but asked in past papers. An analogue low-pass filter placed <i>before</i> the A/D removes everything above half the sampling frequency, so nothing can fold back. Real filters roll off gradually, so sample comfortably above twice the cut-off. For signals of interest in 0–100 Hz: low-pass at about 100 Hz and sample at several times that (e.g. 500 Hz–1 kHz).</p>
 
-<h3>4. The DFT</h3>
-<p>$N$ samples $x_0, \dots, x_{N-1}$ at spacing $t_s$ give $N$ spectral values:</p>
-$$X_k = \sum_{n=0}^{N-1}x_n\,e^{-j2\pi kn/N},\qquad \omega_k = \frac{2\pi k}{Nt_s}$$
-<p>Resolution $\Delta f = 1/(Nt_s) = 1/T_{record}$. Maximum analysable frequency $= f_s/2$. For N = 4, $e^{-j2\pi kn/4}$ is just $1, -j, -1, j$, so small DFTs are quick by hand.</p>
-
-<h3>5. Cost: DFT vs FFT</h3>
-<p>The DFT needs about $N^2$ complex multiplications. The Cooley–Tukey FFT ($N = 2^m$) splits it repeatedly in half and needs about $N\log_2N$ in this course's counting (32 samples → 160; the tutorial Q30 answer uses the same count). Some textbooks quote $\tfrac N2\log_2N$; follow the course.</p>
+<h3>7. Cost: DFT vs FFT</h3>
+<p>Not in Lectures 16.1–16.3, but asked in past papers. The DFT needs about $N^2$ complex multiplications. The Cooley–Tukey FFT ($N = 2^m$) splits it repeatedly in half and needs about $N\log_2N$ in this course's counting (32 samples → 160; the tutorial Q30 answer uses the same count). Some textbooks quote $\tfrac N2\log_2N$; follow the course.</p>
 <table class="data num"><tr><th>N</th><th>DFT N²</th><th>FFT N log₂N</th></tr><tr><td>32</td><td>1 024</td><td>160</td></tr><tr><td>512</td><td>262 144</td><td>4 608</td></tr><tr><td>1024</td><td>1 048 576</td><td>10 240</td></tr><tr><td>2048</td><td>4 194 304</td><td>22 528</td></tr></table>`,
 formulas: [
  {name:"Sampling frequency", tex:R`\omega_s=\frac{2\pi}{t_s},\quad f_s=\frac1{t_s}`},
- {name:"Nyquist criterion", tex:R`f_s\ge2f_{max}`},
+ {name:"Sampled value (sifting)", tex:R`g^*(T)=\delta(t-T)g(t),\quad x(T)=\int\delta(t-T)x(t)dt`},
+ {name:"Sampled signal", tex:R`f^*(t)=\sum_{i}\delta(t-it_s)\,x_i`},
+ {name:"Transform of samples / DFT", tex:R`F^*(\omega)=\sum_{i=0}^{n-1}x_ie^{-j\omega it_s}`},
+ {name:"Frequency spacing (lecture)", tex:R`\Omega=\frac{2\pi}{(n-1)t_s}=\frac{\omega_s}{n-1}`},
+ {name:"Inverse DFT", tex:R`f^*(t_i)=\frac1n\sum_{m=0}^{n-1}F^*(m\Omega)e^{j\,i\,m\Omega t_s}`},
+ {name:"Nyquist criterion", tex:R`\omega_s\ge2\omega_{max},\quad f_{max}=\frac{f_s}2`},
  {name:"Image locations", tex:R`k\,\omega_s\pm\omega_0`},
  {name:"Alias frequency", tex:R`f_{alias}=|f_0-kf_s|`, note:"nearest multiple of f_s"},
- {name:"DFT", tex:R`X_k=\sum_{n=0}^{N-1}x_ne^{-j2\pi kn/N}`},
- {name:"Resolution / max frequency", tex:R`\Delta f=\frac1{Nt_s},\quad f_{max}=\frac{f_s}2`},
  {name:"Operation counts", tex:R`\text{DFT}: N^2\qquad \text{FFT}: N\log_2N`}
 ],
 questions: [
  {src:"Tutorial Q26", q:R`A sampled signal has values 1, 2, −2, −5 starting at t = 0 with interval $t_s$. Describe it in continuous time and find the spectral components at $\omega = 0$, $\pi/2t_s$, $\pi/t_s$.`,
   sol:R`<p>$x^*(t) = \delta(t) + 2\delta(t-t_s) - 2\delta(t-2t_s) - 5\delta(t-3t_s)$.</p>
-  <p>N = 4, so $\omega_k = 2\pi k/4t_s$: k = 0, 1, 2 give 0, $\pi/2t_s$, $\pi/t_s$.</p>
-  <ul><li>$X_0 = 1+2-2-5 = -4$</li><li>$X_1 = 1 + 2(-j) - 2(-1) - 5(j) = 3-7j$</li><li>$X_2 = 1 + 2(-1) - 2(1) - 5(-1) = 2$</li></ul>`, ans:"−4, 3−7j, 2"},
+  <p>$F^*(\omega) = \sum x_ie^{-j\omega it_s}$. At $\omega = \pi/2t_s$ the factors $e^{-j\omega it_s}$ are $1, -j, -1, j$; at $\pi/t_s$ they are $1, -1, 1, -1$.</p>
+  <ul><li>$F^*(0) = 1+2-2-5 = -4$</li><li>$F^*(\pi/2t_s) = 1 + 2(-j) - 2(-1) - 5(j) = 3-7j$</li><li>$F^*(\pi/t_s) = 1 + 2(-1) - 2(1) - 5(-1) = 2$</li></ul>`, ans:"−4, 3−7j, 2"},
  {src:"Tutorial Q27", q:R`$f(t) = 3\sin100\pi t$ is sampled (a) every 12.5 ms and (b) every 5 ms. Sketch the spectrum up to the sampling frequency in each case.`,
   sol:R`<p>Signal: $f_0 = 50$ Hz.</p><p><b>(a)</b> $f_s = 80$ Hz &lt; 2×50: aliasing. Lines at 50 Hz and $80-50 = 30$ Hz (up to 80 Hz). The 30 Hz line is an alias and falls below the Nyquist frequency of 40 Hz.</p><p><b>(b)</b> $f_s = 200$ Hz: no aliasing. Lines at 50 Hz and $200-50 = 150$ Hz; Nyquist 100 Hz, so only 50 Hz appears in the analysed range.</p>`},
  {src:"Tutorial Q28", q:R`A sampled cosine has unit-amplitude real components at 150, 250, 550, 650, 950, 1050, … rad/s. Describe the signal and the sampling frequency.`,
@@ -434,9 +514,15 @@ questions: [
   sol:R`<p><b>(a)</b> Analogue: defined at every instant (continuous). Sampled: values only at discrete instants $kt_s$, a train of weighted impulses.</p><p><b>(b)</b> Digital computers need discrete values to store, process (e.g. FFT), transmit and display data.</p><p><b>(c)</b> Replication of the spectrum about multiples of $\omega_s$; aliasing (folding of components above $\omega_s/2$ to false lower frequencies) when sampling too slowly. Sketch the original lines and their mirror images about $\omega_s$, $2\omega_s$.</p><p><b>(d)</b> Analogue low-pass before the A/D removes content above $f_s/2$ so nothing can alias. For 0–100 Hz: cut-off ≈ 100 Hz and sample at several hundred Hz (≥ 2×, in practice 5–10× because of the gradual roll-off).</p><p><b>(e)</b> Pairs (80, 120), (180, 220), (280, 320) centre on 100, 200, 300 → $\omega_s = 100$ rad/s; baseline 20 rad/s: $\cos20t$.</p><p><b>(f)</b> Phase linear in frequency, $\varphi = -\omega t_d$: constant delay at all frequencies, no distortion (sketch a straight line through the origin with negative slope).</p>`},
  {src:"2022 Exam, Q2e", q:R`512 points are converted with the DFT. What reduction in multiplications does the FFT give?`, sol:R`DFT $512^2 = 262\,144$; FFT $512\times9 = 4\,608$. Reduction $= 257\,536$ (about 57× fewer).`, ans:"257 536"},
  {src:"MCQ · several years", q:R`(i) 32 samples through a Cooley–Tukey FFT: multiplications? 160 / 320 / 80 / 256. (ii) How is $x(t)$ sampled after 2 s described mathematically? (iii) Which signal gives a sampled spectrum with lines at 20, 80, 120, 180, 220…: 2cos80t, cos20t, 2sin80t, cos80t?`,
-  sol:R`(i) $32\log_2 32 = 160$. (ii) $\int_0^\infty\delta(t-2)x(t)\,dt$. (iii) cos 20t.`}
+  sol:R`(i) $32\log_2 32 = 160$. (ii) $\int_0^\infty\delta(t-2)x(t)\,dt$. (iii) cos 20t.`},
+ {src:"Lecture 16.2 practice", q:R`Ten samples $x_0 \dots x_9$ are evaluated at $0, \omega_s/9, \dots, \omega_s$. (a) Which point is the complex conjugate of $F^*(2\omega_s/9)$? (b) Show it for the $x_1$ term. (c) What is the highest frequency worth analysing?`,
+  sol:R`<p><b>(a)</b> Points $k$ and $9-k$ pair up, so $F^*(7\omega_s/9)$.</p><p><b>(b)</b> $x_1e^{-j14\pi/9} = x_1e^{-j(2\pi - 4\pi/9)} = x_1e^{+j4\pi/9}$, the conjugate of $x_1e^{-j4\pi/9}$ (the $x_1$ term of $F^*(2\omega_s/9)$).</p><p><b>(c)</b> $\omega_s/2$: everything above repeats conjugated information.</p>`,
+  ans:"F*(7ωs/9); up to ωs/2", prov:"Worked by Claude from the conjugate-pair argument in Lecture 16.2; checked numerically."},
+ {src:"Lecture 16.3 practice", q:R`$2\sin200t$ is sampled at 1000 rad/s. List the spectral lines up to 3000 rad/s and say which is the true signal. Why do they all have the same height?`,
+  sol:R`<p>Lines at $k\omega_s\pm\omega_0$: <b>200</b>, 800, 1200, 1800, 2200, 2800 rad/s (purely imaginary, since it's a sine). Only 200 rad/s is below $\omega_s/2 = 500$ rad/s, so that's the true signal; the rest are images.</p><p>Sampling is multiplication by an impulse train whose Fourier coefficients are all $D_n = 1/t_s$, so the original spectrum is copied around every multiple of $\omega_s$ with the same weight.</p>`,
+  ans:"200, 800, 1200, 1800, 2200, 2800 rad/s", prov:"From the Lecture 16.3 example plot (2 sin 200t sampled at 1000 rad/s)."}
 ],
-traps: ["The alias appears at f_s − f₀, not at f₀ − f_s/2.", "Record length sets resolution; sampling rate sets the maximum frequency.", "FFT needs N = 2^m; round point counts up to the next power of two."]
+traps: ["The alias appears at f_s − f₀, not at f₀ − f_s/2.", "Only frequencies up to ω_s/2 carry new information; above that the DFT repeats conjugates.", "The lecture spaces DFT points at ω_s/(n−1); many textbooks use ω_s/n.", "Record length sets resolution; sampling rate sets the maximum frequency.", "FFT needs N = 2^m; round point counts up to the next power of two."]
 });
 
 T.topics.push({
