@@ -688,6 +688,17 @@ h3.subhead{font-family:var(--f-display);font-weight:650;font-size:21px;margin:34
 .fs-fnote{font-size:13px;color:#a69f8d}
 @media (max-width:820px){ .fs-tab{top:auto;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:none} }
 @media (prefers-reduced-motion: reduce){ .fs-panel,.fs-tab{transition:none} }
+
+/* completed tutorials */
+.qgrid-btns{display:flex;gap:8px;flex-wrap:wrap}
+.tutbanner{margin:0 0 16px;padding:12px 16px;border:1px solid var(--good);background:var(--good-soft);color:var(--ink);border-radius:3px;box-shadow:inset 4px 0 0 var(--good)}
+.tutbanner b{color:var(--good);margin-right:4px}
+details.tutdone{margin-top:22px}
+details.tutdone > summary{cursor:pointer;font:700 15px/1.3 var(--f-cond,var(--f-body));letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 0;list-style:none}
+details.tutdone > summary::-webkit-details-marker{display:none}
+details.tutdone > summary::before{content:"▶ ";font-size:11px;color:var(--accent)}
+details.tutdone[open] > summary::before{content:"▼ "}
+details.tutdone .topics{opacity:.8}
 </style>
 <div id="app"></div>
 <script>
@@ -6374,6 +6385,17 @@ function tutQuestions(mid, tut){
   qs.sort((a,b)=>a.nums[0]-b.nums[0]);
   return qs;
 }
+function tutDone(mid, tut){
+  const qs = tutQuestions(mid, tut); if (!qs.length) return false;
+  const d = store.get("done:"+mid+":"+tut.id, {}); return qs.every(q => d[q.nums[0]]);
+}
+/* tutorial-only questions (not already on a topic page) that belong to a topic */
+function extraTopicQuestions(mid, tid){
+  const c = S.content[mid]; const out = [];
+  (c.tutorials||[]).forEach(tut => (tut.questions||[]).forEach(q => { if (q.topic === tid) out.push(Object.assign({}, q, { src: q.src || (tut.title + " Q" + q.nums.join(" & Q")) })); }));
+  return out;
+}
+
 function tutorials(mid){
   const m = S.modules[mid], c = S.content[mid];
   const list = c && c.tutorials;
@@ -6383,8 +6405,11 @@ function tutorials(mid){
     <h1>Tutorials</h1><p class="lede">${list ? "Tutorial sheets with every question, its figure, a hint and a worked solution. Tick questions off as you finish them." : "Tutorial sheets for this module will be added here as they're released."}</p>
   </div></div><main style="--mc:var(${m.color})"><div class="wrap">`;
   if (list){
-    h += `<ul class="topics">` + list.map(t => { const qs = tutQuestions(mid,t); const done = store.get("done:"+mid+":"+t.id, {}); const d = qs.filter(q=>done[q.nums[0]]).length;
-      return `<li><a class="trow" href="#${mid}.tut-${t.id}"><span class="n">${esc(t.short||"T")}</span><span class="tt">${esc(t.title)}</span><span class="sub">${esc(t.note||"")} · ${qs.length} questions</span><span class="right"><span class="chip ${d===qs.length?"done":""}">${d} / ${qs.length} done</span></span></a></li>`; }).join("") + `</ul>`;
+    const row = t => { const qs = tutQuestions(mid,t); const done = store.get("done:"+mid+":"+t.id, {}); const d = qs.filter(q=>done[q.nums[0]]).length;
+      return `<li><a class="trow" href="#${mid}.tut-${t.id}"><span class="n">${esc(t.short||"T")}</span><span class="tt">${esc(t.title)}</span><span class="sub">${esc(t.note||"")} · ${qs.length} questions</span><span class="right"><span class="chip ${d===qs.length?"done":""}">${d===qs.length&&qs.length?"Complete":`${d} / ${qs.length} done`}</span></span></a></li>`; };
+    const active = list.filter(t=>!tutDone(mid,t)), finished = list.filter(t=>tutDone(mid,t));
+    h += active.length ? `<ul class="topics">` + active.map(row).join("") + `</ul>` : `<div class="empty">Every tutorial here is complete. Their questions are still on the topic pages.</div>`;
+    if (finished.length) h += `<details class="tutdone"><summary>Completed (${finished.length}) · hidden from the module list</summary><ul class="topics">` + finished.map(row).join("") + `</ul></details>`;
   }
   if (m.tutorials && m.tutorials.length){
     h += `${list?`<h2 style="margin-top:28px">Still to build</h2>`:""}<ul class="topics">` + m.tutorials.map((t,i)=>`<li><div class="trow off"><span class="n">${String(i+1).padStart(2,"0")}</span><span class="tt">${esc(t)}</span><span class="right"><span class="chip">Coming</span></span></div></li>`).join("") + `</ul>`;
@@ -6405,7 +6430,8 @@ function tutorial(mid, id){
     <nav class="crumbs"><a href="#${mid}">${m.code}</a><span>/</span><a href="#${mid}.tutorials">Tutorials</a><span>/</span><span>${esc(tut.title)}</span></nav>
     <h1>${esc(tut.title)}</h1><p class="lede">${esc(tut.intro||"")}</p>
   </div></div><main style="--mc:var(${m.color})"><div class="wrap">
-  <div class="qgrid-head"><span class="small"><b id="donecount"></b> done. Jump to a question:</span><button class="btn small" id="cleardone">Clear ticks</button></div>
+  <div class="tutbanner" id="tutbanner" hidden><b>Tutorial complete.</b> It's now hidden from the module list. The questions stay on their topic pages, and you can find this sheet under Tutorials → Completed.</div>
+  <div class="qgrid-head"><span class="small"><b id="donecount"></b> done. Jump to a question:</span><span class="qgrid-btns"><button class="btn small primary" id="alldone">Mark tutorial complete</button><button class="btn small" id="cleardone">Clear ticks</button></span></div>
   <nav class="qgrid" aria-label="Questions">${qs.map(q=>`<a href="#${mid}.tut-${id}" data-go="tq${q.nums[0]}" class="${done[q.nums[0]]?"done":""}" data-n="${q.nums[0]}">${q.nums.join("+")}</a>`).join("")}</nav>
   <div class="qlist">`;
   let lastPart = null;
@@ -6423,11 +6449,13 @@ function tutorial(mid, id){
   });
   h += `</div>` + askBox() + `</div></main>`;
   app.innerHTML = h; wireSubnav(mid);
-  const count = () => { const d = store.get(key, {}); document.getElementById("donecount").textContent = `${qs.filter(q=>d[q.nums[0]]).length} of ${qs.length}`; };
+  const count = () => { const d = store.get(key, {}); const n = qs.filter(q=>d[q.nums[0]]).length; document.getElementById("donecount").textContent = `${n} of ${qs.length}`;
+    const all = qs.length && n === qs.length; document.getElementById("tutbanner").hidden = !all; document.getElementById("alldone").hidden = !!all; renderPages(mid, "tut-"+id); };
   app.querySelectorAll("[data-done]").forEach(cb => cb.onchange = () => { const d = store.get(key, {}); const n = cb.dataset.done; if (cb.checked) d[n]=1; else delete d[n]; store.set(key, d);
     cb.closest("article").classList.toggle("is-done", cb.checked); app.querySelector(`.qgrid [data-n="${n}"]`).classList.toggle("done", cb.checked); count(); });
   app.querySelectorAll("[data-go]").forEach(a => a.onclick = e => { e.preventDefault(); document.getElementById(a.dataset.go).scrollIntoView(); });
-  document.getElementById("cleardone").onclick = () => { store.set(key, {}); tutorial(mid, id); };
+  document.getElementById("cleardone").onclick = () => { store.set(key, {}); tutorial(mid, id); renderPages(mid, "tut-"+id); };
+  document.getElementById("alldone").onclick = () => { const d = {}; qs.forEach(q => d[q.nums[0]] = 1); store.set(key, d); tutorial(mid, id); window.scrollTo(0,0); };
   app.querySelectorAll("[data-copy]").forEach(b => b.onclick = () => { const q = qs[+b.dataset.copy]; copy(`${m.code} ${m.name} · ${tut.title} · ${label(q)}\n\n${plain(q.q)}\n\nMy question: `); });
   count(); typeset(app); wireTheoryLinks(mid, null);
   if (PENDING && PENDING.back){ const id2 = PENDING.back; PENDING = null; setTimeout(()=>{ const el=document.getElementById(id2); el && el.scrollIntoView({block:"start"}); }, 60); }
@@ -6440,20 +6468,21 @@ function topic(mid, tid){
   const idx = c.topics.findIndex(t=>t.id===tid); if(idx<0) return module(mid);
   const t = c.topics[idx], prev = c.topics[idx-1], next = c.topics[idx+1];
   const rate = ratings(mid)[t.id];
+  const TQ = t.questions.concat(extraTopicQuestions(mid, tid));
   let h = subnav(mid,"topics",tid) + `<div class="band" style="--mc:var(${m.color})"><div class="wrap">
     <span class="plateid">Schematic ${[...new Set(c.topics.map(x=>x.part))].indexOf(t.part)+1}.${c.topics.filter(x=>x.part===t.part).indexOf(t)+1}</span>
     <div class="eyebrow" style="margin-top:14px">${esc(t.part)} · ${esc(t.lectures)}</div>
     <h1>${esc(t.title)}</h1><p class="lede">${esc(t.summary)}</p>
   </div></div><main style="--mc:var(${m.color})"><div class="wrap"><div class="topic-layout">
   <nav class="toc" aria-label="On this page">
-    <a href="#${mid}.${tid}" data-jump="theory">Theory</a><a href="#${mid}.${tid}" data-jump="formulae">Formulae</a><a href="#${mid}.${tid}" data-jump="practice">Practice (${t.questions.length})</a>${t.traps&&t.traps.length?`<a href="#${mid}.${tid}" data-jump="traps">Hazards</a>`:""}
+    <a href="#${mid}.${tid}" data-jump="theory">Theory</a><a href="#${mid}.${tid}" data-jump="formulae">Formulae</a><a href="#${mid}.${tid}" data-jump="practice">Practice (${TQ.length})</a>${t.traps&&t.traps.length?`<a href="#${mid}.${tid}" data-jump="traps">Hazards</a>`:""}
     <div class="rate"><p>System status</p>
       <button class="rbtn good" data-rate="good" aria-pressed="${rate==="good"}">✓ Mission ready</button>
       <button class="rbtn bad" data-rate="bad" aria-pressed="${rate==="bad"}">⚠ Needs work</button></div>
   </nav><div>
   <section class="block" id="theory"><h2>Theory <small>operating manual</small></h2><div class="prose">${numberHeads(t.theory)}</div></section>
   <section class="block" id="formulae"><h2>Formulae <small>spec sheet · ${t.formulas.length}</small></h2><div class="formulas">${t.formulas.map(f=>`<div class="fcard"><div class="fn">${esc(f.name)}</div><div class="fx">$$${f.tex}$$</div>${f.note?`<div class="fnote">${esc(f.note)}</div>`:""}</div>`).join("")}</div></section>
-  <section class="block" id="practice"><h2>Practice <small>field tests · tutorial &amp; past papers</small></h2><div class="qlist">${t.questions.map((q,i)=>`
+  <section class="block" id="practice"><h2>Practice <small>field tests · tutorial &amp; past papers</small></h2><div class="qlist">${TQ.map((q,i)=>`
     <article class="q" id="pq${i}"><div class="qh"><span class="qn">Q${i+1}</span><span class="src">${esc(q.src)}</span></div>
     <div class="qt">${q.q}</div>
     ${[].concat(q.fig||[]).map(f=>`<figure class="tfig"><img src="${S.figs[f]}" alt="Figure for Q${i+1}"></figure>`).join("")}
@@ -6473,7 +6502,7 @@ function topic(mid, tid){
     renderPages(mid, tid);
   });
   app.querySelectorAll("[data-copy]").forEach(b => b.onclick = () => {
-    const q = t.questions[+b.dataset.copy];
+    const q = TQ[+b.dataset.copy];
     copy(`${m.code} ${m.name} · ${t.title} · ${q.src}\n\n${plain(q.q)}\n\nMy question: `);
   });
   drawPlots(app); typeset(app); wireTheoryLinks(mid, tid);
@@ -6608,7 +6637,7 @@ function renderPages(mid, sub){
   let list = `<a class="pg ${!sub?"on":""}" href="#${mid}">Overview &amp; deadlines</a>`;
   const tuts = c && c.tutorials;
   list += `<a class="pg ${sub==="tutorials"?"on":""}" href="#${mid}.tutorials">Tutorials</a>`;
-  if (tuts) list += tuts.map(t=>`<a class="pg sub2 ${sub==="tut-"+t.id?"on":""}" href="#${mid}.tut-${t.id}">${esc(t.title)}</a>`).join("");
+  if (tuts) list += tuts.filter(t => sub==="tut-"+t.id || !tutDone(mid, t)).map(t=>`<a class="pg sub2 ${sub==="tut-"+t.id?"on":""}" href="#${mid}.tut-${t.id}">${esc(t.title)}${tutDone(mid,t)?` <span class="rk good" title="Complete">✓</span>`:""}</a>`).join("");
   if (c && c.mcq) list += `<a class="pg ${sub==="mcq"?"on":""}" href="#${mid}.mcq">Past-paper MCQ drill</a>`;
   list += `<div class="pgrule"></div>`;
   if (c){
