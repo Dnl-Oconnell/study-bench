@@ -1,1 +1,1 @@
-STUDY.sheetImg = {"ssc_laplace-1": "img/sheets/ssc_laplace-1.jpg", "ssc_z-1": "img/sheets/ssc_z-1.jpg"};
+STUDY.sheetImg = {"ssc_formulae-1": "img/sheets/ssc_formulae-1.jpg", "ssc_formulae-2": "img/sheets/ssc_formulae-2.jpg", "ssc_laplace-1": "img/sheets/ssc_laplace-1.jpg", "ssc_z-1": "img/sheets/ssc_z-1.jpg"};

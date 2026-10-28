@@ -4,6 +4,7 @@
 STUDY.sheets = {
   msp: { items: [], blank: "Command issues one Log Tables booklet and a firm handshake. Everything else is stored in your head. Hope the backup drive is working." },
   ssc: { items: [
+    { title: "Exam Appendices: Useful Formulae", note: "Issued with Class Test 3 (the EEN1020 Semester 1 2026/27 exam appendix: transient-performance and state-space formulae, Laplace and Z pairs)", pages: ["ssc_formulae-1", "ssc_formulae-2"] },
     { title: "Laplace Transform Reference Table", note: "Issued with Class Tests 1 and 2", pages: ["ssc_laplace-1"] },
     { title: "Z-Transform Reference Table", note: "Issued with Class Tests 1 and 2", pages: ["ssc_z-1"] }
   ] },

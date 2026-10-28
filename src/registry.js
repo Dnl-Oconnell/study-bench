@@ -22,7 +22,7 @@ window.STUDY = {
       blurb:"Statistics in R: summaries, tables and probability, the normal model, regression, time series, confidence intervals, t-tests, ANOVA and non-parametric tests." },
     pd: { code:"MEC1017", name:"Product Design", color:"--m-pd", ready:true,
       assess:"Semester 1 = 50%: design review presentation (wk 5–6) 20%, SW assembly & animation (wk 9) 15%, spring–damper & circuit review (wk 10) 10%, motion simulation (wk 11) 15%, drawings & order list (wk 12) 20%, design portfolio (wk 13) 20%. Semester 2 build & competition = 50%",
-      blurb:"The FireFighter ladder-climbing robot: brief and constraints, product design specifications, concept selection with weighted matrices, the real hardware limits, and vibration theory for sizing the beaker suspension." }
+      blurb:"The FireFighter ladder-climbing robot: brief and constraints, product design specifications, concept selection with weighted matrices, the real hardware limits, vibration theory for sizing the beaker suspension, and the pneumatic cylinder, 5/2 valve and relay control circuit." }
   },
   content: {}
 };
