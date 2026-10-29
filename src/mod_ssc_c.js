@@ -248,7 +248,7 @@ traps: [
 
 T.topics.push({
 id: "sstrans", part: "State space", title: "Canonical Forms, Parallel Form & the State-Transition Matrix",
-lectures: "State-Space Modified Exam Questions (2021 variation, 2023 Q1, 2024 Q1) and their posted solutions; Φ(t) now lectured in Lecture 3 – State-Space Response and Stability, canonical and parallel forms not yet lectured", status: "partial",
+lectures: "State-Space Modified Exam Questions (2021 variation, 2023 Q1, 2024 Q1) and their posted solutions; Φ(t) now lectured in Lecture 3 – State-Space Response and Stability, controller canonical (phase-variable) form now lectured in Lecture 3 – Converting Higher Order ODEs to State-Spaces, parallel form not yet lectured", status: "partial",
 summary: "What the posted exam solutions use beyond the lectures so far: the controller canonical form, the parallel (diagonal) form from partial fractions, the state-transition matrix Φ(t) = e^{At} via eigenvalues and eigenvectors, and using Φ for free and impulse responses.",
 theory: R`
 <h3>0. Controller canonical form (CCF)</h3>
