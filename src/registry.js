@@ -16,7 +16,7 @@ window.STUDY = {
       blurb:"Phasors and AC power, op-amp signal conditioning, inductors and transformers, DC motors, H-bridges, steppers, encoders and TRIAC switching." },
     mom: { code:"MEC1014", name:"Mechanics of Machines", color:"--m-mom", ready:true,
       assess:"Continuous assessment 100%: quizzes in weeks 4, 8, 10 (10% each) and a final quiz in week 12 (40%); two practical submissions (10% each); SolidWorks assignment 10%",
-      blurb:"Free and forced vibration of single degree of freedom systems, then gear trains, epicyclic gears and belt drives." },
+      blurb:"Free and forced vibration of single degree of freedom systems, then gear trains, epicyclic gears, belt drives and friction clutches." },
     da: { code:"MEC1029", name:"Data Analytics for Engineers", color:"--m-da", ready:true,
       assess:"100% CA: open-book Loop quizzes in the Friday slot (SA101): week 4 5%, week 7 10%, week 10 15%, week 12 final 70%",
       blurb:"Statistics in R: summaries, tables and probability, the normal model, regression, time series, confidence intervals, t-tests, ANOVA and non-parametric tests." },
