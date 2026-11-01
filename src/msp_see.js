@@ -14,10 +14,10 @@ const see = {
  sinusoids:[[1],[2],[4],[4],[3],[1,2,3],[6]],
  "fourier-series":[[5],[3],[3,9],[3,9],[3,2,4,6],[2,1],[1,2],[9],[7,2],[8,3],[4]],
  "fourier-transform":[[2,6,3],[0,2],[7,6],[5,2],[6,5]],
- sampling:[[2,3],[5],[5],[5],[7,4],[0,5,6],[7],[7,1,5],[4],[5]],
- systems:[[1],[1],[2,3],[3],[1],[1],[1]]
+ sampling:[[2,3],[5],[5],[5],[7,4],[0,5,6],[7],[7,1,5],[4],[5],[6],[6],[7],[8]],
+ systems:[[3],[3],[5,6],[6],[3],[3],[3],[4],[2],[2,3],[1]]
 };
 const c = STUDY.content.msp;
 c.topics.forEach(t => (see[t.id]||[]).forEach((s,i) => { if (t.questions[i]) t.questions[i].see = s; }));
-c.tutorials[0].questions.forEach(q => { if (q.nums[0]===35) q.see = [3]; });
+c.tutorials[0].questions.forEach(q => { if (q.nums[0]===35) q.see = [6]; });
 })();

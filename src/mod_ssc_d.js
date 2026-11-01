@@ -95,21 +95,23 @@ questions: [
  {src:"Lecture 3 DIY #1", see:[2], q:R`Convert $G_1(s) = \dfrac{4}{s+3}$ to state space.`,
   hint:"First order: one state, x₁ = y.",
   sol:R`<p>$\dot y + 3y = 4u$. With $x_1 = y$: $\dot x_1 = -3x_1 + 4u$, $y = x_1 + 0u$.</p>`,
-  ans:"ẋ₁ = [−3]x₁ + [4]u, y = [1]x₁ + [0]u", prov:"Follows the indicative answer in Lecture 3."},
+  ans:"ẋ₁ = [−3]x₁ + [4]u, y = [1]x₁ + [0]u", prov:"Follows the posted solution (State-Space DIY Part 1)."},
  {src:"Lecture 3 DIY #2", see:[2], q:R`Convert $H(s) = \dfrac{8}{s^2+4s+8}$ to state space.`,
   hint:"ÿ + 4ẏ + 8y = 8u.",
   sol:R`<p>$\dot x_1 = x_2$, $\dot x_2 = -8x_1 - 4x_2 + 8u$.</p>
   $$\dot x = \begin{bmatrix}0&1\\-8&-4\end{bmatrix}x + \begin{bmatrix}0\\8\end{bmatrix}u,\qquad y = \begin{bmatrix}1&0\end{bmatrix}x$$`,
-  ans:"A = [0 1; −8 −4], B = [0; 8], C = [1 0]", prov:"Follows the indicative answer in Lecture 3."},
+  ans:"A = [0 1; −8 −4], B = [0; 8], C = [1 0]", prov:"Follows the posted solution (State-Space DIY Part 1)."},
  {src:"Lecture 3 DIY #3", see:[1], q:R`Convert $\dfrac{d^2v}{dt^2} + 7\dfrac{dv}{dt} + 12v = v_{in}(t)$ to state space.`,
   hint:"Already an ODE: x₁ = v, x₂ = v̇.",
   sol:R`<p>$\dot x_1 = x_2$, $\dot x_2 = -12x_1 - 7x_2 + v_{in}$.</p>
   $$\dot x = \begin{bmatrix}0&1\\-12&-7\end{bmatrix}x + \begin{bmatrix}0\\1\end{bmatrix}v_{in},\qquad y = \begin{bmatrix}1&0\end{bmatrix}x$$`,
-  ans:"A = [0 1; −12 −7], B = [0; 1], C = [1 0]", prov:"Follows the indicative answer in Lecture 3."},
+  ans:"A = [0 1; −12 −7], B = [0; 1], C = [1 0]", prov:"Follows the posted solution (State-Space DIY Part 1)."},
  {src:"Lecture 3 DIY #4", see:[2], q:R`Convert $Q(s) = \dfrac{24}{s^3+7s^2+14s+8}$ to state space.`,
   hint:"Three phase variables; bottom row −8, −14, −7.",
-  sol:R`$$\dot x = \begin{bmatrix}0&1&0\\0&0&1\\-8&-14&-7\end{bmatrix}x + \begin{bmatrix}0\\0\\24\end{bmatrix}u,\qquad y = \begin{bmatrix}1&0&0\end{bmatrix}x$$`,
-  ans:"A = [0 1 0; 0 0 1; −8 −14 −7], B = [0; 0; 24], C = [1 0 0]", prov:"Follows the indicative answer in Lecture 3."},
+  sol:R`<p>$\dddot y + 7\ddot y + 14\dot y + 8y = 24u$. With $x_1 = y$, $x_2 = \dot y$, $x_3 = \ddot y$: $\dot x_3 = -8x_1 - 14x_2 - 7x_3 + 24u$.</p>
+  $$\dot x = \begin{bmatrix}0&1&0\\0&0&1\\-8&-14&-7\end{bmatrix}x + \begin{bmatrix}0\\0\\24\end{bmatrix}u,\qquad y = \begin{bmatrix}1&0&0\end{bmatrix}x$$
+  <p class="small">The posted handwritten solution writes 14 on the right-hand side (and so B = [0; 0; 14]); the numerator of Q(s) is 24.</p>`,
+  ans:"A = [0 1 0; 0 0 1; −8 −14 −7], B = [0; 0; 24], C = [1 0 0]", prov:"Follows the posted solution (State-Space DIY Part 1) for A and C. The handwritten solution copies the numerator as 14, giving B = [0; 0; 14]; that is a slip, since Q(s) has 24 on top, so B = [0; 0; 24]."},
  {src:"Practice (DIY #3 system)", see:[3], q:R`For the DIY #3 system $\dot x = \begin{bmatrix}0&1\\-12&-7\end{bmatrix}x + \begin{bmatrix}0\\1\end{bmatrix}v_{in}$, $y = \begin{bmatrix}1&0\end{bmatrix}x$, with $x_0 = [1\ \ 0]^T$ and a constant input $v_{in} = 6$: find $y(0^+)$, the equilibrium point and $y_{ss}$. Is the FVT result valid?`,
   hint:"Check the eigenvalues first (det(sI − A) = s² + 7s + 12). det A = 12.",
   sol:R`<p>$y(0^+) = Cx_0 = 1$.</p>
@@ -131,13 +133,13 @@ questions: [
   <p>$\ddot x_2 = K_2(x_1 - x_2) + B_3(\dot x_1 - \dot x_2) - K_3x_2 = x_1 + 3\dot x_1 - 3x_2 - 3\dot x_2$</p>
   $$\dot z = \begin{bmatrix}0&1&0&0\\-3&-3&1&3\\0&0&0&1\\1&3&-3&-3\end{bmatrix}z + \begin{bmatrix}0\\1\\0\\0\end{bmatrix}f(t),\qquad \begin{bmatrix}y_1\\y_2\end{bmatrix} = \begin{bmatrix}1&0&0&0\\0&0&1&0\end{bmatrix}z + \begin{bmatrix}0\\0\end{bmatrix}f(t)$$
   <p>with $z = [x_1\ \dot x_1\ x_2\ \dot x_2]^T$.</p>`,
-  ans:"A = [0 1 0 0; −3 −3 1 3; 0 0 0 1; 1 3 −3 −3], B = [0; 1; 0; 0]", prov:"Follows the indicative answer in Lecture 3."},
+  ans:"A = [0 1 0 0; −3 −3 1 3; 0 0 0 1; 1 3 −3 −3], B = [0; 1; 0; 0]", prov:"Follows the posted solution (State-Space DIY Part 2)."},
  {src:"Lecture 3 Coupled DIY #2", fig:"ssc_l3c3", see:[4], q:R`Torque $T(t)$ drives inertia $J_1$ (damper $D_1$ to the wall), which is joined by torsional spring $K$ to $J_2$ (damper $D_2$ to the other wall). $J_1 = 1$ kg m², $J_2 = 0.5$ kg m², $D_1 = 0.1$, $D_2 = 0.05$ Nms/rad, $K = 1$ Nm/rad. Find the state-space model with output $\theta_2$.`,
   hint:"Rotational version of the two-mass problem: z = [θ₁, θ̇₁, θ₂, θ̇₂].",
   sol:R`<p>$J_1\ddot\theta_1 = T - D_1\dot\theta_1 - K(\theta_1 - \theta_2) \Rightarrow \ddot\theta_1 = -\theta_1 - 0.1\dot\theta_1 + \theta_2 + T$</p>
   <p>$J_2\ddot\theta_2 = K(\theta_1 - \theta_2) - D_2\dot\theta_2 \Rightarrow \ddot\theta_2 = 2\theta_1 - 2\theta_2 - 0.1\dot\theta_2$</p>
   $$\frac{d}{dt}z = \begin{bmatrix}0&1&0&0\\-1&-0.1&1&0\\0&0&0&1\\2&0&-2&-0.1\end{bmatrix}z + \begin{bmatrix}0\\1\\0\\0\end{bmatrix}T(t),\qquad y = \begin{bmatrix}0&0&1&0\end{bmatrix}z$$`,
-  ans:"A = [0 1 0 0; −1 −0.1 1 0; 0 0 0 1; 2 0 −2 −0.1], B = [0; 1; 0; 0], C = [0 0 1 0]", prov:"Follows the indicative answer in Lecture 3."}
+  ans:"A = [0 1 0 0; −1 −0.1 1 0; 0 0 0 1; 2 0 −2 −0.1], B = [0; 1; 0; 0], C = [0 0 1 0]", prov:"Follows the posted solution (State-Space DIY Part 2), which notes the output θ₂ was chosen arbitrarily."}
 ],
 traps: [
  "State 1 is the output variable itself, not its derivative.",

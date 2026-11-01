@@ -431,8 +431,8 @@ traps: ["Delay gives e^(−jωt₀): negative exponent, with j. X(ω − 3) is a
 
 T.topics.push({
 id: "sampling", part: "Signal processing", title: "Discrete Signals, DFT & Sampling",
-lectures: "Lectures 16.1–16.3", status: "lectured",
-summary: "Describing a sampled signal with Dirac functions, taking its Fourier transform to get the DFT, why only frequencies up to ωs/2 matter, how sampling repeats the spectrum at multiples of ωs (and causes aliasing), plus anti-aliasing and DFT vs FFT cost.",
+lectures: "Lectures 16.1–16.3, 17.1–17.2 + Lecture 17 notes", status: "lectured",
+summary: "Describing a sampled signal with Dirac functions, taking its Fourier transform to get the DFT, why only frequencies up to ωs/2 matter, how sampling repeats the spectrum at multiples of ωs and causes aliasing, the Nyquist criterion and anti-aliasing filter, DFT vs FFT cost, and the ideal reconstruction filter.",
 theory: R`
 <h3>0. Why sample</h3>
 <p>Most signal processing is done by digital computers, so continuous (analogue) signals are converted to discrete form by sampling at a fixed interval $t_s$, giving values $x_0, x_1, \dots$ at $t_0, t_1, \dots$. If $t_s$ is small enough that straight lines between points represent the original signal reasonably, the samples carry its information. An analogue signal is defined at every instant; the sampled one only at $t = 0, t_s, 2t_s, \dots$.</p>
@@ -480,12 +480,27 @@ $$\omega_0,\ \ \omega_s\pm\omega_0,\ \ 2\omega_s\pm\omega_0,\ \dots$$
 <div class="callout key"><b>Two effects in a sampled spectrum:</b> (1) images/replicas around multiples of the sampling frequency; (2) aliasing, where replicas overlap the baseband because the sampling rate was too low and high frequencies appear at false low frequencies.</div>
 <p><b>Reading a sampled spectrum backwards:</b> lines at 20, 80, 120, 180, 220… rad/s → pairs $(\omega_s - \omega_0, \omega_s+\omega_0)$ = (80, 120) → $\omega_s = 100$, $\omega_0 = 20$: a cosine at 20 rad/s.</p>
 
-<h3>6. Anti-aliasing filter</h3>
-<p>Not in Lectures 16.1–16.3, but asked in past papers. An analogue low-pass filter placed <i>before</i> the A/D removes everything above half the sampling frequency, so nothing can fold back. Real filters roll off gradually, so sample comfortably above twice the cut-off. For signals of interest in 0–100 Hz: low-pass at about 100 Hz and sample at several times that (e.g. 500 Hz–1 kHz).</p>
+<h3>6. Nyquist criterion and the anti-aliasing filter</h3>
+<p><b>Lecture 17.1 example.</b> $f(t) = 2\cos250t$ sampled at $\omega_s = 1000$ rad/s: the DFT shows lines at 250 and $1000-250 = 750$ rad/s. Reading only up to $\omega_s/2 = 500$ rad/s (normal practice) gives 250 rad/s: correct.</p>
+<p>Change the input to $2\cos625t$: lines at 625 and $1000-625 = 375$ rad/s. Up to 500 rad/s you now see <b>375 rad/s</b> and would wrongly report that as the signal's frequency. The 625 rad/s component has folded about $\omega_s/2$: <b>aliasing</b>.</p>
+<p>In the spectrum picture: sampling copies the continuous spectrum around $0, \omega_s, 2\omega_s, \dots$ If $\omega_s$ is too low, neighbouring copies overlap and can't be separated.</p>
+<div class="callout key"><b>Nyquist cut-off:</b> the highest frequency in the signal must be less than half the sampling frequency, $\omega_{max} &lt; \omega_s/2$. If you can't guarantee that, put an analogue low-pass <b>anti-aliasing filter</b> with cut-off $\omega_c = \omega_s/2$ before the sampler.</div>
+<p><b>Audio example (Lecture 17 notes).</b> The ear hears 20 Hz–20 kHz, so sample at 40 kHz. A 32 kHz component is 12 kHz above the 20 kHz Nyquist frequency, so it folds back to $20-12 = 8$ kHz (the same as $40-32$). So an anti-aliasing low-pass with cut-off 20 kHz is needed as well.</p>
+<p>Real filters roll off gradually, so in design questions sample comfortably above twice the cut-off. For signals of interest in 0–100 Hz: low-pass at about 100 Hz and sample at several times that (e.g. 500 Hz–1 kHz).</p>
 
 <h3>7. Cost: DFT vs FFT</h3>
-<p>Not in Lectures 16.1–16.3, but asked in past papers. The DFT needs about $N^2$ complex multiplications. The Cooley–Tukey FFT ($N = 2^m$) splits it repeatedly in half and needs about $N\log_2N$ in this course's counting (32 samples → 160; the tutorial Q30 answer uses the same count). Some textbooks quote $\tfrac N2\log_2N$; follow the course.</p>
-<table class="data num"><tr><th>N</th><th>DFT N²</th><th>FFT N log₂N</th></tr><tr><td>32</td><td>1 024</td><td>160</td></tr><tr><td>512</td><td>262 144</td><td>4 608</td></tr><tr><td>1024</td><td>1 048 576</td><td>10 240</td></tr><tr><td>2048</td><td>4 194 304</td><td>22 528</td></tr></table>`,
+<p>From Lecture 17.2. In $F(k) = \sum_{i=0}^{n-1}x_ie^{-jk\Omega it_s}$ each term is a real sample times a complex exponential (a real and an imaginary part), so <b>2 multiplications per term</b>. Additions are ignored (much cheaper on a computer).</p>
+<ul><li>Per frequency: $n$ terms × 2 = $2n$ multiplications.</li><li>Only frequencies up to $k = n/2$ are needed, so $2n\times n/2 = n^2$ in total.</li></ul>
+<p>With $\Omega_k = k\omega_s/(n-1)$ and $\omega_s = 2\pi/t_s$, the DFT becomes $F(k) = \sum x_ie^{-j\,2\pi ik/(n-1)}$: the same products of $i$ and $k$ recur, so an algorithm can group the repeated terms and calculate each only once. The <b>Cooley–Tukey</b> algorithm works best when $n$ is a power of 2 and needs about $n\log_2n$ multiplications: a <b>Fast Fourier Transform</b>.</p>
+<p>For 1024 points: DFT $1024^2 \approx 1.05$ million; FFT $1024\log_2 2^{10} = 10\,240$, about 1% of the DFT. (Some textbooks quote $\tfrac n2\log_2n$; follow the course.)</p>
+<table class="data num"><tr><th>N</th><th>DFT N²</th><th>FFT N log₂N</th></tr><tr><td>32</td><td>1 024</td><td>160</td></tr><tr><td>512</td><td>262 144</td><td>4 608</td></tr><tr><td>1024</td><td>1 048 576</td><td>10 240</td></tr><tr><td>2048</td><td>4 194 304</td><td>22 528</td></tr></table>
+
+<h3>8. Reconstructing the continuous signal</h3>
+<p>From the Lecture 17 notes. To rebuild the continuous signal from its samples, the device must pass the signal's frequency content exactly and nothing from the repeated copies: an <b>ideal low-pass filter</b> with gain $A$ for $|\omega| &lt; \omega'$ and zero outside, where $\omega' = \omega_s/2$.</p>
+<p>Its time-domain (impulse) response is the inverse Fourier transform:</p>
+$$h(t) = \frac1{2\pi}\int_{-\omega'}^{\omega'}Ae^{j\omega t}d\omega = \frac{A}{2\pi}\cdot\frac1{jt}\big(e^{j\omega't} - e^{-j\omega't}\big) = \frac{A\omega'}{\pi}\cdot\frac{\sin\omega't}{\omega't}$$
+<p>This is zero whenever $\omega't = k\pi$. Since $\omega' = \omega_s/2 = \pi/t_s$, that's at $t = kt_s$: exactly at the other sample times. So each sample's contribution doesn't disturb the value at any other sample instant, as it should if the samples are accurate values of the signal.</p>
+<p>The notes also check the inverse DFT (section 4) by substituting the forward transform back in: the inner sum gives $n f^*(t_i)$, and the $1/n$ returns $f^*(t_i)$.</p>`,
 formulas: [
  {name:"Sampling frequency", tex:R`\omega_s=\frac{2\pi}{t_s},\quad f_s=\frac1{t_s}`},
  {name:"Sampled value (sifting)", tex:R`g^*(T)=\delta(t-T)g(t),\quad x(T)=\int\delta(t-T)x(t)dt`},
@@ -496,7 +511,9 @@ formulas: [
  {name:"Nyquist criterion", tex:R`\omega_s\ge2\omega_{max},\quad f_{max}=\frac{f_s}2`},
  {name:"Image locations", tex:R`k\,\omega_s\pm\omega_0`},
  {name:"Alias frequency", tex:R`f_{alias}=|f_0-kf_s|`, note:"nearest multiple of f_s"},
- {name:"Operation counts", tex:R`\text{DFT}: N^2\qquad \text{FFT}: N\log_2N`}
+ {name:"Operation counts", tex:R`\text{DFT}: N^2\qquad \text{FFT}: N\log_2N`},
+ {name:"Anti-aliasing cut-off", tex:R`\omega_c=\frac{\omega_s}{2}`},
+ {name:"Ideal reconstruction filter", tex:R`h(t)=\frac{A\omega'}{\pi}\,\frac{\sin\omega't}{\omega't},\quad \omega'=\frac{\omega_s}2=\frac{\pi}{t_s}`}
 ],
 questions: [
  {src:"Tutorial Q26", q:R`A sampled signal has values 1, 2, −2, −5 starting at t = 0 with interval $t_s$. Describe it in continuous time and find the spectral components at $\omega = 0$, $\pi/2t_s$, $\pi/t_s$.`,
@@ -520,32 +537,79 @@ questions: [
   ans:"F*(7ωs/9); up to ωs/2", prov:"Worked by Claude from the conjugate-pair argument in Lecture 16.2; checked numerically."},
  {src:"Lecture 16.3 practice", q:R`$2\sin200t$ is sampled at 1000 rad/s. List the spectral lines up to 3000 rad/s and say which is the true signal. Why do they all have the same height?`,
   sol:R`<p>Lines at $k\omega_s\pm\omega_0$: <b>200</b>, 800, 1200, 1800, 2200, 2800 rad/s (purely imaginary, since it's a sine). Only 200 rad/s is below $\omega_s/2 = 500$ rad/s, so that's the true signal; the rest are images.</p><p>Sampling is multiplication by an impulse train whose Fourier coefficients are all $D_n = 1/t_s$, so the original spectrum is copied around every multiple of $\omega_s$ with the same weight.</p>`,
-  ans:"200, 800, 1200, 1800, 2200, 2800 rad/s", prov:"From the Lecture 16.3 example plot (2 sin 200t sampled at 1000 rad/s)."}
+  ans:"200, 800, 1200, 1800, 2200, 2800 rad/s", prov:"From the Lecture 16.3 example plot (2 sin 200t sampled at 1000 rad/s)."},
+ {src:"Lecture 17.1 example", q:R`$f(t) = 2\cos250t$ and then $f(t) = 2\cos625t$ are each sampled at $\omega_s = 1000$ rad/s. Where are the DFT lines up to $\omega_s$ in each case, and what frequency would you report reading up to $\omega_s/2$? What should be done about it?`,
+  hint:"Lines at ω₀ and ω_s − ω₀; only the half below 500 rad/s is read.",
+  sol:R`<p><b>250 rad/s:</b> lines at 250 and 750 rad/s. Below 500 rad/s: 250 rad/s, correct.</p><p><b>625 rad/s:</b> lines at 625 and $1000-625 = 375$ rad/s. Below 500 rad/s you'd report 375 rad/s instead of 625: aliasing, because 625 &gt; $\omega_s/2$.</p><p>Fix: sample faster than $2\times625 = 1250$ rad/s, or put an anti-aliasing low-pass filter with cut-off $\omega_s/2 = 500$ rad/s before the sampler.</p>`,
+  ans:"250 → 250 rad/s (correct); 625 → appears at 375 rad/s (alias)", prov:"From the worked example in Lecture 17.1."},
+ {src:"Lecture 17 notes: audio example", q:R`Audio is sampled at 40 kHz because the ear hears up to 20 kHz. A 32 kHz component is also present. At what frequency does it appear in the sampled signal, and what is needed to prevent this?`,
+  sol:R`<p>Nyquist frequency $= 20$ kHz. 32 kHz is 12 kHz above it, so it folds back to $20-12 = 8$ kHz (equivalently $40-32 = 8$ kHz).</p><p>An anti-aliasing low-pass filter with cut-off 20 kHz before the A/D removes it.</p>`,
+  ans:"8 kHz; low-pass anti-aliasing filter at 20 kHz", prov:"From the worked example in the Lecture 17 notes."},
+ {src:"Lecture 17.2 practice", q:R`Explain why a direct DFT of $n$ samples needs about $n^2$ multiplications, and compare it with a Cooley–Tukey FFT for 1024 points.`,
+  hint:"Two multiplications per term, n terms per frequency, n/2 frequencies.",
+  sol:R`<p>Each term $x_ie^{-jk\Omega it_s}$ is a real number times (cos − j sin): 2 multiplications. $n$ terms per frequency gives $2n$; evaluated at $n/2$ frequencies gives $2n\cdot n/2 = n^2$.</p><p>1024 points: DFT $1024^2 = 1\,048\,576$. FFT $n\log_2n = 1024\times10 = 10\,240$, about 1% of the DFT.</p>`,
+  ans:"1 048 576 vs 10 240 (≈1%)", prov:"From the worked example in Lecture 17.2; arithmetic checked."},
+ {src:"Lecture 17 notes: reconstruction", q:R`What frequency characteristic does an ideal device for reconstructing a continuous signal from its samples need? Find its time-domain response and show it is zero at every other sample instant.`,
+  hint:"Inverse-transform a rectangle of height A from −ω′ to ω′, with ω′ = ω_s/2.",
+  sol:R`<p>Gain $A$ for $|\omega| &lt; \omega' = \omega_s/2$, zero outside: it passes the baseband and rejects all the repeated copies.</p>
+  $$h(t) = \frac1{2\pi}\int_{-\omega'}^{\omega'}Ae^{j\omega t}d\omega = \frac{A}{2\pi jt}\big(2j\sin\omega't\big) = \frac{A\omega'}{\pi}\cdot\frac{\sin\omega't}{\omega't}$$
+  <p>$\sin\omega't = 0$ when $\omega't = k\pi$. With $\omega' = \pi/t_s$, that's $t = kt_s$ (k ≠ 0): exactly the sample times, so no sample affects the value at another sample instant.</p>`,
+  prov:"From the derivation in the Lecture 17 notes."}
 ],
-traps: ["The alias appears at f_s − f₀, not at f₀ − f_s/2.", "Only frequencies up to ω_s/2 carry new information; above that the DFT repeats conjugates.", "The lecture spaces DFT points at ω_s/(n−1); many textbooks use ω_s/n.", "Record length sets resolution; sampling rate sets the maximum frequency.", "FFT needs N = 2^m; round point counts up to the next power of two."]
+traps: ["The alias appears at f_s − f₀, not at f₀ − f_s/2.", "Only frequencies up to ω_s/2 carry new information; above that the DFT repeats conjugates.", "The lecture spaces DFT points at ω_s/(n−1); many textbooks use ω_s/n.", "Record length sets resolution; sampling rate sets the maximum frequency.", "FFT needs N = 2^m; round point counts up to the next power of two.", "The anti-aliasing filter goes before the sampler: once a component has aliased, no later filtering can separate it from a real one."]
 });
 
 T.topics.push({
 id: "systems", part: "Signal processing", title: "Systems Analysis: Frequency Response & Convolution",
-lectures: "Not yet lectured · built from tutorial sheet & past papers", status: "pending",
-summary: "How a linear system changes a signal: the frequency response function H(ω) from an ODE or a circuit, gain and phase at a frequency, −3 dB bandwidth, the impulse response, and convolution of sampled signals.",
+lectures: "Lectures 18.1–18.3 + tutorial sheet", status: "lectured",
+summary: "How a linear system changes a signal: linear ODE models, superposition and frequency preservation, the first-order system's sinusoidal response, the frequency response function H(ω) (gain and phase at a frequency, Bode plot, −3 dB bandwidth), the impulse response and convolution of sampled signals.",
 theory: R`
-<div class="callout warn">Lectures not yet released. Built from tutorial Q31–Q35 and past papers.</div>
-<h3>1. Linear systems keep frequency</h3>
-<p>A sinusoid into a linear system comes out as a sinusoid of the <b>same frequency</b>, scaled in amplitude and shifted in phase. Describing a system means saying how much it scales and shifts each frequency.</p>
+<h3>1. Signals and systems</h3>
+<p>Lecture 18.1. A system $h$ turns an input $x$ into an output $y$: $x(t)\to h(t)\to y(t)$. Typical questions:</p>
+<ul><li>Given $x$ and $h$, how does $y$ differ from $x$ (waveform and spectrum)?</li><li>What system $h$ do we need to get a wanted $y$ from $x$ (e.g. remove noise so only the signal remains)?</li><li>Knowing $x$ and $y$, what is $h$ (system identification)?</li></ul>
 
-<h3>2. Frequency response function</h3>
-$$H(\omega) = \frac{Y(\omega)}{X(\omega)}\qquad\Longleftrightarrow\qquad Y(\omega) = H(\omega)X(\omega)$$
-<p><b>From an ODE:</b> Fourier-transform both sides; each $d/dt$ becomes $j\omega$. E.g. $y + 2\dfrac{dy}{dt} = 3x$ → $Y(1+2j\omega) = 3X$ → $H = \dfrac{3}{1+2j\omega}$.</p>
+<h3>2. Linear systems: superposition and frequency preservation</h3>
+<p>Many physical systems are linear: input and output are related by a linear ODE</p>
+$$a_0y + a_1\frac{dy}{dt} + a_2\frac{d^2y}{dt^2} + \dots = b_0x + b_1\frac{dx}{dt} + b_2\frac{d^2x}{dt^2} + \dots$$
+<p>(for simple inputs only $b_0x$ on the right). Keeping terms up to $a_3$ makes it third order. Examples from the lecture:</p>
+<ul><li>Spring–mass–damper (2nd order), force in, displacement out: $ky + c\dfrac{dy}{dt} + m\dfrac{d^2y}{dt^2} = \text{force}$.</li><li>RLC circuit, input $x = di/dt$, output voltage $y$: $\dfrac1Ly + \dfrac1R\dfrac{dy}{dt} + C\dfrac{d^2y}{dt^2} = x$.</li></ul>
+<div class="callout key"><b>Superposition:</b> the response to several inputs applied together is the sum of the responses to each alone, so a signal made of harmonics gives an output that is the sum of the responses to each harmonic.<br><b>Frequency preservation:</b> a sinusoid at ω in gives a sinusoid at the <b>same ω</b> out, only with changed amplitude and phase.</div>
+
+<h3>3. First-order system: response to a sinusoid</h3>
+<p>Lecture 18.2, using the thermocouple (step in → delayed exponential step out). From $a_0y + a_1\dfrac{dy}{dt} = b_0x$:</p>
+$$y + \tau Dy = \frac{b_0}{a_0}x,\qquad \tau = \frac{a_1}{a_0},\quad D = \frac{d}{dt}$$
+<p>Apply a unit sinusoid, $y + \tau Dy = \sin\omega t$, and try $y = Ae^{at} + b\sin(\omega t+\phi)$ (transient + particular). The exponential part gives $a = -1/\tau$. For the sinusoidal part, expand and equate the $\sin\omega t$ and $\cos\omega t$ terms:</p>
+$$b\cos\phi - \tau b\omega\sin\phi = 1,\qquad b\sin\phi + \tau b\omega\cos\phi = 0$$
+$$\Rightarrow\quad \phi = -\tan^{-1}(\tau\omega),\qquad b = \frac{1}{\sqrt{1+(\tau\omega)^2}}$$
+<p>The initial condition ($y = T_0$ at $t = 0$) gives $A = T_0 - b\sin\phi$, so $y = Ae^{-t/\tau} + b\sin(\omega t+\phi)$.</p>
+<p>Once the transient $Ae^{-t/\tau}$ has died away, the <b>steady state</b> is</p>
+$$y = b\sin(\omega t+\phi) = b\sin\omega(t + t_d),\qquad t_d = \phi/\omega$$
+<p>Same frequency, amplitude scaled by $b$, phase shifted by $\phi$; both depend on ω and the time constant τ. $t_d$ is usually negative, so the output looks like a <b>delayed</b>, scaled copy of the input.</p>
+
+<h3>4. Frequency response function</h3>
+<p>Lecture 18.3. Fourier-transform the system: $x(t)\to X(\omega)$, $y(t)\to Y(\omega)$, $h(t)\to H(\omega)$. Differentiating the inverse transform $f(t) = \frac1{2\pi}\int F(\omega)e^{j\omega t}d\omega$ brings down a $j\omega$, so <b>$d/dt$ in time is multiplication by $j\omega$ in frequency</b>. A linear ODE therefore becomes algebra:</p>
+$$H(\omega) = \frac{Y(\omega)}{X(\omega)} = A(\omega)e^{-j\phi(\omega)}\qquad\Longleftrightarrow\qquad Y(\omega) = A(\omega)e^{-j\phi}X(\omega)$$
+<p>$A(\omega)$ is the gain and $\phi(\omega)$ the phase change at each frequency. If you know how both vary over the frequency range of interest you have a good description of the system: that is the <b>frequency response function (FRF)</b>. Plotting gain and phase against frequency gives a <b>Bode plot</b>. Multiplying by $e^{-j\phi}$ in frequency is a time lag in time.</p>
+<p><b>From an ODE:</b> e.g. $y + 2\dfrac{dy}{dt} = 3x$ → $Y(1+2j\omega) = 3X$ → $H = \dfrac{3}{1+2j\omega}$.</p>
 <p><b>From a circuit:</b> use impedances $Z_R = R$, $Z_L = j\omega L$, $Z_C = 1/j\omega C$ and the voltage-divider rule.</p>
-<p><b>At a particular frequency</b> substitute ω and find:</p>
-<ul><li><b>Gain</b> $|H(\omega)|$: output amplitude / input amplitude.</li><li><b>Phase</b> $\angle H(\omega)$: angle of numerator − angle of denominator.</li></ul>
-<div class="callout key"><b>First-order low-pass</b> $H = \dfrac{K}{1+j\omega\tau}$: $|H| = K/\sqrt{1+\omega^2\tau^2}$, phase $= -\tan^{-1}\omega\tau$. −3 dB when $\omega\tau = 1$: <b>bandwidth $\omega_c = 1/\tau$</b>, where gain is $K/\sqrt2$ and phase −45°.</div>
+<p><b>At a particular frequency</b> substitute ω, then write the complex number in polar form: $\text{Re} + j\,\text{Im} = Ae^{j\phi}$ with $A = \sqrt{\text{Re}^2+\text{Im}^2}$ and $\phi = \tan^{-1}(\text{Im}/\text{Re})$ (check the quadrant). Or directly: gain $= |N|/|D|$, phase $= \angle N - \angle D$.</p>
+<div class="callout key"><b>First-order low-pass</b> $H = \dfrac{K}{1+j\omega\tau}$: $|H| = K/\sqrt{1+\omega^2\tau^2}$, phase $= -\tan^{-1}\omega\tau$ (the same $b$ and $\phi$ as section 3). −3 dB when $\omega\tau = 1$: <b>bandwidth $\omega_c = 1/\tau$</b>, where gain is $K/\sqrt2$ and phase −45°.</div>
 
-<h3>3. Impulse response</h3>
+<h3>5. Worked example: base-excited spring–mass–damper</h3>
+<p>Lecture 18.3: mass $m$ on a spring $k$ and damper $c$ whose base moves $x(t)$; output is the mass displacement $y(t)$. $m = 1$ kg, $k = 104$ N/m, $\zeta = 0.2$.</p>
+$$m\ddot y = c(\dot x - \dot y) + k(x-y)\ \Rightarrow\ \ddot y + 2\zeta\omega_n\dot y + \omega_n^2y = 2\zeta\omega_n\dot x + \omega_n^2x,\qquad \omega_n = \sqrt{k/m},\ \ \zeta = \frac{c}{2m\omega_n}$$
+<p>Transform ($d/dt\to j\omega$, $d^2/dt^2\to-\omega^2$):</p>
+$$H(\omega) = \frac{Y}{X} = \frac{\omega_n^2 + 2j\zeta\omega\omega_n}{(\omega_n^2-\omega^2) + 2j\zeta\omega\omega_n} = \frac{104 + 4j\omega}{(104-\omega^2) + 4j\omega}$$
+<p>($\omega_n^2 = 104$, $2\zeta\omega_n \approx 4$.) At ω = 4: $\dfrac{104+16j}{88+16j}\cdot\dfrac{88-16j}{88-16j} = \dfrac{9408-256j}{8000} = 1.176 - 0.032j = 1.176e^{-0.027j}$.</p>
+<table class="data num"><tr><th>ω (rad/s)</th><th>H(ω)</th><th>Gain</th><th>Phase (rad)</th></tr><tr><td>4</td><td>1.176 − 0.032j</td><td>1.176</td><td>−0.027</td></tr><tr><td>10</td><td>1.248 − 2.475j</td><td>2.77</td><td>−1.10</td></tr><tr><td>50</td><td>−0.036 − 0.086j</td><td>0.094</td><td>−1.97</td></tr></table>
+<p>Below $\omega_n \approx 10.2$ rad/s the mass follows the base (gain ≈ 1, little lag); near $\omega_n$ it amplifies (gain ≈ 2.8) with a large lag; well above it the motion is strongly attenuated and the phase heads towards −180°. <span class="small">The slide gives 0.0918 for the gain at 50 rad/s; the expression gives 0.0938.</span></p>
+
+<h3>6. Impulse response</h3>
+<p class="small">Not in Lectures 18.1–18.3; built from the tutorial sheet and past papers.</p>
 <p>The impulse response $h(t)$ is the output when the input is a unit impulse $\delta(t)$. Since an impulse contains all frequencies equally ($\delta\leftrightarrow1$), $h(t)$ and $H(\omega)$ are a Fourier-transform pair. Find it by hitting the system with a short sharp input (e.g. a hammer tap) and recording the output, or by inverse-transforming $H(\omega)$.</p>
 
-<h3>4. Convolution: output in the time domain</h3>
+<h3>7. Convolution: output in the time domain</h3>
+<p class="small">Not in Lectures 18.1–18.3; built from the tutorial sheet and past papers.</p>
 <p>Treat the input as a string of impulses; each produces a scaled, delayed copy of $h$, and the output is their sum:</p>
 $$y(t) = \int_{0}^{t}h(\tau)\,x(t-\tau)\,d\tau \qquad\text{sampled: } y_n = \sum_k h_k\,x_{n-k}$$
 <p>Convolution in time ⇔ multiplication in frequency ($Y = HX$).</p>
@@ -556,7 +620,12 @@ formulas: [
  {name:"Impedances", tex:R`Z_R=R,\ \ Z_L=j\omega L,\ \ Z_C=\frac1{j\omega C}`},
  {name:"Gain and phase", tex:R`|H|=\frac{|N|}{|D|},\quad \angle H=\angle N-\angle D`},
  {name:"First-order bandwidth", tex:R`H=\frac{K}{1+j\omega\tau}\Rightarrow\omega_c=\frac1\tau`},
- {name:"Convolution", tex:R`y(t)=\int_0^t h(\tau)x(t-\tau)d\tau,\qquad y_n=\sum_kh_kx_{n-k}`}
+ {name:"Convolution", tex:R`y(t)=\int_0^t h(\tau)x(t-\tau)d\tau,\qquad y_n=\sum_kh_kx_{n-k}`},
+ {name:"First-order ODE", tex:R`y+\tau\frac{dy}{dt}=\frac{b_0}{a_0}x,\quad \tau=\frac{a_1}{a_0}`},
+ {name:"First-order sinusoidal response", tex:R`y_{ss}=b\sin(\omega t+\phi),\ \ b=\frac1{\sqrt{1+(\tau\omega)^2}},\ \ \phi=-\tan^{-1}\tau\omega`},
+ {name:"Time shift", tex:R`t_d=\phi/\omega`},
+ {name:"FRF polar form", tex:R`H(\omega)=A(\omega)e^{-j\phi(\omega)},\quad A=\sqrt{\mathrm{Re}^2+\mathrm{Im}^2}`},
+ {name:"Base-excited SMD", tex:R`H(\omega)=\frac{\omega_n^2+2j\zeta\omega\omega_n}{(\omega_n^2-\omega^2)+2j\zeta\omega\omega_n}`, note:"ω_n = √(k/m), ζ = c/2mω_n"}
 ],
 questions: [
  {src:"Tutorial Q31 & Q33", q:R`A system obeys $y + 2\dfrac{dy}{dt} = 3x$. (Q31) How is a 4 rad/s signal altered? (Q33) What is the bandwidth (−3 dB point)?`,
@@ -589,8 +658,32 @@ questions: [
   <p>(ii) $Y = \dfrac{2(2+j\omega)}{4-(j\omega)^2} = \dfrac{4+2j\omega}{4-(j\omega)^2}$. Since $4-(j\omega)^2 = (2+j\omega)(2-j\omega)$ this also equals $\dfrac{2}{2-j\omega}$. <span class="small">On the 2025 paper both of those forms are options; pick the one that matches the 2024 key, $(4+2j\omega)/(4-(j\omega)^2)$, and mention the simplification if there's space.</span></p>
   <p>(iii) $H = \dfrac{1-j\omega}{(1-j\omega)(1+j\omega)} = \dfrac{1}{1+j\omega}$ → $\dfrac{1}{1+3j}$.</p>
   <p>(iv) 1/3 rad/s.</p>
-  <p>(v) $H(2) = \dfrac{1}{4+4j}$: amplitude $\dfrac{1}{4\sqrt2}$, phase $-\pi/4$.</p>`}
+  <p>(v) $H(2) = \dfrac{1}{4+4j}$: amplitude $\dfrac{1}{4\sqrt2}$, phase $-\pi/4$.</p>`},
+ {src:"Lecture 18.3 example", q:R`A base-excited spring–mass–damper ($m = 1$ kg, $k = 104$ N/m, $\zeta = 0.2$) has $H(\omega) = \dfrac{104+4j\omega}{(104-\omega^2)+4j\omega}$. Find the gain and phase at 4, 10 and 50 rad/s and say what they mean.`,
+  hint:"Substitute ω, then gain = |N|/|D| and phase = ∠N − ∠D. Watch the quadrant at 50 rad/s, where the real part of the denominator is negative.",
+  sol:R`<p><b>ω = 4:</b> $\dfrac{104+16j}{88+16j} = \dfrac{(104+16j)(88-16j)}{88^2+16^2} = \dfrac{9408-256j}{8000} = 1.176-0.032j$. Gain $\sqrt{1.176^2+0.032^2} = 1.176$, phase $\tan^{-1}(-0.032/1.176) = -0.027$ rad.</p>
+  <p><b>ω = 10:</b> $\dfrac{104+40j}{4+40j}$. $|N| = 111.4$, $|D| = 40.2$ → gain 2.77. Phase $= \tan^{-1}(40/104) - \tan^{-1}(40/4) = 0.367 - 1.471 = -1.10$ rad.</p>
+  <p><b>ω = 50:</b> $\dfrac{104+200j}{-2396+200j}$. $|N| = 225.4$, $|D| = 2404.3$ → gain 0.094. Phase $= 1.091 - (\pi - 0.083) = -1.97$ rad.</p>
+  <p>Near-unity transmission with almost no lag well below $\omega_n = \sqrt{104} \approx 10.2$ rad/s, amplification (≈2.8×) and about 63° of lag near $\omega_n$, and strong attenuation with the phase approaching −180° well above it.</p>`,
+  ans:"1.176∠−0.027; 2.77∠−1.10; 0.094∠−1.97 rad", prov:"From the worked example in Lecture 18.3. The slide's 0.0918 at 50 rad/s is a slip; the expression gives 0.0938 (checked numerically)."},
+ {src:"Lecture 18.2 derivation", q:R`For the first-order system $y + \tau\dfrac{dy}{dt} = \sin\omega t$, use the trial solution $y = Ae^{at} + b\sin(\omega t+\phi)$ to find $a$, $b$ and $\phi$. What is the steady-state response and its time shift?`,
+  hint:"Expand sin(ωt+φ) and cos(ωt+φ), then equate the sin ωt and cos ωt coefficients.",
+  sol:R`<p>Exponential part: $Ae^{at}(1+\tau a) = 0$ → $a = -1/\tau$.</p>
+  <p>Sinusoidal part: $b\sin(\omega t+\phi) + \tau b\omega\cos(\omega t+\phi) = \sin\omega t$. Expanding and equating:</p>
+  <p>$\sin\omega t$: $b\cos\phi - \tau b\omega\sin\phi = 1$; $\cos\omega t$: $b\sin\phi + \tau b\omega\cos\phi = 0$.</p>
+  <p>The second gives $\tan\phi = -\tau\omega$, so $\phi = -\tan^{-1}\tau\omega$. Then $\cos\phi = 1/\sqrt{1+\tau^2\omega^2}$, $\sin\phi = -\tau\omega/\sqrt{1+\tau^2\omega^2}$, and the first gives $b\sqrt{1+\tau^2\omega^2} = 1$, so $b = 1/\sqrt{1+(\tau\omega)^2}$.</p>
+  <p>With $y(0) = T_0$: $A = T_0 - b\sin\phi$. As $t\to\infty$, $Ae^{-t/\tau}\to0$, leaving $y = b\sin(\omega t+\phi) = b\sin\omega(t+t_d)$ with $t_d = \phi/\omega$ (negative: a delay).</p>`,
+  ans:"a = −1/τ; b = 1/√(1+(τω)²); φ = −tan⁻¹(τω); t_d = φ/ω", prov:"From the derivation in Lecture 18.2."},
+ {src:"Lecture 18.2 practice", q:R`A thermocouple behaves as a first-order system with $\tau = 2$ s. The gas temperature varies as a unit sinusoid at 0.5 rad/s. Find the steady-state amplitude ratio, phase and time lag of the reading.`,
+  hint:"τω = 1.",
+  sol:R`<p>$\tau\omega = 2\times0.5 = 1$.</p><p>$b = 1/\sqrt{1+1} = 0.707$; $\phi = -\tan^{-1}1 = -45° = -0.785$ rad; $t_d = \phi/\omega = -0.785/0.5 = -1.57$ s.</p><p>The reading shows 71% of the true swing and lags it by about 1.6 s. This is exactly the −3 dB point: 0.5 rad/s is the sensor's bandwidth $1/\tau$.</p>`,
+  ans:"0.707, −45°, lags by 1.57 s", prov:"Worked by Claude; no solution is available."},
+ {src:"Lecture 18.1 practice", q:R`State the two properties of linear systems that make frequency-domain analysis work, and use them to describe the output when $x(t) = \sin t + \sin 10t$ passes through $H(\omega) = \dfrac{1}{1+j\omega}$.`,
+  sol:R`<p><b>Superposition:</b> the response to a sum of inputs is the sum of the individual responses. <b>Frequency preservation:</b> a sinusoid at ω comes out at ω with changed amplitude and phase.</p>
+  <p>At ω = 1: $|H| = 1/\sqrt2 = 0.707$, phase $-45°$. At ω = 10: $|H| = 1/\sqrt{101} = 0.0995$, phase $-\tan^{-1}10 = -84.3°$.</p>
+  <p>$y(t) = 0.707\sin(t - 0.785) + 0.0995\sin(10t - 1.471)$: the low-pass system keeps the 1 rad/s component and cuts the 10 rad/s one by about 10×.</p>`,
+  ans:"y = 0.707 sin(t − 0.785) + 0.0995 sin(10t − 1.471)", prov:"Worked by Claude; no solution is available."}
 ],
-traps: ["(jω)² = −ω², so 4 − (jω)² = 4 + ω².", "Bandwidth of K/(1 + jωτ) is 1/τ rad/s; convert to Hz only if asked.", "Phase of 1/(a + jb) is −tan⁻¹(b/a): the minus sign comes from being in the denominator."]
+traps: ["(jω)² = −ω², so 4 − (jω)² = 4 + ω².", "When the real part of a denominator is negative (above ω_n), its angle is π − tan⁻¹(|Im/Re|), not the calculator's tan⁻¹ value.", "The time shift is t_d = φ/ω; phase in radians, not degrees.", "Bandwidth of K/(1 + jωτ) is 1/τ rad/s; convert to Hz only if asked.", "Phase of 1/(a + jb) is −tan⁻¹(b/a): the minus sign comes from being in the denominator."]
 });
 })();
