@@ -3343,7 +3343,7 @@ traps: [
 ]
 });
 })();
-/* EEN1029 — Task 2 (motors, drives, encoders) and Task 3 (ac switching, from past papers) */
+/* EEN1029 — Task 2 (motors, drives, encoders) and Task 3 (ac switching) */
 (function(){
 const R = String.raw;
 const T = STUDY.content.ems = STUDY.content.ems || { topics: [] };
@@ -3619,8 +3619,8 @@ traps: [
 
 T.topics.push({
 id: "triacs", part: "Task 3: AC switching", title: "Thyristors, TRIACs & Zero-Crossing Phase Control",
-lectures: "Not lectured yet: built from the 2025/2026 past papers and Task 3 component datasheets", status: "pending",
-summary: "Thyristor operating modes, TRIACs and DIACs, firing angle, optocoupled TRIAC drivers (MOC30xx), zero-crossing detection (H11L1), resistor sizing, and phase-control code. Q5 on every past paper. Revisit when the Task 3 lectures are posted.",
+lectures: "Task 3 – Switching Power Electronics; Task 3 Description; Task 3 Circuit Design Data and Calculations; 2025/2026 past papers", status: "lectured",
+summary: "Thyristor operating modes and the two-transistor latch, TRIACs and DIACs, firing angle, gate trigger/latching/holding currents, optocoupled TRIAC drivers (random-phase vs zero-crossing), snubbers, zero-crossing detection (H11L1), the Task 3 component sizing, and phase-control code. Q5 on every past paper.",
 theory: R`
 <h3>0. Thyristor (SCR) modes</h3>
 <ul>
@@ -3662,7 +3662,69 @@ void loop() {
     delayMicroseconds(pulseWidth);
     digitalWrite(PIN_TRIAC, HIGH);
   }
-}</pre>`,
+}</pre>
+
+<h3>5. Inside the thyristor: the two-transistor latch</h3>
+<p>Four layers P-N-P-N, three junctions J1–J3 counted from the anode. The gate is on the P layer next to the cathode. Model it as a PNP (T1) and an NPN (T2) wired so each one's collector drives the other's base:</p>
+<div class="flow"><span>Gate pulse turns T2 on</span><i>→</i><span>T2 collector current = T1 base current, T1 turns on</span><i>→</i><span>T1 feeds more base current into T2</span><i>→</i><span>both saturate: latched</span></div>
+<p>The gate can now be removed; only the external circuit limits the current. It stays on until the anode current falls below $I_H$. Off-state: leakage only, with forward breakover voltages of hundreds or thousands of volts. Reverse-biased it behaves like a reverse-biased diode (including Zener breakdown). SCR (silicon controlled rectifier) is GE's trade name for a thyristor.</p>
+<ul>
+<li><b>Natural (zero-cross) commutation:</b> on ac the current reverses every half-cycle, so the device switches itself off.</li>
+<li><b>Forced commutation:</b> on dc, reverse-bias the anode, e.g. by firing a second thyristor to dump a capacitor into the first one's cathode. After turn-off you must wait the <b>circuit-commutated turn-off time</b> $t_Q$ before forward voltage can be reapplied.</li>
+<li>It is only ever fully on or off. "Variable" control is duty-cycle control, which needs a load with mechanical, thermal or electrical inertia.</li>
+</ul>
+
+<h3>6. SCR and TRIAC phase-control circuits</h3>
+<ul>
+<li><b>Single SCR:</b> fires at the same point of each positive half-cycle, so load power is adjustable from 0% to only <b>50%</b>. Two SCRs in inverse parallel give full-wave control but need duplicated trigger and isolation circuitry.</li>
+<li><b>SCR duty-cycle circuit with a Shockley diode:</b> R2–C1 start charging when the anode goes positive; when $v_{C1}$ reaches the Shockley (four-layer) diode's breakover voltage it fires the SCR. Firing angle 0–180°. Once on, the low SCR drop discharges C1. Zener Z1 protects the trigger diode; R3 stops noise false-triggering the SCR.</li>
+<li><b>TRIAC + DIAC dimmer:</b> the capacitor charges both ways, giving a firing delay in both half-cycles.</li>
+<li><b>Inductive loads:</b> current lags voltage, so when the current reaches $I_H$ there is still voltage across the TRIAC. That sudden "rise" can retrigger it (control is lost). Also the current may not have reached $I_H$/latching at trigger time, so use a <b>pulse train</b> on the gate until it latches.</li>
+<li><b>Two inverse-parallel SCRs vs one TRIAC</b> for high power/high frequency/difficult inductive loads: each SCR sees a full reverse half-cycle, so turn-off is guaranteed whatever the load, at the cost of more complex triggering.</li>
+<li><b>TRIAC solid-state relay with a comparator zero-crossing detector:</b> switching a motor on near 0 V limits starting surge. On/off soft switching only, not duty-cycle control.</li>
+</ul>
+
+<h3>7. TRIAC triggering terms</h3>
+<table class="data">
+<tr><th>Term</th><th>Meaning</th></tr>
+<tr><td>Quadrants I–IV</td><td>Sign of MT2 voltage vs sign of gate voltage (both relative to MT1). QI most sensitive, QIV least. A TRIAC fired by an opto-TRIAC driver always works in QI and QIII.</td></tr>
+<tr><td>$I_{GT}$</td><td>Minimum gate current to trigger. Falls with higher MT1–MT2 voltage and higher temperature; depends on quadrant.</td></tr>
+<tr><td>$I_L$ latching</td><td>Main current the device must reach while the gate pulse is still present to stay on once the gate is removed (gate pulse of tens of µs).</td></tr>
+<tr><td>$I_H$ holding</td><td>Main current below which a conducting device turns off.</td></tr>
+<tr><td>$V_{DRM}$, $V_{DSM}$</td><td>Max repetitive / non-repetitive (&lt; 10 ms pulse) peak off-state voltage.</td></tr>
+<tr><td>$I_{TSM}$</td><td>Max non-repetitive surge on-state current (one 20 ms cycle at 50 Hz).</td></tr>
+<tr><td>$V_{GD}$</td><td>Max gate voltage guaranteed not to trigger.</td></tr>
+<tr><td>dV/dt</td><td>Max rate of rise of off-state voltage before spurious turn-on through gate–MT2 capacitance.</td></tr>
+<tr><td>$V_{t0}$, $R_d$</td><td>On-state drop $V_T = V_{t0} + R_d I_T$; dissipation $P = \frac{2\sqrt2}{\pi}V_{t0}I_{T(RMS)} + R_d I_{T(RMS)}^2$.</td></tr>
+</table>
+
+<h3>8. Opto-TRIAC drivers and snubbers</h3>
+<ul>
+<li><b>Always</b> use an opto-isolated driver for mains SCRs/TRIACs, whether switching live or neutral. Only physical disconnection guarantees no mains voltage (and watch storage capacitors).</li>
+<li>The driver's photo-TRIAC only triggers: a few hundred mW, ~1 A surge, and a low commutating $(dI/dt)_c$ (≈ 0.02 A/ms ⇒ guaranteed turn-off only up to ~70 mA resistive at 50 Hz).</li>
+<li><b>Sequence:</b> $I_F > I_{FT}$ turns the photo-TRIAC on ⇒ gate current through R fires the power TRIAC ⇒ voltage across it collapses ⇒ photo-TRIAC current falls below its own $I_H$ and it turns off (even with the LED still lit) ⇒ power TRIAC carries the load until the current zero ⇒ re-fires next half-cycle if the LED is still on.</li>
+<li><b>Random-phase drivers</b> (e.g. the MOC3021M used in Task 3) fire anywhere in the cycle: needed for phase control. <b>Zero-crossing drivers</b> have an inhibit circuit and only fire when $|v| < V_{INH}$: low surge and EMI, on/off only, no dimming or speed control.</li>
+<li><b>RC snubber</b> (series R + C across the TRIAC): the capacitor voltage can't jump, so it limits dV/dt and stops false turn-on; R limits the capacitor's discharge surge into the TRIAC at turn-on and damps ringing with load inductance. Example values in the notes: 39 Ω + 0.01 µF across the main TRIAC, 470 Ω + 0.05 µF across the driver.</li>
+<li>$R_{GK}$ (10 Ω–1 kΩ, sometimes with up to 100 nF) from gate to MT1 drains capacitive gate current from transients; it raises the effective $I_{GT}$.</li>
+<li><b>Diode snubber</b> (flyback/freewheeling diode) across a dc inductive load: blocks normally, carries the inductor current when the switch opens. Drawback: the actuator drops out more slowly. Switching faster than ~10 ns needs fast/ultrafast/Schottky diodes.</li>
+</ul>
+
+<h3>9. The Task 3 lab circuit</h3>
+<p>H11L1M zero-crossing detector (bridge → R1 → LED; output Pin 4 = $V_O$, Pin 5 = GND, Pin 6 = $V_{CC}$, R2 pull-up, C1 = 0.1 µF "104" decoupling) feeds ESP32 <code>PIN_IN_ZC = 4</code>; <code>PIN_OUT_TRIAC = 5</code> pulls MOC3021M pin 2 low through R3 to fire the BT136 through R4. Source: ADALM signal generator, 10 Vpp at 50 Hz.</p>
+<table class="data num">
+<tr><th>Part</th><th>Design</th><th>Value</th></tr>
+<tr><td>R1 (H11L1M LED)</td><td>$I_F$ between 2 and 30 mA for ±5 to ±25 V: needs 793 Ω–1.9 kΩ</td><td>820 Ω (4.6 mA at 5 V, 29 mA at 25 V)</td></tr>
+<tr><td>R2 (pull-up)</td><td>datasheet uses 270 Ω</td><td>220 Ω</td></tr>
+<tr><td>R3 (MOC3021M LED)</td><td>$(3.3-1.15)/10\text{ mA}$</td><td>215 Ω ⇒ 180 Ω (try 220 Ω)</td></tr>
+<tr><td>R4 (surge)</td><td>$V_{peak}/I_{TSM} = 25/1$</td><td>&gt; 25 Ω ⇒ 33 Ω</td></tr>
+</table>
+<div class="callout"><b>Check R3:</b> the MOC3021M is only guaranteed to trigger at $I_F \ge I_{FT} = 15$ mA (recommended 15–60 mA), which from 3.3 V means $36\ \Omega \le R_3 \le 143\ \Omega$. 180 Ω (11.9 mA) and 220 Ω (9.8 mA) rely on a typical device triggering below its maximum $I_{FT}$, which is why the notes say "try" them.</div>
+<ul>
+<li><b>Delay:</b> total = (measured ZC-edge lead) + (phase delay). The phase delay is at most <b>10 ms</b>: a half-cycle at 50 Hz, and the bridge gives a new zero-crossing pulse every 10 ms.</li>
+<li><b>Gate pulse:</b> tens of µs is enough; the photo-TRIAC drops out by itself once the power TRIAC is on.</li>
+<li><b>Soft start:</b> fire only at the zero crossing (zero phase delay), or swap in a zero-crossing opto-TRIAC driver.</li>
+<li><b>One polarity only:</b> fire on alternate zero-crossing pulses (software, since the bridge loses polarity), or sense polarity with a non-bridged detector/diode, or swap the TRIAC for a single SCR.</li>
+</ul>`,
 formulas: [
  {name:"Firing delay", tex:R`t = \frac{\alpha}{360^\circ f}`},
  {name:"LED resistor", tex:R`R = \frac{V_{supply} - V_F}{I_F}`},
@@ -3698,9 +3760,49 @@ questions: [
   hint:"Flag in ISR, timing in loop, add 1 ms.",
   sol:R`<p>Issue 1: the 1 ms early edge isn't compensated ⇒ add a 1000 µs delay before the firing delay.</p>
   <p>Issue 2: long blocking delays inside an ISR ⇒ ISR just sets <code>zcFlag</code>; do the timing in <code>loop()</code> (see section 4).</p>`,
-  ans:"Compensate 1 ms; move timing out of the ISR", prov:"Follows the posted exam solution."}
+  ans:"Compensate 1 ms; move timing out of the ISR", prov:"Follows the posted exam solution."},
+ {src:"Switching Power Electronics notes", see:[5], q:R`Using the two-transistor model, explain why a thyristor stays on after the gate pulse is removed, and how it can be turned off on a dc supply.`,
+  hint:"Each transistor supplies the other's base current.",
+  sol:R`<p>A gate pulse turns on the NPN (T2); its collector current is the PNP's (T1) base current, so T1 turns on and feeds more base current back into T2. The positive feedback drives both into saturation, so the loop sustains itself without the gate.</p>
+  <p>It turns off only when the anode current falls below $I_H$. On dc that won't happen by itself, so use <b>forced commutation</b>: reverse-bias the anode, e.g. fire a second thyristor to discharge a capacitor into the first one's cathode, then wait at least $t_Q$ before reapplying forward voltage.</p>`,
+  ans:"Regenerative feedback latch; forced commutation on dc", prov:"From the Switching Power Electronics notes."},
+ {src:"Switching Power Electronics notes", see:[6], q:R`Why can a single SCR in series with a resistive load on ac control the load power only from 0% to 50%? Give two ways to get full-wave control and one drawback of each.`,
+  hint:"Which half-cycle can an SCR conduct in?",
+  sol:R`<p>An SCR conducts in one direction only, so at most the whole positive half-cycle reaches the load: half the full-wave power.</p>
+  <p>(1) Two SCRs in inverse parallel: turn-off is guaranteed for any load, but each needs its own trigger and isolation circuitry. (2) A TRIAC: one gate, simpler triggering, but with inductive loads it may fail to turn off at the end of each half-cycle (or fail to latch at trigger time).</p>`,
+  ans:"One-directional ⇒ max one half-cycle (50%)", prov:"From the Switching Power Electronics notes."},
+ {src:"Switching Power Electronics notes", see:[8], q:R`Explain what an RC snubber across a TRIAC does and why each component is there. How does a diode snubber on a dc relay coil differ, and what is its drawback?`,
+  hint:"Capacitor voltage can't change instantly.",
+  sol:R`<p>The capacitor can't change voltage instantly, so it limits dV/dt across the TRIAC when it turns off (e.g. with an inductive load), preventing spurious turn-on. The series resistor limits the capacitor's discharge current into the TRIAC when it fires and damps ringing with the load inductance.</p>
+  <p>A flyback diode sits reverse-biased across the coil; when the switch opens the coil current circulates through it and decays through the diode drop and coil resistance, so no voltage spike. Drawback: the current decays slowly, so the relay/actuator drops out late.</p>`,
+  ans:"C limits dV/dt, R limits surge; diode delays drop-out", prov:"From the Switching Power Electronics notes."},
+ {src:"Task 3 Circuit Design Data", see:[9], q:R`Size the H11L1M input resistor R1 so the detector works for any ac input between ±5 V and ±25 V ($V_F$ = 1.2 V, use $I_F$ ≥ 2 mA to turn on, $I_F$ ≤ 30 mA max). Check your choice at both extremes.`,
+  hint:"Low voltage sets a maximum R; high voltage sets a minimum R.",
+  sol:R`<p>At 5 V the LED must get ≥ 2 mA: $R_1 \le (5-1.2)/0.002 = 1900$ Ω.</p>
+  <p>At 25 V it must stay ≤ 30 mA: $R_1 \ge (25-1.2)/0.03 = 793$ Ω.</p>
+  <p>Choose <b>820 Ω</b>: 4.6 mA at 5 V and 29.0 mA at 25 V. (For a 5 V-only input anything above 127 Ω keeps under 30 mA.)</p>`,
+  ans:"R1 = 820 Ω", prov:"Follows the worked calculation in the Task 3 design notes; numbers checked."},
+ {src:"Task 3 Circuit Design Data", see:[9,2], q:R`Size R3 (MOC3021M LED from a 3.3 V ESP32 pin, $V_F$ = 1.15 V, target $I_F$ = 10 mA) and the surge resistor R4 for a ±25 V source ($I_{TSM}$ = 1 A). Is 10 mA a safe design point given $I_{FT}$ = 15 mA?`,
+  hint:"R4 = V_peak / I_TSM.",
+  sol:R`<p>$R_3 = (3.3 - 1.15)/0.01 = 215$ Ω ⇒ 180 Ω (11.9 mA) or try 220 Ω (9.8 mA).</p>
+  <p>$R_4 > 25/1 = 25$ Ω ⇒ <b>33 Ω</b>. (For 230 V mains: $230\sqrt2/1 = 325$ Ω.)</p>
+  <p>Not guaranteed: the datasheet guarantees triggering only at $I_F \ge 15$ mA (recommended 15–60 mA ⇒ 36–143 Ω). 10 mA works if the particular part triggers below its maximum $I_{FT}$, which is typical, so test it.</p>`,
+  ans:"R3 ≈ 215 Ω (180 Ω used); R4 = 33 Ω", prov:"R3 and R4 follow the Task 3 design notes; the I_FT check is Claude's, from the datasheet values on the same sheet."},
+ {src:"Task 3 Description, Step 6", see:[9,1], q:R`Why is the phase-control delay after the zero crossing limited to 10 ms at 50 Hz?`,
+  hint:"How often does the bridge-fed detector pulse?",
+  sol:R`<p>A half-cycle at 50 Hz lasts $1/(2 \times 50) = 10$ ms. The full-wave bridge makes the detector pulse at every zero crossing, i.e. every 10 ms, and the TRIAC turns off at the end of each half-cycle. A delay of 10 ms is a firing angle of 180° (no power); any longer would run into the next half-cycle's pulse.</p>`,
+  ans:"Half-cycle = 10 ms = 180°", prov:"Worked by Claude; no solution is available."},
+ {src:"Task 3 Description, Step 7", see:[7,1], q:R`In the Task 3 traces (10 Vpp source, load 467 Ω, 216 Ω, 99.4 Ω) the TRIAC switches on where expected but turns off well before the voltage zero crossing, and later as the load resistance falls. Explain.`,
+  hint:"Peak load current vs the BT136's holding/latching currents.",
+  sol:R`<p>With only 5 V peak the load current is tiny: $5/467 = 10.7$ mA, $5/216 = 23.1$ mA, $5/99.4 = 50.3$ mA peak. The BT136's holding current is 2.2 mA typical, up to 15 mA. The TRIAC turns off when $i = v/R$ falls below $I_H$, i.e. when $v < I_H R$, which happens a noticeable time before the voltage zero. A smaller R means a larger current, so $i$ stays above $I_H$ until closer to the zero crossing.</p>
+  <p>(On real mains the current is far larger than $I_H$ for nearly the whole half-cycle, so the early turn-off is negligible.)</p>`,
+  ans:"Low current hits I_H early; bigger current (smaller R) turns off later", prov:"Worked by Claude; no solution is available."}
 ],
 traps: [
+ "A single SCR on ac gives at most 50% power: it only conducts in one half-cycle.",
+ "The opto-TRIAC driver only triggers the power TRIAC; it turns itself off once the power TRIAC conducts.",
+ "Zero-crossing opto drivers can't do phase control: use a random-phase driver (MOC3021M).",
+ "A gate-to-MT1 resistor improves noise immunity but raises the trigger current needed.",
  "A thyristor/TRIAC stays on after the gate pulse until the current drops below the HOLDING current.",
  "Worst-case LED current is at the mains PEAK: 220 V rms × √2 = 311 V.",
  "A bridge rectifier gives a zero-crossing pulse every 10 ms at 50 Hz (twice per cycle).",
