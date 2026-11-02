@@ -2,6 +2,7 @@
 (function(){
 const T = STUDY.content.mom = STUDY.content.mom || { topics: [] };
 T.tutorials = [
+ { id:"loop", short:"L", title:"Loop Quiz: Vibration, Gears & Belts", note:"6 questions · your answers checked", fromTopics:"Loop quiz ", intro:"Forced vibration, base excitation, an epicyclic train, a four-speed gearbox and two belt-drive questions. Each also sits on its topic page." },
  { id:"t1", short:"1", title:"Tutorial 1: Free Vibration", note:"Solution posted", fromTopics:"Tutorial 1 ", intro:"Undamped single degree of freedom systems: natural frequency, initial conditions, amplitude and phase." },
  { id:"t2", short:"2", title:"Tutorial 2: Free Vibration of Damped Systems", note:"Solution posted", fromTopics:"Tutorial 2 ", intro:"Damping ratio, a damped lever, and identifying k and c from a measured decay." },
  { id:"t3", short:"3", title:"Tutorial 3: Free Vibration of Damped Systems II", note:"Solution posted", fromTopics:"Tutorial 3 ", intro:"Viscous design problems, Coulomb friction decay and hysteretic damping." },
