@@ -8,6 +8,7 @@ T.tutorials = [
  { id:"t3", short:"3", title:"Tutorial 3: Free Vibration of Damped Systems II", note:"Solution posted", fromTopics:"Tutorial 3 ", intro:"Viscous design problems, Coulomb friction decay and hysteretic damping." },
  { id:"t4", short:"4", title:"Tutorial 4: Forced Vibration I", note:"Solution posted", fromTopics:"Tutorial 4 ", intro:"Undamped and damped harmonic forcing, resonance, and a base-excited lever." },
  { id:"t5", short:"5", title:"Tutorial 5: Forced Vibration II", note:"Solution posted (Q1 differs: see note)", fromTopics:"Tutorial 5 ", intro:"Road excitation, rotating imbalance and the resonance peak." },
- { id:"t6", short:"6", title:"Tutorial 6: Gears", note:"Solution posted", fromTopics:"Tutorial 6 ", intro:"Epicyclic trains: ring-fixed reduction, driving the ring, carrier input, sharing load across planets, and a two-stage compound train." }
+ { id:"t6", short:"6", title:"Tutorial 6: Gears", note:"Solution posted", fromTopics:"Tutorial 6 ", intro:"Epicyclic trains: ring-fixed reduction, driving the ring, carrier input, sharing load across planets, and a two-stage compound train." },
+ { id:"t7", short:"7", title:"Tutorial 7: Belts", note:"Solution posted", fromTopics:"Tutorial 7 ", intro:"A capstan with several turns of rope, a stress-limited leather belt at its running and optimum speeds, and the gain from an idler pulley that increases the lap angle." }
 ];
 })();

@@ -100,7 +100,30 @@ questions: [
   sol:R`<p>$P = (T_1 - T_c)(1 - e^{-\mu\theta})v = (T_1v - m'v^3)(1 - e^{-\mu\theta})$. The bracket $(1 - e^{-\mu\theta})$ is constant, so</p>
   $$\frac{dP}{dv} = 0\;\Rightarrow\; T_1 - 3m'v^2 = 0\;\Rightarrow\; m'v^2 = T_c = \frac{T_1}{3},\quad v = \sqrt{\frac{T_1}{3m'}}$$
   <p>Then $T_1 - T_c = \tfrac23T_1$ and $P_{max} = \tfrac23T_1(1 - e^{-\mu\theta})\sqrt{T_1/3m'}$.</p>`,
-  ans:"T_c = T₁/3 at v = √(T₁/3m′); P_max = (2T₁/3)(1 − e^{−μθ})v", prov:"From the derivation in Lecture 4."}
+  ans:"T_c = T₁/3 at v = √(T₁/3m′); P_max = (2T₁/3)(1 − e^{−μθ})v", prov:"From the derivation in Lecture 4."},
+ {src:"Tutorial 7 Q1", see:[3,4], q:R`A ship is dragged through a lock by a capstan and rope. The capstan has a diameter of 500 mm and turns at 30 rpm. The rope makes 3 complete turns around the capstan, $\mu = 0.25$, and a pull of 100 N is applied at the free end. The mass of the rope is negligible. Find (a) the pull on the ship and (b) the power required to drive the capstan.`,
+  hint:"Same tension ratio as a belt, with no centrifugal term: θ = 3 turns = 6π rad. The capstan surface moves at rω.",
+  sol:R`<p>$\theta = 3\times2\pi = 6\pi$ rad, $\omega = 30\times\dfrac{2\pi}{60} = \pi$ rad/s, $r = 0.25$ m. The ship is on the tight side $T_1$; the 100 N pull is $T_2$.</p>
+  <p>(a) $T_1 = T_2e^{\mu\theta} = 100\,e^{0.25(6\pi)} = 100\,e^{4.712} = 11\,132$ N.</p>
+  <p>(b) $P = (T_1 - T_2)r\omega = (11\,132 - 100)(0.25\pi) = 8665$ W.</p>`,
+  ans:"(a) 11.13 kN, (b) 8.66 kW", prov:"Follows the posted solution; numbers re-checked."},
+ {src:"Tutorial 7 Q2", see:[2,3,4,5], q:R`A leather belt, 125 mm wide and 6 mm thick, transmits power from a pulley of 750 mm diameter running at 500 rpm. The angle of lap is 150° and $\mu = 0.3$. The belt density is 1 Mg/m³ and the stress in the belt must not exceed 2.75 MN/m². Find the power that can be transmitted at this speed, and the maximum power that could be transmitted if the belt ran at its optimum speed.`,
+  hint:"Maximum tension T₁ = σ_max × A. Belt mass per metre m′ = ρA. Keep the centrifugal term because m′ is known. For the optimum speed, m′v² = T₁/3.",
+  sol:R`<p>$A = 0.125\times0.006 = 0.75\times10^{-3}$ m², $m' = \rho A = 1000\times0.75\times10^{-3} = 0.75$ kg/m, $T_1 = \sigma_{max}A = 2.75\times10^6\times0.75\times10^{-3} = 2062.5$ N.</p>
+  <p>$\omega = 500\times\dfrac{2\pi}{60} = 52.36$ rad/s, $v = r\omega = 0.375\times52.36 = 19.63$ m/s, $T_c = m'v^2 = 289.2$ N. $\theta = 150^\circ = 2.618$ rad, $e^{\mu\theta} = e^{0.785} = 2.193$.</p>
+  <p><b>At 500 rpm:</b> $T_2 = \dfrac{T_1 - T_c}{e^{\mu\theta}} + T_c = \dfrac{2062.5 - 289.2}{2.193} + 289.2 = 1097.7$ N.</p>
+  <p>$P = (T_1 - T_2)v = (2062.5 - 1097.7)(19.63) = 18.94$ kW.</p>
+  <p><b>At the optimum speed:</b> $m'v^2 = \dfrac{T_1}{3}$, so $v = \sqrt{\dfrac{2062.5}{3(0.75)}} = 30.28$ m/s and $T_c = 687.5$ N.</p>
+  <p>$T_2 = \dfrac{2T_1/3}{e^{\mu\theta}} + \dfrac{T_1}{3} = \dfrac{1375}{2.193} + 687.5 = 1314.4$ N.</p>
+  <p>$P_{max} = (2062.5 - 1314.4)(30.28) = 22.65$ kW.</p>`,
+  ans:"18.9 kW at 500 rpm; 22.6 kW at the optimum speed of 30.3 m/s", prov:"Follows the posted solution. It rounds ω to 52.4 rad/s (v = 19.65 m/s) and gets 18,970 W and 22,680 W; unrounded arithmetic gives 18.94 kW and 22.65 kW."},
+ {src:"Tutorial 7 Q3", see:[2,3,4], q:R`In a belt drive the angle of lap on the small pulley is 150°. With a belt speed of 20 m/s and a tight-side tension of 1.35 kN, the greatest power that can be transmitted without slip is 10 kW. What increase in power would be obtained, for the same belt speed and maximum tension, by using an idler pulley to increase the angle of lap to 210°? Include the centrifugal effect; the belt mass is 0.75 kg/m.`,
+  hint:"First find T₂ from the 10 kW, then back out μ from the tension ratio at 150°. Reuse that μ at 210° to get the new T₂.",
+  sol:R`<p>$T_c = m'v^2 = 0.75(20^2) = 300$ N. From $P = (T_1 - T_2)v$: $T_2 = 1350 - \dfrac{10\,000}{20} = 850$ N.</p>
+  <p>At $\theta_s = 150^\circ = \tfrac56\pi$: $\mu = \dfrac{1}{\theta_s}\ln\dfrac{T_1 - T_c}{T_2 - T_c} = \dfrac{\ln(1050/550)}{5\pi/6} = \dfrac{0.6466}{2.618} = 0.247$.</p>
+  <p>At $\theta_s = 210^\circ = \tfrac76\pi$: $\mu\theta_s = 0.247\times3.665 = 0.905$, so $T_2 = \dfrac{1050}{e^{0.905}} + 300 = 424.7 + 300 = 724.7$ N.</p>
+  <p>$P = (1350 - 724.7)(20) = 12.51$ kW, an increase of $\Delta P = 2.5$ kW.</p>`,
+  ans:"μ = 0.247; new T₂ ≈ 725 N; P = 12.5 kW, an increase of 2.5 kW", prov:"Follows the posted solution; numbers re-checked. The posted working prints the exponent as 0.343(7π/6), a typo: its 725 N only follows from μ = 0.247."}
 ],
 traps: [
  "Use the lap angle of the small pulley in e^{μθ}: it slips first.",
@@ -108,7 +131,8 @@ traps: [
  "T_c appears on both sides of the tension ratio. Only drop it when the question says low speed or gives no belt mass.",
  "Power uses T₁ − T₂, not T₁ − T_c.",
  "With an elastic belt T₁ + T₂ = 2T₀ + 2T_c, not 2T₀.",
- "For a V-belt the exponent is μθ/sin β, where β is the semi-angle (half the standard belt angle)."
+ "For a V-belt the exponent is μθ/sin β, where β is the semi-angle (half the standard belt angle).",
+ "A capstan or rope wrapped n full turns has θ = 2πn rad, so the tension ratio grows very fast with each extra turn."
 ]
 });
 })();
