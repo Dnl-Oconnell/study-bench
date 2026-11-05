@@ -136,3 +136,10 @@ To add one:
 - Don't change the theme, layout, images or `app.js` behaviour as part of a content run.
 - Don't add work orders or touch the artifact's stored data.
 - Don't put anything into the repo except the app and its source. It is public.
+
+## Exam-frequency table (module overview)
+The overview's "Exam frequency" table is built automatically from each question's `src` label, so keep labels parseable when adding past-paper material:
+- Written exam questions: `Exam 2025 Q1(a)`, `2024 Exam, Q2`, `2023 Resit, Q1`, `Final (2025) Q3`, `Sample 2025 Q2(b)`.
+- A tutorial/sheet question that is a past-paper question: tag it in brackets, e.g. `State-Space Sheet Q5 (exam 2024 Q1(b))`.
+- MCQ bank items: `s: "2025, 2023R"` (R = resit).
+- Assessed continuous assessment: `Class Test 1 Q2`, `Quiz 2 (2025) Q4`, `Loop quiz Q3`.

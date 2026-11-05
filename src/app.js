@@ -193,6 +193,73 @@ function home(){
 function subnav(){ return ""; }
 function wireSubnav(){}
 
+/* ---------- exam frequency (module overview) ---------- */
+/* Reads each question's src and works out what kind of source it is and which past papers it came from. */
+function srcInfo(src){
+  const s = src || ""; const papers = [];
+  const add = (y, k) => { k = /^r/i.test(k||"") ? "Resit" : /sample/i.test(k||"") ? "Sample" : "Exam"; papers.push({ key: y+" "+k, y, k }); };
+  if (/^MCQ/i.test(s)){ for (const m of s.matchAll(/(\d{4})\s*(Resit|R\b)?/g)) add(m[1], m[2]); return { kind:"exam", papers }; }
+  let m;
+  if ((m = /Class Test\s*(\d+)/i.exec(s))) return { kind:"test", papers:[{ key:"Class Test "+m[1], ct:true }] };
+  if ((m = /^Quiz\s*(\d+)/i.exec(s))) return { kind:"test", papers:[{ key:"Quiz "+m[1], ct:true }] };
+  if (/Loop quiz/i.test(s)) return { kind:"test", papers:[{ key:"Loop quiz", ct:true }] };
+  if ((m = /(\d{4})\s+(Exam|Resit)/i.exec(s))) { add(m[1], m[2]); return { kind:"exam", papers }; }
+  if ((m = /\b(Exam|Final|Sample|Resit)\s*\(?(\d{4}(?:\/\d{2})?)\)?/i.exec(s))) { add(m[2], m[1]); return { kind:"exam", papers }; }
+  const tagged = /\((?:[^()]*?\b)?(?:exam\s+)?(\d{4}(?:\/\d{2})?)(?:\s+exam)?\s*(?:Q[\w()]*)?\)/i.exec(s);
+  const kind = /Tutorial|Sheet|Additional|DIY/i.test(s) ? "tut" : /Lecture|Refresher|notes|homework/i.test(s) ? "lec" : /Practice/i.test(s) ? "prac" : "tut";
+  if (tagged && /exam|Q\d/i.test(tagged[0])) { add(tagged[1]); return { kind, papers }; }
+  return { kind, papers };
+}
+function examStats(mid){
+  const c = S.content[mid]; if (!c) return null;
+  const rows = c.topics.map(t => ({ t, n:{exam:0, mcq:0, test:0, tut:0, lec:0, prac:0}, papers:new Set() }));
+  const byId = Object.fromEntries(rows.map(r => [r.t.id, r]));
+  const all = new Map();
+  const note = (r, p) => { r.papers.add(p.key); if (!all.has(p.key)) all.set(p.key, p); };
+  rows.forEach(r => r.t.questions.concat(extraTopicQuestions(mid, r.t.id)).forEach(q => {
+    const i = srcInfo(q.src); i.papers.forEach(p => note(r, p));
+    if (!/^MCQ/i.test(q.src||"")) r.n[i.kind]++;
+  }));
+  (c.mcq||[]).forEach(q => { const r = byId[q.t]; if (!r) return; r.n.mcq++; srcInfo("MCQ "+q.s).papers.forEach(p => note(r, p)); });
+  const ord = p => p.ct ? [1, p.key] : [0, p.y + (p.k==="Sample"?"0":p.k==="Exam"?"1":"2")];
+  const cols = [...all.values()].sort((a,b) => { const A=ord(a), B=ord(b); return A[0]-B[0] || (A[1]<B[1]?-1:A[1]>B[1]?1:0); });
+  return { rows, exams: cols.filter(p=>!p.ct), tests: cols.filter(p=>p.ct), hasMcq: !!(c.mcq && c.mcq.length) };
+}
+function freqPanel(mid){
+  const st = examStats(mid); if (!st) return "";
+  const sortBy = store.get("freqsort:"+mid, "course");
+  const NE = st.exams.length, NT = st.tests.length;
+  const seen = r => st.exams.filter(p => r.papers.has(p.key)).length;
+  const seenT = r => st.tests.filter(p => r.papers.has(p.key)).length;
+  const total = r => Object.values(r.n).reduce((a,b)=>a+b,0);
+  let rows = st.rows.slice();
+  if (sortBy === "exam") rows.sort((a,b) => seen(b)-seen(a) || seenT(b)-seenT(a) || (b.n.exam+b.n.mcq)-(a.n.exam+a.n.mcq));
+  const abbr = p => p.ct ? p.key.replace(/Class Test /,"CT").replace(/Quiz /,"Qz").replace(/Loop quiz/,"Loop") : "’"+String(p.y).replace(/^\d\d(\d\d)\/\d\d$/,"$1").slice(-2) + (p.k==="Resit"?"R":p.k==="Sample"?"S":"");
+  const full = p => p.ct ? p.key : (/\//.test(p.y) ? p.y : p.y) + " " + (p.k==="Exam"?"exam":p.k==="Resit"?"resit":"sample paper");
+  const cols = st.exams.concat(st.tests);
+  const showMcq = st.hasMcq;
+  const r = ratings(mid);
+  const band = (k, n) => n ? (k/n >= 0.7 ? "hot" : k/n >= 0.4 ? "warm" : "cool") : "none";
+  const hot = NE >= 3 ? st.rows.filter(x => seen(x) && seen(x)/NE >= 0.7) : [];
+  const never = NE ? st.rows.filter(x => !seen(x) && !seenT(x)) : [];
+  const head = `<tr><th class="ft">Topic</th>${NE||NT?`<th class="fs" title="Past papers this topic appears on">Seen on</th>`:""}${cols.map(p=>`<th class="fp${p.ct?" ct":""}" title="${esc(full(p))}">${esc(abbr(p))}</th>`).join("")}<th class="fn" title="Written past-paper questions">Exam Qs</th>${showMcq?`<th class="fn" title="Past-paper MCQs in the drill">MCQ</th>`:""}${NT?`<th class="fn" title="Class test / quiz questions">Tests</th>`:""}<th class="fn" title="Tutorial and problem-sheet questions">Tut</th><th class="fn" title="Lecture examples">Lect</th><th class="fn" title="Practice questions written for you">Prac</th><th class="fn" title="All questions on the topic">Total</th></tr>`;
+  const body = rows.map(x => { const k = seen(x), kt = seenT(x);
+    return `<tr class="${r[x.t.id]==="good"?"conf":""}"><th class="ft"><a href="#${mid}.${x.t.id}">${esc(x.t.title)}</a>${r[x.t.id]==="good"?` <span class="rk good" title="Confident">✓</span>`:r[x.t.id]==="bad"?` <span class="rk bad" title="Needs work">↻</span>`:""}</th>`
+      + (NE||NT ? `<td class="fs"><span class="fb ${band(k,NE)}">${NE?`${k}/${NE}`:"–"}</span>${NT?`<small>${kt}/${NT} tests</small>`:""}</td>` : "")
+      + cols.map(p => `<td class="fp${p.ct?" ct":""}">${x.papers.has(p.key)?`<i class="dot" title="${esc(x.t.title)}: ${esc(full(p))}"></i>`:""}</td>`).join("")
+      + `<td class="fn">${x.n.exam||""}</td>${showMcq?`<td class="fn">${x.n.mcq||""}</td>`:""}${NT?`<td class="fn">${x.n.test||""}</td>`:""}<td class="fn">${x.n.tut||""}</td><td class="fn">${x.n.lec||""}</td><td class="fn">${x.n.prac||""}</td><td class="fn tot">${total(x)}</td></tr>`; }).join("");
+  const sum = k => st.rows.reduce((a,x)=>a+x.n[k],0);
+  const foot = `<tr class="sum"><th class="ft">All topics</th>${NE||NT?`<td class="fs"></td>`:""}${cols.map(p=>`<td class="fp${p.ct?" ct":""}">${st.rows.filter(x=>x.papers.has(p.key)).length||""}</td>`).join("")}<td class="fn">${sum("exam")}</td>${showMcq?`<td class="fn">${sum("mcq")}</td>`:""}${NT?`<td class="fn">${sum("test")}</td>`:""}<td class="fn">${sum("tut")}</td><td class="fn">${sum("lec")}</td><td class="fn">${sum("prac")}</td><td class="fn tot">${st.rows.reduce((a,x)=>a+total(x),0)}</td></tr>`;
+  const intro = NE
+    ? `<p class="freqlede">${NE} past paper${NE>1?"s":""} on file (${st.exams.map(full).join(", ")})${NT?`, plus ${NT} class test${NT>1?"s":""} or quiz${NT>1?"zes":""}`:""}. A dot means the topic came up on that paper.</p>`
+    : `<p class="freqlede">No past exam papers on file for this module yet${NT?`; dots show the class tests and quizzes instead`:""}. Drop them into the module folder and this fills in.</p>`;
+  const callouts = NE ? `<div class="freqcall">${hot.length?`<div class="fc hot"><b>On most past papers</b><span>${hot.map(x=>`<a href="#${mid}.${x.t.id}">${esc(x.t.title)}</a>`).join(" · ")}</span></div>`:""}${never.length?`<div class="fc none"><b>Not on any paper on file</b><span>${never.map(x=>`<a href="#${mid}.${x.t.id}">${esc(x.t.title)}</a>`).join(" · ")}</span></div>`:""}</div>` : "";
+  return `<h2 class="ovh" id="freq">Exam frequency</h2>${intro}${callouts}
+    <div class="freqbar"><span>Sort</span><button class="fsb ${sortBy==="course"?"on":""}" data-fsort="course">Course order</button><button class="fsb ${sortBy==="exam"?"on":""}" data-fsort="exam">Most examined</button></div>
+    <div class="freqwrap"><table class="freq"><thead>${head}</thead><tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>
+    <p class="freqnote">Counts come from each question's source label. Questions that appear on several papers count once per topic but put a dot under every paper.</p>`;
+}
+function wireFreq(mid){ document.querySelectorAll("[data-fsort]").forEach(b => b.onclick = () => { store.set("freqsort:"+mid, b.dataset.fsort); const y = window.scrollY; module(mid); window.scrollTo(0, y); }); }
 function module(mid){
   const m = S.modules[mid]; if(!m) return home();
   const c = S.content[mid];
@@ -205,13 +272,13 @@ function module(mid){
   if (c){
     const r = ratings(mid); const parts = [...new Set(c.topics.map(t=>t.part))];
     h += `<h2 class="ovh">Progress</h2><div class="ovgrid">` + parts.map((p,pi)=>{ const ts=c.topics.filter(t=>t.part===p); const g=ts.filter(t=>r[t.id]==="good").length, bd=ts.filter(t=>r[t.id]==="bad").length;
-      return `<a class="ovcard" href="#${mid}.${ts[0].id}"><span class="pn">${pi+1}</span><span class="ovt">${esc(p)}</span><span class="ovm">${ts.length} topics · ${g} confident${bd?` · ${bd} need work`:""}</span><span class="meter"><i style="width:${100*g/ts.length}%"></i></span></a>`; }).join("") + `</div>`;
+      return `<a class="ovcard" href="#${mid}.${ts[0].id}"><span class="pn">${pi+1}</span><span class="ovt">${esc(p)}</span><span class="ovm">${ts.length} topics · ${g} confident${bd?` · ${bd} need work`:""}</span><span class="meter"><i style="width:${100*g/ts.length}%"></i></span></a>`; }).join("") + `</div>` + freqPanel(mid);
   } else {
     h += `<div class="empty">Topic pages for this module haven't been written yet. The pages panel lists the topics found in your lecture files. Ask in the chat when you want this one built.</div>`;
   }
   h += askBox() + `</div></main>`;
   app.innerHTML = h;
-  wireSubnav(mid); dlChanged(); mountHangars();
+  wireSubnav(mid); wireFreq(mid); dlChanged(); mountHangars();
 }
 
 /* ---------- tutorials ---------- */

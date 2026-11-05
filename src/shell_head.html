@@ -371,6 +371,39 @@ h2.tsec{font:600 15px/1.2 var(--f-mono);letter-spacing:.06em;text-transform:uppe
 .ovcard .ovt{font-family:var(--f-display);font-weight:650;font-size:18px;line-height:1.25}
 .ovcard .ovm{font-size:14px;color:var(--muted)}
 .ovcard .meter{max-width:none}
+#freq{margin-top:28px}
+.freqlede{color:var(--muted);margin:0 0 10px;max-width:70ch}
+.freqcall{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin:0 0 12px}
+.freqcall .fc{display:flex;flex-direction:column;gap:4px;padding:10px 14px;border-radius:10px;border:1px solid var(--rule);background:var(--paper);border-left:4px solid var(--muted)}
+.freqcall .fc.hot{border-left-color:var(--bad)}
+.freqcall .fc b{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.freqcall .fc a{color:var(--ink)}
+.freqbar{display:flex;align-items:center;gap:6px;margin:0 0 8px;font-size:13px;color:var(--muted)}
+.fsb{font:600 13px/1 var(--f-body);padding:7px 11px;border-radius:999px;border:1px solid var(--rule);background:var(--paper);color:var(--muted);cursor:pointer}
+.fsb.on{background:var(--mc);border-color:var(--mc);color:var(--paper)}
+.freqwrap{overflow-x:auto;max-width:100%;border:1px solid var(--rule);border-radius:10px;background:var(--paper)}
+table.freq{border-collapse:collapse;font-size:14px;width:100%;min-width:max-content}
+table.freq th,table.freq td{padding:7px 8px;border-bottom:1px solid var(--rule);text-align:center;white-space:nowrap}
+table.freq thead th{position:sticky;top:0;background:var(--code);font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+table.freq th.ft{text-align:left;font-weight:600;position:sticky;left:0;background:var(--paper);z-index:1;white-space:normal;min-width:170px;max-width:240px}
+table.freq thead th.ft{background:var(--code);z-index:2}
+table.freq th.ft a{color:var(--ink);text-decoration:none}
+table.freq th.ft a:hover{text-decoration:underline}
+table.freq td.fn{font-variant-numeric:tabular-nums;color:var(--ink);min-width:38px}
+table.freq td.tot{font-weight:700}
+table.freq td.fp,table.freq th.fp{width:30px;padding:7px 3px;font-family:var(--f-mono)}
+table.freq th.fp.ct,table.freq td.fp.ct{background:color-mix(in srgb,var(--code) 55%,transparent)}
+table.freq .dot{display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--mc);vertical-align:middle}
+table.freq td.fp.ct .dot{background:transparent;border:2px solid var(--mc);width:8px;height:8px}
+table.freq td.fs small{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+table.freq .fb{display:inline-block;min-width:44px;padding:3px 7px;border-radius:6px;font:700 13px/1.2 var(--f-mono);background:var(--code);color:var(--muted)}
+table.freq .fb.hot{background:var(--bad);color:var(--paper)}
+table.freq .fb.warm{background:var(--warn);color:var(--paper)}
+table.freq .fb.cool{background:color-mix(in srgb,var(--mc) 25%,var(--code));color:var(--ink)}
+table.freq tfoot td,table.freq tfoot th{font-weight:700;background:var(--code);border-bottom:0}
+table.freq tbody tr:hover th.ft,table.freq tbody tr:hover td{background:color-mix(in srgb,var(--mc) 8%,var(--paper))}
+.freqnote{font-size:13px;color:var(--muted);margin:8px 0 18px}
+
 .toc2{padding-left:24px!important;font-size:14px}
 h3.subhead{font-family:var(--f-display);font-weight:650;font-size:21px;margin:34px 0 12px;padding-top:14px;border-top:1px dashed var(--rule)}
 @media (max-width:820px){
