@@ -375,6 +375,74 @@ function tutorial(mid, id){
 
 function askBox(){ return ""; }
 
+/* ---------- recall flashcards (end of each topic's theory) ---------- */
+/* STUDY.cards[mid][tid] = [{ q, a, k: "why"|"def"|"f", g?: "where it's given" }]. k:"f" = formula recall. */
+function cardsFor(mid, tid){ return ((S.cards||{})[mid]||{})[tid] || []; }
+function cardKey(mid, tid){ return "cards:"+mid+":"+tid; }
+function cardTag(c){
+  if (c.k === "f") return c.g ? `<span class="fc-tag f given">Formula · given: ${esc(c.g)}</span>` : `<span class="fc-tag f">Formula · not given in the exam</span>`;
+  return c.k === "why" ? `<span class="fc-tag why">Why</span>` : `<span class="fc-tag def">Concept</span>`;
+}
+function deckHTML(mid, tid){
+  const cs = cardsFor(mid, tid); if (!cs.length) return "";
+  return `<section class="block" id="recall"><h2>Recall check <small>flashcards · ${cs.length}</small></h2>
+    <p class="fc-lede">Theory only, no working. Say the answer out loud or in your head, then flip. Mark it honestly: anything marked <b>again</b> comes back round.</p>
+    <div class="deck" id="deck"></div></section>`;
+}
+function wireDeck(mid, tid){
+  const root = document.getElementById("deck"); if (!root) return;
+  const cs = cardsFor(mid, tid), key = cardKey(mid, tid);
+  let st = store.get(key, {}); /* index -> "got" | "again" */
+  let order = [], pos = 0, flipped = false, mode = "deck";
+  const fresh = (onlyAgain) => { order = cs.map((_,i)=>i).filter(i => onlyAgain ? st[i]==="again" : st[i]!=="got"); if (!order.length && !onlyAgain) order = []; pos = 0; flipped = false; };
+  const shuffle = () => { for (let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [order[i],order[j]]=[order[j],order[i]]; } };
+  fresh(false);
+  const counts = () => { const g = cs.filter((_,i)=>st[i]==="got").length, a = cs.filter((_,i)=>st[i]==="again").length; return {g,a}; };
+  const save = () => store.set(key, st);
+  function draw(first){
+    const {g,a} = counts();
+    const bar = `<div class="fc-top"><div class="fc-prog"><span class="meter"><i style="width:${100*g/cs.length}%"></i></span><span><b>${g}</b>/${cs.length} stuck${a?` · <span class="fc-again-n">${a} again</span>`:""}</span></div>
+      <div class="fc-ctrl"><button class="fsb ${mode==="deck"?"on":""}" data-fm="deck">Cards</button><button class="fsb ${mode==="list"?"on":""}" data-fm="list">List all</button></div></div>`;
+    if (mode === "list"){
+      root.innerHTML = bar + `<ol class="fc-list">${cs.map((c,i)=>`<li class="${st[i]||""}"><div class="fc-lq">${cardTag(c)}<div>${c.q}</div></div><details><summary>Answer</summary><div class="fc-la">${c.a}</div></details></li>`).join("")}</ol>`;
+    } else if (!order.length || pos >= order.length){
+      const done = g === cs.length;
+      root.innerHTML = bar + `<div class="fc-end ${done?"done":""}"><b>${done?`All ${cs.length} cards stuck.`:`Round finished: ${g} stuck, ${a} to go again.`}</b>
+        <span>${done?"This topic's theory is in. Hit the practice questions next.":"Run the misses again until they stick."}</span>
+        <div class="fc-endbtns">${a?`<button class="btn small" data-fa="again">Go again on ${a} miss${a>1?"es":""}</button>`:""}<button class="btn small ghost" data-fa="reset">Reset deck</button></div></div>`;
+    } else {
+      const i = order[pos], c = cs[i];
+      root.innerHTML = bar + `<div class="fc-card ${flipped?"flip":""}" role="button" tabindex="0" aria-label="${flipped?"Answer showing":"Show answer"}">
+          <div class="fc-meta"><span class="fc-n">${order.length-pos} left</span>${cardTag(c)}</div>
+          <div class="fc-q">${c.q}</div>
+          <div class="fc-a" ${flipped?"":"hidden"}>${c.a}</div>
+          ${flipped?"":`<div class="fc-hint">Tap or press Space to flip</div>`}
+        </div>
+        <div class="fc-btns">${flipped
+          ? `<button class="btn fc-no" data-fa="no">↻ Again</button><button class="btn fc-yes" data-fa="yes">✓ Got it</button>`
+          : `<button class="btn ghost" data-fa="skip">Skip</button><button class="btn" data-fa="flip">Show answer</button>`}</div>
+        <div class="fc-sub"><button class="linkbtn" data-fa="shuffle">Shuffle</button> · <button class="linkbtn" data-fa="reset">Reset deck</button></div>`;
+    }
+    root.querySelectorAll("[data-fm]").forEach(b => b.onclick = () => { mode = b.dataset.fm; draw(); });
+    root.querySelectorAll("[data-fa]").forEach(b => b.onclick = e => { e.stopPropagation(); act(b.dataset.fa); });
+    const card = root.querySelector(".fc-card"); if (card) card.onclick = () => { if (!flipped) act("flip"); };
+    if (!first) typeset(root);
+  }
+  function act(x){
+    if (x === "flip"){ flipped = true; }
+    else if (x === "yes" || x === "no"){ const i = order[pos]; st[i] = x==="yes" ? "got" : "again"; save(); if (x==="no") order.push(i); pos++; flipped = false; }
+    else if (x === "skip"){ order.push(order[pos]); pos++; }
+    else if (x === "shuffle"){ order = order.slice(pos); pos = 0; shuffle(); flipped = false; }
+    else if (x === "again"){ fresh(true); }
+    else if (x === "reset"){ st = {}; save(); fresh(false); }
+    draw();
+    const card = root.querySelector(".fc-card"); if (card && x!=="flip") card.focus({preventScroll:true});
+  }
+  root.onkeydown = e => { if (mode!=="deck" || !root.querySelector(".fc-card")) return; if (e.target.tagName==="BUTTON" && e.key!==" ") return;
+    if (e.key===" " || e.key==="Enter"){ e.preventDefault(); act(flipped ? "yes" : "flip"); }
+    else if (flipped && (e.key==="ArrowRight" || e.key==="1")) act("yes"); else if (flipped && (e.key==="ArrowLeft" || e.key==="2")) act("no"); };
+  draw(true);
+}
 function topic(mid, tid){
   const m = S.modules[mid], c = S.content[mid]; if(!c) return module(mid);
   const idx = c.topics.findIndex(t=>t.id===tid); if(idx<0) return module(mid);
@@ -387,12 +455,13 @@ function topic(mid, tid){
     <h1>${esc(t.title)}</h1><p class="lede">${esc(t.summary)}</p>
   </div></div><main style="--mc:var(${m.color})"><div class="wrap"><div class="topic-layout">
   <nav class="toc" aria-label="On this page">
-    <a href="#${mid}.${tid}" data-jump="theory">Theory</a><a href="#${mid}.${tid}" data-jump="formulae">Formulae</a><a href="#${mid}.${tid}" data-jump="practice">Practice (${TQ.length})</a>${t.traps&&t.traps.length?`<a href="#${mid}.${tid}" data-jump="traps">Hazards</a>`:""}
+    <a href="#${mid}.${tid}" data-jump="theory">Theory</a>${cardsFor(mid,tid).length?`<a href="#${mid}.${tid}" data-jump="recall">Recall check</a>`:""}<a href="#${mid}.${tid}" data-jump="formulae">Formulae</a><a href="#${mid}.${tid}" data-jump="practice">Practice (${TQ.length})</a>${t.traps&&t.traps.length?`<a href="#${mid}.${tid}" data-jump="traps">Hazards</a>`:""}
     <div class="rate"><p>System status</p>
       <button class="rbtn good" data-rate="good" aria-pressed="${rate==="good"}">✓ Mission ready</button>
       <button class="rbtn bad" data-rate="bad" aria-pressed="${rate==="bad"}">⚠ Needs work</button></div>
   </nav><div>
   <section class="block" id="theory"><h2>Theory <small>operating manual</small></h2><div class="prose">${numberHeads(t.theory)}</div></section>
+  ${deckHTML(mid, tid)}
   <section class="block" id="formulae"><h2>Formulae <small>spec sheet · ${t.formulas.length}</small></h2><div class="formulas">${t.formulas.map(f=>`<div class="fcard"><div class="fn">${esc(f.name)}</div><div class="fx">$$${f.tex}$$</div>${f.note?`<div class="fnote">${esc(f.note)}</div>`:""}</div>`).join("")}</div></section>
   <section class="block" id="practice"><h2>Practice <small>field tests · tutorial &amp; past papers</small></h2><div class="qlist">${TQ.map((q,i)=>`
     <article class="q" id="pq${i}"><div class="qh"><span class="qn">Q${i+1}</span><span class="src">${esc(q.src)}</span></div>
@@ -417,7 +486,7 @@ function topic(mid, tid){
     const q = TQ[+b.dataset.copy];
     copy(`${m.code} ${m.name} · ${t.title} · ${q.src}\n\n${plain(q.q)}\n\nMy question: `);
   });
-  drawPlots(app); typeset(app); wireTheoryLinks(mid, tid);
+  drawPlots(app); wireDeck(mid, tid); typeset(app); wireTheoryLinks(mid, tid);
   if (PENDING){ const p = PENDING; PENDING = null; setTimeout(() => { if (p.n!==undefined) goTheory(p.n, p.ret); else if (p.back){ const el=document.getElementById(p.back); el && el.scrollIntoView({block:"start"}); } }, 60); }
 }
 

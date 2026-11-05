@@ -143,3 +143,10 @@ The overview's "Exam frequency" table is built automatically from each question'
 - A tutorial/sheet question that is a past-paper question: tag it in brackets, e.g. `State-Space Sheet Q5 (exam 2024 Q1(b))`.
 - MCQ bank items: `s: "2025, 2023R"` (R = resit).
 - Assessed continuous assessment: `Class Test 1 Q2`, `Quiz 2 (2025) Q4`, `Loop quiz Q3`.
+
+## Recall flashcards
+Each topic page has a "Recall check" deck after the theory, built from `src/cards_<module>.js`:
+`STUDY.cards.<mid>.<topicId> = [{ k, q, a, g? }]`.
+- `k`: `"def"` (concept), `"why"` (reasoning) or `"f"` (formula recall). `g` (formula cards only) says where the formula is given in the exam, e.g. `"printed on the paper"` or `"exam appendix"`; leave it out when it must be memorised.
+- Theory only: no cards that need working out. That belongs in the practice questions.
+- When a topic's theory is extended, add cards for the new material. Inside `$…$`, write `\lt` and `\gt` rather than `<` and `>`.
