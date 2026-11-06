@@ -225,6 +225,48 @@ function examStats(mid){
   const cols = [...all.values()].sort((a,b) => { const A=ord(a), B=ord(b); return A[0]-B[0] || (A[1]<B[1]?-1:A[1]>B[1]?1:0); });
   return { rows, exams: cols.filter(p=>!p.ct), tests: cols.filter(p=>p.ct), hasMcq: !!(c.mcq && c.mcq.length) };
 }
+/* exam grid: rows = question number, columns = papers, cells = the topics that question tested */
+function qOf(src, alias){
+  if (alias && alias[src]) return alias[src].match(/^Q(\d+)(?:\(([a-z])\))?/).slice(1);
+  if (/^MCQ/i.test(src||"")) return ["MCQ", ""];
+  const y = /\d{4}/.exec(src||""); if (!y) return null;
+  const m = /Q(\d+)\s*(?:\(([a-z])\))?/.exec(src.slice(y.index)); return m ? [m[1], m[2]||""] : null;
+}
+function examGrid(mid){
+  const c = S.content[mid]; if (!c) return null;
+  const alias = {}; (c.tutorials||[]).forEach(t => t.paper && Object.assign(alias, t.paper.alias||{}));
+  const papers = new Map(), cells = {};   /* cells[q][paperKey] = Map(topicId -> Set(parts)) */
+  const put = (t, q, src) => { const info = srcInfo(src); const qq = qOf(src, alias); if (!qq) return;
+    info.papers.filter(p => !p.ct).forEach(p => { if (!papers.has(p.key)) papers.set(p.key, p);
+      const row = cells[qq[0]] = cells[qq[0]] || {}; const cell = row[p.key] = row[p.key] || new Map();
+      if (!cell.has(t.id)) cell.set(t.id, new Set()); if (qq[1]) cell.get(t.id).add(qq[1]); }); };
+  c.topics.forEach(t => t.questions.forEach(q => put(t, q, q.src)));
+  (c.mcq||[]).forEach(q => { const t = c.topics.find(x => x.id === q.t); if (t) put(t, null, "MCQ "+q.s); });
+  const cols = [...papers.values()].sort((a,b) => (a.y+(a.k==="Sample"?"0":a.k==="Exam"?"1":"2")) < (b.y+(b.k==="Sample"?"0":b.k==="Exam"?"1":"2")) ? 1 : -1);   /* newest first */
+  const rows = Object.keys(cells).sort((a,b) => (a==="MCQ"?-1:+a) - (b==="MCQ"?-1:+b));
+  return { cols, rows, cells, topics: c.topics };
+}
+function gridPanel(mid){
+  const g = examGrid(mid); if (!g || !g.cols.length) return "";
+  const short = t => t.short || t.title.split(/:| & |, /)[0];
+  const idx = Object.fromEntries(g.topics.map((t,i)=>[t.id,i]));
+  const full = p => (p.y) + " " + (p.k==="Exam"?"exam":p.k==="Resit"?"resit":"sample");
+  const abbr = p => "’"+String(p.y).replace(/^\d{4}\/(\d\d)$/,"$1").slice(-2) + (p.k==="Resit"?"R":p.k==="Sample"?"S":"");
+  const tutFor = p => (S.content[mid].tutorials||[]).find(t => t.paper && new RegExp(t.paper.re,"i").test(p.k==="Resit"?"Resit "+p.y:"Exam "+p.y));
+  const head = `<tr><th class="gq">Q</th>${g.cols.map(p=>{ const t = tutFor(p); return `<th title="${esc(full(p))}">${t?`<a href="#${mid}.tut-${t.id}">${esc(abbr(p))}</a>`:esc(abbr(p))}</th>`; }).join("")}<th class="gu">Usually</th></tr>`;
+  const body = g.rows.map(q => {
+    const row = g.cells[q]; const tally = {};
+    Object.values(row).forEach(cell => cell.forEach((_, tid) => tally[tid] = (tally[tid]||0) + 1));
+    const usual = Object.entries(tally).sort((a,b)=>b[1]-a[1]||idx[a[0]]-idx[b[0]]).slice(0,2).filter(x=>x[1]>=2);
+    return `<tr><th class="gq">${q==="MCQ"?"MCQ":"Q"+q}</th>` + g.cols.map(p => { const cell = row[p.key];
+      return `<td>${cell ? [...cell.entries()].sort((a,b)=>idx[a[0]]-idx[b[0]]).map(([tid,parts]) => { const t = g.topics[idx[tid]];
+        return `<a class="gchip" href="#${mid}.${tid}" title="${esc(t.title)}">${esc(short(t))}${parts.size?` <small>${[...parts].sort().join(",")}</small>`:""}</a>`; }).join("") : `<span class="gnone">–</span>`}</td>`; }).join("")
+      + `<td class="gu">${usual.map(([tid,n]) => `<b>${esc(short(g.topics[idx[tid]]))}</b> <small>${n}/${g.cols.length}</small>`).join("<br>")||"<small>varies</small>"}</td></tr>`;
+  }).join("");
+  return `<h2 class="ovh" id="grid">Past papers by question</h2>
+    <p class="freqlede">What each exam question tested, newest paper first. Letters are the parts; tap a paper to sit it, or a topic to revise it.</p>
+    <div class="freqwrap"><table class="egrid"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
+}
 function freqPanel(mid){
   const st = examStats(mid); if (!st) return "";
   const sortBy = store.get("freqsort:"+mid, "course");
@@ -254,12 +296,16 @@ function freqPanel(mid){
     ? `<p class="freqlede">${NE} past paper${NE>1?"s":""} on file (${st.exams.map(full).join(", ")})${NT?`, plus ${NT} class test${NT>1?"s":""} or quiz${NT>1?"zes":""}`:""}. A dot means the topic came up on that paper.</p>`
     : `<p class="freqlede">No past exam papers on file for this module yet${NT?`; dots show the class tests and quizzes instead`:""}. Drop them into the module folder and this fills in.</p>`;
   const callouts = NE ? `<div class="freqcall">${hot.length?`<div class="fc hot"><b>On most past papers</b><span>${hot.map(x=>`<a href="#${mid}.${x.t.id}">${esc(x.t.title)}</a>`).join(" · ")}</span></div>`:""}${never.length?`<div class="fc none"><b>Not on any paper on file</b><span>${never.map(x=>`<a href="#${mid}.${x.t.id}">${esc(x.t.title)}</a>`).join(" · ")}</span></div>`:""}</div>` : "";
+  const grid = gridPanel(mid);
+  if (grid) return grid + `<details class="freqmore" id="freq" ${store.get("freqopen:"+mid, false)?"open":""}><summary>Questions per topic</summary>${intro}
+    <div class="freqbar"><span>Sort</span><button class="fsb ${sortBy==="course"?"on":""}" data-fsort="course">Course order</button><button class="fsb ${sortBy==="exam"?"on":""}" data-fsort="exam">Most examined</button></div>
+    <div class="freqwrap"><table class="freq"><thead>${head}</thead><tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div></details>`;
   return `<h2 class="ovh" id="freq">Exam frequency</h2>${intro}${callouts}
     <div class="freqbar"><span>Sort</span><button class="fsb ${sortBy==="course"?"on":""}" data-fsort="course">Course order</button><button class="fsb ${sortBy==="exam"?"on":""}" data-fsort="exam">Most examined</button></div>
     <div class="freqwrap"><table class="freq"><thead>${head}</thead><tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>
     <p class="freqnote">Counts come from each question's source label. Questions that appear on several papers count once per topic but put a dot under every paper.</p>`;
 }
-function wireFreq(mid){ document.querySelectorAll("[data-fsort]").forEach(b => b.onclick = () => { store.set("freqsort:"+mid, b.dataset.fsort); const y = window.scrollY; module(mid); window.scrollTo(0, y); }); }
+function wireFreq(mid){ const d = document.querySelector("details.freqmore"); if (d) d.ontoggle = () => store.set("freqopen:"+mid, d.open); document.querySelectorAll("[data-fsort]").forEach(b => b.onclick = () => { store.set("freqsort:"+mid, b.dataset.fsort); const y = window.scrollY; module(mid); window.scrollTo(0, y); }); }
 function module(mid){
   const m = S.modules[mid]; if(!m) return home();
   const c = S.content[mid];
@@ -633,7 +679,7 @@ function renderPages(mid, sub){
   let list = `<a class="pg ${!sub?"on":""}" href="#${mid}">Overview &amp; deadlines</a>`;
   const tuts = c && c.tutorials;
   list += `<a class="pg ${sub==="tutorials"?"on":""}" href="#${mid}.tutorials">Tutorials</a>`;
-  if (tuts) list += tuts.filter(t => sub==="tut-"+t.id || !tutDone(mid, t)).map(t=>`<a class="pg sub2 ${sub==="tut-"+t.id?"on":""}" href="#${mid}.tut-${t.id}">${esc(t.title)}${tutDone(mid,t)?` <span class="rk good" title="Complete">✓</span>`:""}</a>`).join("");
+  if (tuts) list += tuts.filter(t => sub==="tut-"+t.id || (!t.paper && !tutDone(mid, t))).map(t=>`<a class="pg sub2 ${sub==="tut-"+t.id?"on":""}" href="#${mid}.tut-${t.id}">${esc(t.title)}${tutDone(mid,t)?` <span class="rk good" title="Complete">✓</span>`:""}</a>`).join("");
   if (c && c.mcq) list += `<a class="pg ${sub==="mcq"?"on":""}" href="#${mid}.mcq">Past-paper MCQ drill</a>`;
   list += `<div class="pgrule"></div>`;
   if (c){

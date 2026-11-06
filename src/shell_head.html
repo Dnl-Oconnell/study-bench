@@ -444,6 +444,20 @@ table.freq tbody tr:hover th.ft,table.freq tbody tr:hover td{background:color-mi
 @media (max-width:600px){.fc-q{font-size:17px}.fc-btns .btn{min-width:0;flex:1}}
 .deck .fc-btns .btn.fc-yes{background:var(--good)!important;border-color:var(--good)!important;color:#111!important}
 .deck .fc-btns .btn.fc-no{border-color:var(--warn)!important;color:var(--warn)!important}
+#grid{margin-top:28px}
+table.egrid{border-collapse:collapse;font-size:14px;min-width:max-content;width:100%}
+table.egrid th,table.egrid td{padding:8px;border-bottom:1px solid var(--rule);border-right:1px solid var(--rule);vertical-align:top;text-align:left}
+table.egrid thead th{background:var(--code);font:700 13px/1.2 var(--f-mono);color:var(--muted);position:sticky;top:0;text-align:center}
+table.egrid thead th a{color:var(--ink)}
+table.egrid th.gq{position:sticky;left:0;background:var(--code);font:700 14px/1.2 var(--f-mono);text-align:center;width:44px;z-index:1}
+table.egrid td{min-width:120px;max-width:170px}
+table.egrid .gchip{display:block;margin:0 0 4px;padding:4px 7px;border-radius:6px;background:color-mix(in srgb,var(--mc) 16%,var(--paper));border:1px solid color-mix(in srgb,var(--mc) 40%,transparent);color:var(--ink);text-decoration:none;font-size:13px;line-height:1.25}
+table.egrid .gchip small{font-family:var(--f-mono);color:var(--muted)}
+table.egrid .gnone{color:var(--muted)}
+table.egrid td.gu,table.egrid th.gu{min-width:150px;background:color-mix(in srgb,var(--code) 50%,transparent)}
+table.egrid td.gu small{color:var(--muted);font-family:var(--f-mono)}
+details.freqmore{margin:18px 0}
+details.freqmore>summary{cursor:pointer;font-weight:700;color:var(--muted);margin-bottom:10px}
 .freqnote{font-size:13px;color:var(--muted);margin:8px 0 18px}
 
 .toc2{padding-left:24px!important;font-size:14px}

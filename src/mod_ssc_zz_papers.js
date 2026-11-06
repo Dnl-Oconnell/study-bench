@@ -370,6 +370,14 @@ add("ztrans", { src: "Resit 2025/26 Q4(a)", plab: "Q4(a)–(d)", see: [4, 5, 6],
   sol: R`<ol class="steps"><li>(a) $H=\dfrac{z^{-2}}{1+0.5z^{-1}+0.06z^{-2}}=\dfrac{1}{z^2+0.5z+0.06}$.</li><li>(b) Poles −0.2, −0.3: inside the unit circle ⇒ stable.</li><li>(c) $\mathbf x[n+1]=\begin{bmatrix}0&1\\-0.06&-0.5\end{bmatrix}\mathbf x[n]+\begin{bmatrix}0\\1\end{bmatrix}x[n]$, $y=\begin{bmatrix}1&0\end{bmatrix}\mathbf x$.</li><li>(d) $\dfrac Yz=\dfrac{25/39}{z-1}+\dfrac{100/13}{z+0.3}-\dfrac{25/3}{z+0.2}$ ⇒ $$y[n]=\left[\tfrac{25}{39}+\tfrac{100}{13}(-0.3)^n-\tfrac{25}{3}(-0.2)^n\right]u[n]$$</li><li>Check: $y[0]=y[1]=0$, $y[2]=1$ (two-sample delay) ✓; final value $H(1)=1/1.56=0.641$ ✓.</li></ol>`,
   ans: "H = 1/(z²+0.5z+0.06); stable; y = 25/39 + (100/13)(−0.3)ⁿ − (25/3)(−0.2)ⁿ" });
 
+
+/* short names for the per-question exam grid */
+const SHORT = { laplace:"Laplace & ODEs", ztrans:"Z transform", tfcircuits:"Circuit TFs", translational:"Translational", rotational:"Rotational",
+  linearise:"Linearisation", ctstab:"CT stability / K range", dtstab:"DT stability", ivtfvt:"IVT / FVT", order12:"Step response, %OS",
+  statespace:"State-space model", ssresp:"Φ(t) & responses", sstrans:"Canonical / parallel form", ssode:"ODE → state space",
+  bdalgebra:"Block diagrams", bdreduce:"Block reduction" };
+T.topics.forEach(t => { if (SHORT[t.id]) t.short = SHORT[t.id]; });
+
 /* ---------- each paper as a sittable set (Tutorials page) ---------- */
 const P = (id, short, title, note, re, alias) => ({ id, short, title, note, paper: { re, alias: alias || {} },
   intro: "Every part of this paper, in exam order, each with a hint and a worked solution. The same questions also sit on their topic pages. Sit it under exam conditions: Q1 plus any two of Q2–Q4 in 2 hours." });
