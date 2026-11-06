@@ -225,5 +225,37 @@ ssode: [
     R`The phase-variable pattern assumes the highest derivative has coefficient 1; divide the whole ODE by it first.`),
 ],
 
+bdalgebra: [
+  C("def", R`What does a line, a block and a summing junction represent in a block diagram?`,
+    R`A line is a one-way signal (labelled, in the Laplace domain). A block is a SISO component with $G=\dfrac{\text{output}}{\text{input}}$. A summing junction adds or subtracts its inputs by the signs at each arrow.`),
+  C("f", R`What is the equivalent of blocks in cascade, and of two parallel paths?`,
+    R`Cascade: multiply, $G_1G_2\cdots$. Parallel: add with the junction signs, $G_1\pm G_2$.`),
+  C("f", R`Closed-loop transfer function of a negative-feedback loop with forward path $G$ and feedback $H$?`,
+    R`$$\frac{Y}{R}=\frac{G}{1+GH}$$ Unity feedback: $\frac{G}{1+G}$. Positive feedback: $\frac{G}{1-GH}$.`),
+  C("def", R`Name the four standard elements of a feedback loop.`,
+    R`$R(s)$ reference input (desired output), $C(s)$ controller (turns the error into a command), $G(s)$ plant (the process being controlled), $H(s)$ sensor/feedback element (measures the output).`),
+  C("why", R`Why use closed-loop rather than open-loop control?`,
+    R`The plant changes with age and environment (and users misuse products), so an open-loop design based on the original $G(s)$ goes wrong. Closed loop measures the output and corrects the error.`),
+  C("def", R`What happens to a side input when you move a summing junction forward past block $G$? Backward?`,
+    R`Forward: the side input passes through an extra $G$. Backward: it passes through $\frac{1}{G}$. Check by writing the output both ways.`),
+],
+
+bdreduce: [
+  C("def", R`What are the steps of the signal-analysis method?`,
+    R`Label every summer output; write an equation for each summer and block; substitute until only inputs and $Y$ remain; collect the $Y$ terms and divide.`),
+  C("f", R`Closed-loop TF for $G_1$ followed by an inner loop ($G_2G_3$, feedback $H_2$) inside an outer loop (feedback $H_1$)?`,
+    R`$$\frac{Y}{R}=\frac{G_1G_2G_3}{1+G_2G_3H_2+G_1G_2G_3H_1}$$`),
+  C("why", R`When can several feedback paths be combined in parallel?`,
+    R`When they enter summers with no block between them, so the summers act as one: $H_1+H_2+H_3$.`),
+  C("why", R`Why can't you apply the feedback rule to a loop with a feedforward input entering inside it?`,
+    R`The rule assumes a single input entering at the loop's summer. Move the inner summer back past the block (side input gets $\frac1G$) or use signal analysis.`),
+  C("def", R`How do you handle a block diagram with two inputs?`,
+    R`Superposition: set all but one input to zero, find the output for that input, repeat for each, and add.`),
+  C("why", R`What check does superposition give you on the denominators?`,
+    R`Every input's term has the same denominator (the closed-loop characteristic polynomial); only the numerators differ.`),
+  C("why", R`Can feedback stabilise an unstable plant?`,
+    R`Yes. Closed-loop poles are the roots of the closed-loop denominator, e.g. $\frac{1}{(s+3)(s-2)}$ with feedback gain $K$ gives $s^2+s+K-6$, stable for $K\gt 6$.`),
+],
+
 };
 })();
