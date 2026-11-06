@@ -234,7 +234,7 @@ function freqPanel(mid){
   const total = r => Object.values(r.n).reduce((a,b)=>a+b,0);
   let rows = st.rows.slice();
   if (sortBy === "exam") rows.sort((a,b) => seen(b)-seen(a) || seenT(b)-seenT(a) || (b.n.exam+b.n.mcq)-(a.n.exam+a.n.mcq));
-  const abbr = p => p.ct ? p.key.replace(/Class Test /,"CT").replace(/Quiz /,"Qz").replace(/Loop quiz/,"Loop") : "’"+String(p.y).replace(/^\d\d(\d\d)\/\d\d$/,"$1").slice(-2) + (p.k==="Resit"?"R":p.k==="Sample"?"S":"");
+  const abbr = p => p.ct ? p.key.replace(/Class Test /,"CT").replace(/Quiz /,"Qz").replace(/Loop quiz/,"Loop") : "’"+String(p.y).replace(/^\d{4}\/(\d\d)$/,"$1").slice(-2) + (p.k==="Resit"?"R":p.k==="Sample"?"S":"");
   const full = p => p.ct ? p.key : (/\//.test(p.y) ? p.y : p.y) + " " + (p.k==="Exam"?"exam":p.k==="Resit"?"resit":"sample paper");
   const cols = st.exams.concat(st.tests);
   const showMcq = st.hasMcq;
@@ -284,6 +284,21 @@ function module(mid){
 /* ---------- tutorials ---------- */
 function tutQuestions(mid, tut){
   const c = S.content[mid]; let qs = [];
+  if (tut.paper){
+    const re = new RegExp(tut.paper.re, "i"), alias = tut.paper.alias || {}, seen = {};
+    const roman = ["", "i", "ii", "iii", "iv", "v", "vi", "vii"];
+    c.topics.forEach(t => t.questions.forEach(q => {
+      let lab = alias[q.src];
+      if (!lab){ const at = q.src.search(re); if (at < 0) return;
+        const m = /Q(\d)\(([a-z])\)(?:\((i{1,3}|iv|vi{0,3})\))?/.exec(q.src.slice(at)); if (!m) return; lab = m[0]; }
+      const m = /Q(\d)\(([a-z])\)(?:\((i{1,3}|iv|vi{0,3})\))?/.exec(lab);
+      const num = (+m[1])*100 + (m[2].charCodeAt(0)-96)*10 + (m[3] ? roman.indexOf(m[3]) : 0);
+      const pref = /^(Exam|Resit)/.test(q.src);
+      if (seen[num] && (seen[num].pref || !pref)) return;
+      seen[num] = { pref, q: Object.assign({}, q, { nums: [num], lab: q.plab || lab, topic: t.id }) };
+    }));
+    qs = Object.values(seen).map(x => x.q);
+  }
   if (tut.fromTopics){
     c.topics.forEach(t => t.questions.forEach(q => {
       const pre = typeof tut.fromTopics === "string" ? tut.fromTopics : "Tutorial ";
@@ -337,14 +352,14 @@ function tutorial(mid, id){
   const qs = tutQuestions(mid, tut);
   const titles = Object.fromEntries(c.topics.map(t=>[t.id,t.title]));
   const key = "done:"+mid+":"+id; const done = store.get(key, {});
-  const label = q => "Q"+q.nums.join(" & Q");
+  const label = q => q.lab || "Q"+q.nums.join(" & Q");
   let h = subnav(mid,"tutorials") + `<div class="band" style="--mc:var(${m.color})"><div class="wrap">
     <nav class="crumbs"><a href="#${mid}">${m.code}</a><span>/</span><a href="#${mid}.tutorials">Tutorials</a><span>/</span><span>${esc(tut.title)}</span></nav>
     <h1>${esc(tut.title)}</h1><p class="lede">${esc(tut.intro||"")}</p>
   </div></div><main style="--mc:var(${m.color})"><div class="wrap">
   <div class="tutbanner" id="tutbanner" hidden><b>Tutorial complete.</b> It's now hidden from the module list. The questions stay on their topic pages, and you can find this sheet under Tutorials → Completed.</div>
   <div class="qgrid-head"><span class="small"><b id="donecount"></b> done. Jump to a question:</span><span class="qgrid-btns"><button class="btn small primary" id="alldone">Mark tutorial complete</button><button class="btn small" id="cleardone">Clear ticks</button></span></div>
-  <nav class="qgrid" aria-label="Questions">${qs.map(q=>`<a href="#${mid}.tut-${id}" data-go="tq${q.nums[0]}" class="${done[q.nums[0]]?"done":""}" data-n="${q.nums[0]}">${q.nums.join("+")}</a>`).join("")}</nav>
+  <nav class="qgrid" aria-label="Questions">${qs.map(q=>`<a href="#${mid}.tut-${id}" data-go="tq${q.nums[0]}" class="${done[q.nums[0]]?"done":""}" data-n="${q.nums[0]}">${q.lab ? esc(q.lab.replace(/^Q/,"").replace(/–.*$/,"+")) : q.nums.join("+")}</a>`).join("")}</nav>
   <div class="qlist">`;
   let lastPart = null;
   qs.forEach((q,i) => {

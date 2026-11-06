@@ -150,3 +150,6 @@ Each topic page has a "Recall check" deck after the theory, built from `src/card
 - `k`: `"def"` (concept), `"why"` (reasoning) or `"f"` (formula recall). `g` (formula cards only) says where the formula is given in the exam, e.g. `"printed on the paper"` or `"exam appendix"`; leave it out when it must be memorised.
 - Theory only: no cards that need working out. That belongs in the practice questions.
 - When a topic's theory is extended, add cards for the new material. Inside `$…$`, write `\lt` and `\gt` rather than `<` and `>`.
+
+## Past papers as sittable sets
+A tutorial entry with `paper: { re, alias }` (see `src/mod_ssc_zz_papers.js`) collects every topic question whose `src` matches `re` and labels it by its `Q1(a)` part, in exam order. Questions already in the bench under another label (e.g. "State-Space Sheet Q4 (exam 2024 Q1(a))") are picked up automatically; a question src that names the paper without a part goes in `alias`. Give a question `plab: "Q4(a)–(d)"` when it covers several parts. The file is named `zz_` so it loads after `mod_ssc_tut.js` (which assigns the tutorial list).
