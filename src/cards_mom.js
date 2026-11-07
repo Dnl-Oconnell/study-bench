@@ -188,5 +188,22 @@ clutch: [
     R`A slipping clutch delivers its limiting torque $T_c$ regardless of the input, so the torque reaching the output is fixed.`),
 ],
 
+balance: [
+  C("def", R`What is static unbalance?`,
+    R`The mass centre does not lie on the axis of rotation (mass unevenly spread around it). Under gravity the shaft rolls until the eccentric mass is at the bottom.`),
+  C("f", R`Condition for static balance.`,
+    R`$$\sum m_i\vec r_i=0$$ The $m\vec r$ vectors must close; checking torques at one position is not enough.`),
+  C("f", R`Force on the shaft from a rotating eccentric mass.`,
+    R`$$F_e=m_er_e\omega^2$$`),
+  C("f", R`Extra condition for dynamic balance.`,
+    R`$$\sum m_i\vec r_i\,l_i=0$$ with $l$ signed from the reference plane, as well as $\sum m_i\vec r_i=0$.`),
+  C("why", R`Why does static balance not guarantee dynamic balance?`,
+    R`The rotors sit at different axial positions, so cancelling forces can still form a rotating couple that bends the shaft and loads the bearings.`),
+  C("why", R`Why put the reference plane at one of the correction planes?`,
+    R`That plane's unknown then has $l=0$ and drops out of $\sum mrl=0$, so you solve for the other plane first, then use $\sum mr=0$ for the first.`),
+  C("def", R`Wheel tramp vs wheel shimmy.`,
+    R`Tramp: static imbalance (wheel hops). Shimmy: dynamic imbalance (wheel wobbles side to side).`),
+],
+
 };
 })();

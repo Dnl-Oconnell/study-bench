@@ -9,6 +9,7 @@ T.tutorials = [
  { id:"t4", short:"4", title:"Tutorial 4: Forced Vibration I", note:"Solution posted", fromTopics:"Tutorial 4 ", intro:"Undamped and damped harmonic forcing, resonance, and a base-excited lever." },
  { id:"t5", short:"5", title:"Tutorial 5: Forced Vibration II", note:"Solution posted (Q1 differs: see note)", fromTopics:"Tutorial 5 ", intro:"Road excitation, rotating imbalance and the resonance peak." },
  { id:"t6", short:"6", title:"Tutorial 6: Gears", note:"Solution posted", fromTopics:"Tutorial 6 ", intro:"Epicyclic trains: ring-fixed reduction, driving the ring, carrier input, sharing load across planets, and a two-stage compound train." },
- { id:"t7", short:"7", title:"Tutorial 7: Belts", note:"Solution posted", fromTopics:"Tutorial 7 ", intro:"A capstan with several turns of rope, a stress-limited leather belt at its running and optimum speeds, and the gain from an idler pulley that increases the lap angle." }
+ { id:"t7", short:"7", title:"Tutorial 7: Belts", note:"Solution posted", fromTopics:"Tutorial 7 ", intro:"A capstan with several turns of rope, a stress-limited leather belt at its running and optimum speeds, and the gain from an idler pulley that increases the lap angle." },
+ { id:"t8", short:"8", title:"Tutorial 8: Clutch", note:"No solution posted yet (worked by Claude)", fromTopics:"Tutorial 8 ", intro:"Friction loss in a collar thrust bearing under uniform wear and uniform pressure, the torque formula for a two-face plate clutch and the time to accelerate a countershaft, and sizing a multi-plate clutch." }
 ];
 })();

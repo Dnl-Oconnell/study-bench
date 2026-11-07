@@ -98,7 +98,30 @@ questions: [
   hint:"Ring area on the cone is 2πr dr / sin β; resolve the normal force axially.",
   sol:R`<p>A ring of radial width $dr$ has slant length $dr/\sin\beta$, so $dF_N = p\,2\pi r\,dr/\sin\beta$. Its axial component is $dF_N\sin\beta = p\,2\pi r\,dr$, identical to a plate, so $W = 2\pi\int p r\,dr$.</p>
   <p>Friction acts on $dF_N$: $dT = \mu\,dF_N\,r = \dfrac{2\pi\mu p r^2\,dr}{\sin\beta}$, which is the plate result divided by $\sin\beta$. Hence $T = \mu W R/\sin\beta$ with $R = R_{eq}$ or $R_{mean}$.</p>`,
-  ans:"W unchanged; T = μWR/sin β", prov:"From the derivation in Lecture 5."}
+  ans:"W unchanged; T = μWR/sin β", prov:"From the derivation in Lecture 5."},
+ {src:"Tutorial 8 Q1", see:[2,4], q:R`An axial thrust of 50 kN is carried by a plain collar thrust bearing with inner and outer diameters 250 mm and 400 mm. $\mu=0.02$ between the thrust surfaces, and the local wear rate is proportional to the pressure and to the rubbing speed. Find the power absorbed in friction at 120 rpm. Compare this with the power when the pressure is uniform.`,
+  hint:"Wear ∝ p × v means uniform wear (pr = C), so T = μW(r_o + r_i)/2. A collar has one friction surface. Then repeat with R_eq for uniform pressure.",
+  sol:R`<p>Radii: $r_i=0.125$ m, $r_o=0.200$ m. $\omega=120\times2\pi/60=12.566$ rad/s. One pair of surfaces.</p>
+  <p><b>Uniform wear</b> (wear $\propto pv$): $R_{mean}=\dfrac{0.125+0.200}{2}=0.1625$ m, $T=\mu WR_{mean}=0.02\times50000\times0.1625=162.5$ N·m, $P=T\omega=162.5\times12.566=2042$ W.</p>
+  <p><b>Uniform pressure:</b> $R_{eq}=\dfrac23\cdot\dfrac{0.2^3-0.125^3}{0.2^2-0.125^2}=0.16538$ m, $T=0.02\times50000\times0.16538=165.4$ N·m, $P=165.4\times12.566=2078$ W.</p>
+  <p>Uniform pressure predicts about 1.8% more friction loss, as expected since $R_{eq}>R_{mean}$.</p>`,
+  ans:"2.04 kW (uniform wear); 2.08 kW (uniform pressure)", prov:"Worked by Claude; no solution is available."},
+ {src:"Tutorial 8 Q2", see:[4,6], q:R`Establish a formula for the maximum torque transmitted by a single plate clutch with two pairs of friction surfaces, internal and external radii $r_i$ and $r_o$, limiting friction coefficient $\mu$ and axial spring load $P$, assuming uniform pressure. Use it to find the time to accelerate a countershaft (rotating mass 500 kg, radius of gyration 20 mm) from rest to 250 rev/min through a single plate clutch with radii 125 mm and 200 mm, $\mu=0.3$ and spring load 600 N.`,
+  hint:"Uniform pressure on one face: p = P/(π(r_o² − r_i²)), T = (2/3)πμp(r_o³ − r_i³). Two faces doubles it. While slipping, the clutch torque is constant, so α = T/I and t = ω/α.",
+  sol:R`<p><b>Formula.</b> Uniform pressure: $p=\dfrac{P}{\pi(r_o^2-r_i^2)}$. One face: $T_1=2\pi\mu p\int_{r_i}^{r_o}r^2\,dr=\tfrac23\pi\mu p(r_o^3-r_i^3)$. Each of the two pairs carries the full spring load, so</p>$$T=2\times\frac23\mu P\,\frac{r_o^3-r_i^3}{r_o^2-r_i^2}=\frac43\mu P\,\frac{r_o^3-r_i^3}{r_o^2-r_i^2}$$
+  <p><b>Numbers.</b> $R_{eq}=\dfrac23\cdot\dfrac{0.2^3-0.125^3}{0.2^2-0.125^2}=0.16538$ m, $T=2\times0.3\times600\times0.16538=59.54$ N·m.</p>
+  <p>$I=mk^2=500\times0.02^2=0.2$ kg·m², $\omega=250\times2\pi/60=26.18$ rad/s.</p>
+  <p>$\alpha=T/I=59.54/0.2=297.7$ rad/s², so $t=\omega/\alpha=26.18/297.7=0.088$ s.</p>
+  <div class="callout">As printed, the radius of gyration (20 mm) gives a very short time. If it was meant to be 200 mm, $I=20$ kg·m² and $t=8.79$ s. Check against the posted solution when it appears.</div>`,
+  ans:"T = (4/3)μP(r_o³ − r_i³)/(r_o² − r_i²) = 59.5 N·m; t = 0.088 s as printed (8.79 s if k = 200 mm)", prov:"Worked by Claude; no solution is available."},
+ {src:"Tutorial 8 Q3", see:[4], q:R`A multi-plate clutch is to transmit 12 kW at 2000 rev/min. The plates have inner and outer radii 50 mm and 100 mm. The maximum axial spring force is 1 kN. Find the necessary number of pairs of friction surfaces if $\mu=0.35$, assuming constant wear. What axial force is then needed?`,
+  hint:"T = P/ω. Under constant wear each pair carries μWR_mean. Round the number of pairs up, then find the W that gives exactly the required torque.",
+  sol:R`<p>$\omega=2000\times2\pi/60=209.44$ rad/s, so $T=12000/209.44=57.30$ N·m.</p>
+  <p>Constant wear: $R_{mean}=(0.05+0.10)/2=0.075$ m. At the maximum force, one pair gives $\mu WR_{mean}=0.35\times1000\times0.075=26.25$ N·m.</p>
+  <p>$n=57.30/26.25=2.18$, so round up to <b>3 pairs</b>.</p>
+  <p>Axial force needed with 3 pairs: $W=\dfrac{T}{n\mu R_{mean}}=\dfrac{57.30}{3\times0.35\times0.075}=728$ N.</p>
+  <p>(If the plate arrangement needs an even number of pairs, use 4 pairs and $W=546$ N.)</p>`,
+  ans:"3 pairs; W ≈ 728 N", prov:"Worked by Claude; no solution is available."}
 ],
 traps: [
  "Uniform wear uses R_mean = (r_o + r_i)/2; constant pressure uses R_eq = (2/3)(r_o³ − r_i³)/(r_o² − r_i²). Use whichever the question states.",
