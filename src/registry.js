@@ -13,7 +13,7 @@ window.STUDY = {
       blurb:"Laplace and Z transforms, modelling circuits and mechanical systems, stability and first/second-order response, state-space models, state-space response and stability, and block diagrams and their reduction." },
     ems: { code:"EEN1029", name:"Electromechanical Systems", color:"--m-ems", ready:true,
       assess:"Exam 50% (2 h, answer 4 of 5) · CA 50%: weekly quizzes 5%, demos 10%, reports 25%, peer/self-assessment 10%",
-      blurb:"Phasors and AC power, op-amp signal conditioning, inductors and transformers, DC motors, H-bridges, steppers, encoders and TRIAC switching." },
+      blurb:"Phasors and AC power, op-amp signal conditioning, inductors and transformers, DC motors, H-bridges, steppers, encoders, TRIAC switching, three-phase and ac motors, and power converters (rectifiers, inverters, dc–dc, soft starters and VFDs)." },
     mom: { code:"MEC1014", name:"Mechanics of Machines", color:"--m-mom", ready:true,
       assess:"Continuous assessment 100%: quizzes in weeks 4, 8, 10 (10% each) and a final quiz in week 12 (40%); two practical submissions (10% each); SolidWorks assignment 10%",
       blurb:"Free and forced vibration of single degree of freedom systems, then gear trains, epicyclic gears, belt drives, friction clutches and balancing of rotating masses." },

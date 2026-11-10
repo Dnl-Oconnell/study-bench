@@ -181,5 +181,43 @@ triacs: [
     R`Natural: on ac the current reverses each half-cycle, so it switches off by itself. Forced: on dc you must reverse-bias the anode (e.g. dump a capacitor), then wait $t_Q$ before reapplying forward voltage.`),
 ],
 
+acmotors: [
+  C("why", R`Why is three-phase ac used for transmission and motors?`,
+    R`Power delivered to a balanced load is constant over the cycle (smoother transfer), and three phase windings fed 120° apart produce a rotating magnetic field.`),
+  C("f", R`Synchronous speed of the rotating field?`,
+    R`$$n_s=\frac{120f}{p}$$ p = number of poles: 4 poles at 50 Hz → 1500 rpm.`),
+  C("f", R`Line vs phase voltage and current in star and delta?`,
+    R`Star: $V_L=\sqrt3V_{ph}$, $I_L=I_{ph}$ (line voltages lead by 30°). Delta: $V_L=V_{ph}$, $I_L=\sqrt3I_{ph}$ (line currents lag by 30°).`),
+  C("def", R`How is an induction motor's rotor energised?`,
+    R`By induction: the rotating stator field induces currents in the rotor bars, which have no external connections. Squirrel cage (most common) or wound rotor.`),
+  C("why", R`Why does an induction motor always run below synchronous speed?`,
+    R`At synchronous speed there's no relative motion between field and rotor, so no induced current and no torque. More load needs more slip, so speed falls with load.`),
+  C("f", R`Define slip.`,
+    R`$$s=\frac{n_s-n}{n_s}$$ Rotor current frequency $f_r=sf$.`),
+  C("def", R`What is $R_u$ in the induction motor equivalent circuit?`,
+    R`A fictitious resistance that models the mechanical load: the power in it is the mechanical output. $R_u=R_2(1-s)/s$. The rest of the circuit is like a transformer's.`),
+  C("def", R`What makes a synchronous motor synchronous?`,
+    R`Its rotor has its own field (permanent magnet or dc-energised winding) that locks to the rotating stator field, so it runs at exactly $n_s$ from no load to full load.`),
+],
+
+powerelec: [
+  C("def", R`Name the four converter families with an application each.`,
+    R`AC–DC rectifier (dc supplies, chargers, HVDC); DC–AC inverter (VFDs, solar, UPS); DC–DC (buck/boost supplies); AC–AC (TRIAC dimmers and heater control, motor starters).`),
+  C("def", R`Uncontrolled vs controlled rectifier?`,
+    R`Uncontrolled: diode bridge, simple and cheap, fixed output. Controlled: thyristor bridge, dc output varied with the firing angle.`),
+  C("def", R`How does sinusoidal PWM work?`,
+    R`A sine reference is compared with a fast sawtooth/triangle carrier; the result switches an H-bridge. Pulse widths follow the sine and the load inductance smooths them into a sine.`),
+  C("def", R`What do all switching dc–dc converters share?`,
+    R`Energy is periodically stored in and released from an inductor by a switch opened and closed continuously; the duty cycle sets the output.`),
+  C("f", R`Ideal buck, boost and buck-boost outputs?`,
+    R`$$V_o=DV_{in},\quad V_o=\frac{V_{in}}{1-D},\quad V_o=-\frac{D}{1-D}V_{in}$$`),
+  C("def", R`What's special about the Ćuk converter?`,
+    R`It can step up or down (like buck-boost) and its output current is continuous.`),
+  C("def", R`How does a soft starter start an ac motor?`,
+    R`Anti-parallel thyristors in each line raise the voltage gradually by decreasing the firing angle: smooth acceleration and smaller power surges. Frequency is unchanged.`),
+  C("def", R`What are the three stages of a VFD, and what does it give you?`,
+    R`Rectifier → filter (dc link capacitor) → PWM inverter. Variable frequency, so full speed control from 0 to rated speed.`),
+],
+
 };
 })();
