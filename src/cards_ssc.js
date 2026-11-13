@@ -255,6 +255,16 @@ bdreduce: [
     R`Every input's term has the same denominator (the closed-loop characteristic polynomial); only the numerators differ.`),
   C("why", R`Can feedback stabilise an unstable plant?`,
     R`Yes. Closed-loop poles are the roots of the closed-loop denominator, e.g. $\frac{1}{(s+3)(s-2)}$ with feedback gain $K$ gives $s^2+s+K-6$, stable for $K\gt 6$.`),
+  C("def", R`What does a $z^{-1}$ block do?`,
+    R`Delays the signal by one sample: output $x[n-1]$. In a chain, $X_2=z^{-1}X_1$ means $X_1=zX_2$.`),
+  C("f", R`How do you get a difference equation from a closed-loop $\frac{Y(z)}{X(z)}=\frac{N(z)}{D(z)}$?`,
+    R`Cross-multiply, $Y(z)D(z)=N(z)X(z)$, and replace $z^kY(z)$ by $y[n+k]$ (and $z^kX$ by $x[n+k]$).`),
+  C("def", R`What is the stability condition for a discrete-time closed loop?`,
+    R`Every closed-loop pole inside the unit circle, $|p|\lt 1$. A simple pole with $|p|=1$ is marginally stable.`),
+  C("why", R`A closed-loop z-pole is $p=\frac{1.5}{1+1.5K}$. Why solve for both $p=1$ and $p=-1$?`,
+    R`The unit circle is crossed at $+1$ or $-1$ on the real axis; each gives a boundary on $K$. Here $K\gt\frac13$ (or $K\lt-\frac53$).`),
+  C("f", R`For $s^2+a_1s+a_0$, when are both roots in the left half-plane?`,
+    R`Exactly when $a_1\gt 0$ and $a_0\gt 0$.`),
 ],
 
 };

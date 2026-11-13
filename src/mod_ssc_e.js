@@ -95,7 +95,7 @@ traps: [
 
 T.topics.push({
 id: "bdreduce", part: "Block diagrams", title: "Block Diagram Reduction, Overlapping Loops & Multiple Inputs",
-lectures: "Section 2B – Block Diagram Reduction; posted block-diagram Examples sheets", status: "lectured",
+lectures: "Section 2B – Block Diagram Reduction; posted block-diagram Examples sheets (incl. Examples from Lectures 3 and 4)", status: "lectured",
 summary: "Reducing multi-loop block diagrams to one transfer function, by block algebra or by analysing the signals: combining parallel feedback loops, inner-then-outer loops, moving a summer to untangle overlapping loops, superposition for several inputs, and reading an ODE or a stability condition off the result.",
 theory: R`
 <h3>0. Two methods</h3>
@@ -150,12 +150,25 @@ $$C(s)=\frac{G_1G_2}{1+G_1G_2}R(s)+\frac{G_2}{1+G_1G_2}U(s)$$
 <h3>5. From the closed-loop transfer function to an ODE or a stability condition</h3>
 <p><b>ODE:</b> cross-multiply and inverse-Laplace with zero initial conditions ($s\to\frac{d}{dt}$). E.g. $\dfrac{Y}{X}=\dfrac{4}{s^2+2s+4}$ gives $\ddot y+2\dot y+4y=4x$.</p>
 <p><b>Stability:</b> the closed-loop poles are the roots of the closed-loop denominator, so feedback can stabilise an unstable plant. With $G_1=\frac{1}{s+3}$, $G_2=\frac{1}{s-2}$ (pole at +2, unstable) and feedback gain $K$, the closed loop is $\dfrac{1}{s^2+s+K-6}$; its poles are in the left half-plane only for $K>6$.</p>
+<p>The same works for a gain inside the loop. With $K$ and $\frac{1}{s-1}$ forward and $\frac{1}{s+3}$ in the feedback path, the closed-loop denominator is $s^2+2s+K-3$: stable for $K>3$. With a PI controller $K_1+\frac{K_2}{s}$ around $\frac{1}{s-2}$ it is $s^2+(K_1-2)s+K_2$. For a quadratic $s^2+a_1s+a_0$, both roots are in the left half-plane exactly when $a_1>0$ and $a_0>0$. Complex roots mean oscillation, not instability.</p>
+
+<h3>6. Discrete-time (z-domain) block diagrams</h3>
+<p>The rules are the same with $z$ in place of $s$: cascade multiplies, parallel adds, a loop gives $\frac{G(z)}{1+G(z)H(z)}$, and signal analysis works step for step. What is new:</p>
+<ol class="steps">
+<li><b>Delay blocks.</b> $z^{-1}$ is a one-sample delay. In a chain $X_2=z^{-1}X_1$, $X_3=z^{-1}X_2$, write everything in terms of the last signal: $X_2=zX_3$, $X_1=z^2X_3$. Clear negative powers by multiplying top and bottom by the highest power of $z$.</li>
+<li><b>Plant given as a difference equation.</b> Z-transform it first: $y[n]=1.5y[n-1]+1.5x_p[n]$ gives $H(z)=\dfrac{1.5}{1-1.5z^{-1}}=\dfrac{1.5z}{z-1.5}$ (open-loop pole at 1.5, unstable).</li>
+<li><b>Difference equation from the closed loop.</b> Cross-multiply $Y(z)D(z)=N(z)X(z)$ and replace $z^kY$ by $y[n+k]$. E.g. $\dfrac{Y}{X}=\dfrac{z^2}{4z^2-0.3z+0.02}$ gives $4y[n+2]-0.3y[n+1]+0.02y[n]=x[n+2]$, or shifted back by two samples, $4y[n]-0.3y[n-1]+0.02y[n-2]=x[n]$.</li>
+<li><b>Stability.</b> Closed-loop poles must be inside the unit circle, $|p|<1$. A simple pole on the circle ($|p|=1$) is marginally stable. When a pole depends on a gain, solve both boundaries $p=+1$ and $p=-1$: e.g. $p=\frac{1.5}{1+1.5K}$ is inside for $K>\frac13$ (or $K<-\frac53$).</li>
+<li><b>Complex pole pairs.</b> For $az^2+bz+c$ with complex roots, $|p|^2=\frac{c}{a}$, so check $\frac{c}{a}<1$ directly.</li>
+</ol>
 `,
 formulas: [
  {name:"Feedback loops into consecutive summers", tex:R`\frac{C}{R}=\frac{G_1G_2G_3}{1+G_2G_3(H_1+H_2+H_3)}`},
  {name:"Nested inner and outer loops", tex:R`\frac{Y}{R}=\frac{G_1G_2G_3}{1+G_2G_3H_2+G_1G_2G_3H_1}`},
  {name:"Superposition (two inputs, unity feedback)", tex:R`C=\frac{G_1G_2}{1+G_1G_2}R+\frac{G_2}{1+G_1G_2}U`, note:"Same denominator for every input."},
- {name:"TF to ODE", tex:R`Y(s)\,D(s)=N(s)\,X(s)\;\Rightarrow\;s^k\to\frac{d^k}{dt^k}`, note:"Zero initial conditions."}
+ {name:"TF to ODE", tex:R`Y(s)\,D(s)=N(s)\,X(s)\;\Rightarrow\;s^k\to\frac{d^k}{dt^k}`, note:"Zero initial conditions."},
+ {name:"TF to difference equation", tex:R`Y(z)\,D(z)=N(z)\,X(z)\;\Rightarrow\;z^kY(z)\to y[n+k]`, note:"Shift back by the highest power to get y[n] in terms of past values."},
+ {name:"Discrete stability", tex:R`|p|<1\ \text{for every closed-loop pole};\quad az^2+bz+c\ \text{complex roots: } |p|^2=\tfrac{c}{a}`}
 ],
 questions: [
  {src:"Section 2B Example 1", fig:"ssc_bd1", see:[1], q:R`Find $C(s)/R(s)$ for the diagram (three feedback paths $H_1$, $H_2$, $H_3$ into three consecutive summers). Do it by block algebra, then check by analysing the signals.`,
@@ -198,6 +211,38 @@ questions: [
   hint:"Ea = K(Vref − Vo/20) and Vo = Ea − αIa. Substitute Vo into the first, solve for Ea, then back-substitute.",
   sol:R`<p>$E_a=K\left(V_{ref}-\frac{1}{20}(E_a-\alpha I_a)\right)$, so $E_a\left(1+\frac{K}{20}\right)=KV_{ref}+\frac{K\alpha}{20}I_a$ and</p>$$E_a=\frac{20K}{20+K}V_{ref}+\frac{K\alpha}{20+K}I_a$$<p>Then $V_o=E_a-\alpha I_a$, and $\frac{K\alpha}{20+K}-\alpha=-\frac{20\alpha}{20+K}$:</p>$$V_o(s)=\frac{20K}{20+K}V_{ref}(s)-\frac{20\alpha}{20+K}I_a(s)$$<p>Larger $K$ pushes the $V_{ref}$ gain towards 20 and shrinks the effect of the load current $I_a$: feedback rejecting a disturbance.</p>`,
   ans:"Vo = 20K/(20+K)·Vref − 20α/(20+K)·Ia", prov:"Follows the posted solution."},
+ {src:"Block Diagram Examples (Lecture 3) Ex 1", fig:"ssc_bdL3a", see:[6], q:R`Determine the difference equation relating $x[n]$ and $y[n]$. $X(z)$ enters a summer (feedback $3Y$ subtracted), then $\dfrac{z}{z-0.1}$ and $\dfrac{z}{z-0.2}$ in cascade give $Y(z)$.`,
+  hint:"Feedback rule with G = z²/((z−0.1)(z−0.2)) and H = 3. Then cross-multiply and replace z^k·Y by y[n+k].",
+  sol:R`$$G(z)=\frac{Y(z)}{X(z)}=\frac{\left(\frac{z}{z-0.1}\right)\left(\frac{z}{z-0.2}\right)}{1+3\left(\frac{z}{z-0.1}\right)\left(\frac{z}{z-0.2}\right)}=\frac{z^2}{(z-0.1)(z-0.2)+3z^2}=\frac{z^2}{4z^2-0.3z+0.02}$$<p>So $Y(z)\left[4z^2-0.3z+0.02\right]=z^2X(z)$, giving</p>$$4y[n+2]-0.3y[n+1]+0.02y[n]=x[n+2]$$<p>(Equivalently, shifting back two samples: $4y[n]-0.3y[n-1]+0.02y[n-2]=x[n]$.)</p>`,
+  ans:"4y[n+2] − 0.3y[n+1] + 0.02y[n] = x[n+2]", prov:"Follows the posted solution."},
+ {src:"Block Diagram Examples (Lecture 3) Ex 2", fig:"ssc_bdL3b", see:[6], q:R`The plant obeys $y[n]=1.5y[n-1]+1.5x_p[n]$. It sits in a loop: $X(z)$ enters a summer (unity feedback of $Y$ subtracted), a gain $K$ gives $X_p$, and the plant $H(z)$ gives $Y(z)$. Form $H(z)$ and determine the minimum $K>0$ for an asymptotically stable system.`,
+  hint:"Z-transform the plant: H = 1.5z/(z − 1.5). The closed loop has one pole, 1.5/(1 + 1.5K); find where it crosses the unit circle.",
+  sol:R`<p>$Y(z)=1.5z^{-1}Y(z)+1.5X_p(z)$, so $H(z)=\dfrac{1.5}{1-1.5z^{-1}}=\dfrac{1.5z}{z-1.5}$. On its own this is unstable: pole $1.5>1$.</p>$$\frac{Y}{X}=\frac{K\frac{1.5z}{z-1.5}}{1+K\frac{1.5z}{z-1.5}}=\frac{1.5Kz}{(1+1.5K)z-1.5}\qquad p=\frac{1.5}{1+1.5K}$$<p>Need $|p|<1$. Boundary $p=1$: $1.5=1+1.5K\Rightarrow K=\frac13$. Boundary $p=-1$: $1.5=-1-1.5K\Rightarrow K=-\frac53$.</p><p>For $K>0$ the pole is positive and shrinks as $K$ grows, so it is inside the unit circle for $K>\frac13$. (The other stable range, $K<-\frac53$, has a negative gain.)</p>`,
+  ans:"K > 1/3", prov:"Follows the posted solution."},
+ {src:"Block Diagram Examples (Lecture 3) Ex 3", see:[6], q:R`A system is described by $y[n]=ay[n-1]+by[n-2]+cx[n]$. Its poles are $-0.5$ and $-0.25$, and $y[0]=1$ when $x[n]=\delta[n]$, with $y[n]=0$ for $n<0$. What are $a$, $b$ and $c$?`,
+  hint:"Form H(z) = c z²/(z² − az − b) and match the denominator to (z + 0.5)(z + 0.25). For c, evaluate the equation at n = 0.",
+  sol:R`$$Y(z)\left(1-az^{-1}-bz^{-2}\right)=cX(z)\;\Rightarrow\;H(z)=\frac{c}{1-az^{-1}-bz^{-2}}=\frac{cz^2}{z^2-az-b}$$<p>Poles: $(z+0.5)(z+0.25)=z^2+0.75z+0.125$, so $-a=0.75$ and $-b=0.125$: $a=-0.75$, $b=-0.125$.</p><p>At $n=0$ with an impulse input, $y[-1]=y[-2]=0$ and $x[0]=1$: $y[0]=c\,x[0]$, so $1=c$.</p>`,
+  ans:"a = −0.75, b = −0.125, c = 1", prov:"Follows the posted solution."},
+ {src:"Block Diagram Examples (Lecture 4) Ex 1", fig:"ssc_bdL4a", see:[6], q:R`$X$ enters a summer (feedback subtracted), then a gain $K$ and $\dfrac{z}{z+1.2}$ give $Y$. The feedback path is $\dfrac{z}{z+0.5}$. Form the transfer function and determine the stability of the system for $K=0.1$ and $K=1$.`,
+  hint:"Denominator (z + 1.2)(z + 0.5) + Kz² = (1 + K)z² + 1.7z + 0.6. Find its roots for each K and check their magnitudes.",
+  sol:R`$$\frac{Y(z)}{X(z)}=\frac{\frac{Kz}{z+1.2}}{1+\frac{Kz}{z+1.2}\cdot\frac{z}{z+0.5}}=\frac{Kz(z+0.5)}{(z+1.2)(z+0.5)+Kz^2}=\frac{Kz(z+0.5)}{(1+K)z^2+1.7z+0.6}$$<p>Poles: $p=\dfrac{-1.7\pm\sqrt{1.7^2-4(1+K)(0.6)}}{2(1+K)}$.</p><p><b>$K=0.1$:</b> $\sqrt{2.89-2.64}=0.5$, so $p=\frac{-2.2}{2.2}=-1$ and $p=\frac{-1.2}{2.2}=-0.545$. One simple pole is on the unit circle: <b>marginally stable</b>.</p><p><b>$K=1$:</b> $2z^2+1.7z+0.6$; the discriminant $2.89-4.8=-1.91$ is negative, so $p=-0.425\pm j0.346$ with $|p|=\sqrt{0.6/2}=0.548<1$: <b>asymptotically stable</b>.</p>`,
+  ans:"K = 0.1: poles −1 and −0.545, marginally stable. K = 1: |p| = 0.548, stable", prov:"Follows the posted solution; the sheet stops at 'check if magnitude < 1' for K = 1, so that check was worked by Claude."},
+ {src:"Block Diagram Examples (Lecture 4) Ex 2", fig:"ssc_bdL4b", see:[6,0], q:R`Determine the transfer function $Y/X$. $X(z)$ enters a summer giving $X_1$; a delay $z^{-1}$ gives $X_2$ and a second $z^{-1}$ gives $X_3$. $X_2$ is fed back through gain 4 and $X_3$ through gain 16, both subtracted at the input summer. The output summer adds $16X_3$ and $8X_2$ to give $Y(z)$.`,
+  hint:"X1 = X − 4X2 − 16X3, X2 = z⁻¹X1, X3 = z⁻¹X2. Write X1 = z²X3 and X2 = zX3, then solve for X3.",
+  sol:R`<p>Summer and delays: $X_1=X-4X_2-16X_3$, $X_2=z^{-1}X_1$, $X_3=z^{-1}X_2$.</p><p>The posted solution substitutes step by step: $X_2(1+4z^{-1})=z^{-1}X-16z^{-1}X_3$, so $X_2=\dfrac{1}{z+4}X-\dfrac{16}{z+4}X_3$; then $X_3=z^{-1}X_2$ gives</p>$$X_3=\frac{\frac{z^{-1}}{z+4}}{1+\frac{16z^{-1}}{z+4}}X=\frac{1}{z^2+4z+16}X$$<p>(Quicker: $X_1=z^2X_3$ and $X_2=zX_3$, so $z^2X_3=X-4zX_3-16X_3$.)</p><p>Output: $Y=16X_3+8X_2=(16+8z)X_3$, so</p>$$\frac{Y(z)}{X(z)}=\frac{8z+16}{z^2+4z+16}$$<p>Not asked, but the poles have $|p|^2=16$, $|p|=4$: this loop is unstable.</p>`,
+  ans:"Y/X = (8z + 16)/(z² + 4z + 16)", prov:"Follows the posted solution; the shortcut and the stability remark are Claude's."},
+ {src:"Block Diagram Examples (Lecture 4) Ex 3", fig:"ssc_bdL4c", see:[6,3], q:R`Form $Y(z)/R(z)$. $R$ enters summer 1 (feedback $2Y$ subtracted) giving $X_1$; $\dfrac{z}{z-0.2}$ gives $X_2$. Summer 2 forms $X_3=X_2+R-Y$ ($R$ is also fed forward to it, and $Y$ is fed back with unity gain), and $\dfrac{z}{z-1.2}$ gives $Y(z)$.`,
+  hint:"Signal analysis: X1 = R − 2Y, X2 = z/(z−0.2)·X1, X3 = X2 + R − Y, Y = z/(z−1.2)·X3. Solve the inner loop for Y in terms of X2 and R first.",
+  sol:R`<p>$Y=\dfrac{z}{z-1.2}(X_2+R-Y)$, so $Y\left(1+\dfrac{z}{z-1.2}\right)=\dfrac{z}{z-1.2}(X_2+R)$, i.e. $Y=\dfrac{z}{2z-1.2}(X_2+R)$.</p><p>Substitute $X_2=\dfrac{z}{z-0.2}R-\dfrac{2z}{z-0.2}Y$:</p>$$Y\left[1+\frac{2z^2}{(2z-1.2)(z-0.2)}\right]=\frac{z^2+z(z-0.2)}{(2z-1.2)(z-0.2)}R$$$$\frac{Y}{R}=\frac{2z^2-0.2z}{(2z-1.2)(z-0.2)+2z^2}=\frac{2z^2-0.2z}{4z^2-1.6z+0.24}$$<p>Not asked: the poles are $0.2\pm j0.141$, $|p|=0.245$, so the closed loop is stable even though $\frac{z}{z-1.2}$ alone is not.</p>`,
+  ans:"Y/R = (2z² − 0.2z)/(4z² − 1.6z + 0.24)", prov:"Follows the posted solution; the stability remark is Claude's."},
+ {src:"Block Diagram Tutorial Examples Q1", fig:"ssc_bdTE1", see:[5], q:R`Determine the value of $K$ if asymptotic stability is required. $X(s)$ enters a summer (feedback subtracted), then a gain $K$ and $\dfrac{1}{s-1}$ give $Y(s)$. The feedback path is $\dfrac{1}{s+3}$.`,
+  hint:"Closed-loop denominator (s − 1)(s + 3) + K = s² + 2s + K − 3. The '+' root must be negative.",
+  sol:R`$$G(s)=\frac{\frac{K}{s-1}}{1+\frac{K}{s-1}\cdot\frac{1}{s+3}}=\frac{K(s+3)}{s^2+2s-3+K}$$<p>Poles: $p=\dfrac{-2\pm\sqrt{4-4(K-3)}}{2}=\dfrac{-2\pm\sqrt{16-4K}}{2}$. The $-$ root is always negative. The $+$ root is negative when $\sqrt{16-4K}<2$: $16-4K<4$, so $4K>12$ and $K>3$.</p><p>If $K>4$ the square-root term is negative and the poles are complex ($-1\pm j\ldots$): still stable, but the response oscillates.</p>`,
+  ans:"K > 3", prov:"Follows the posted solution."},
+ {src:"Block Diagram Tutorial Examples Q2", fig:"ssc_bdTE2", see:[5], q:R`Determine the range of values of $K_2$ for a stable system if $K_1=3.5$. $X(s)$ enters a summer (unity feedback of $Y$ subtracted), then the controller $K_1+\dfrac{K_2}{s}$ and the plant $\dfrac{1}{s-2}$ give $Y(s)$.`,
+  hint:"Closed-loop denominator s(s − 2) + K1·s + K2 = s² + (K1 − 2)s + K2. Put K1 = 3.5.",
+  sol:R`$$G(s)=\frac{\left(K_1+\frac{K_2}{s}\right)\frac{1}{s-2}}{1+\left(K_1+\frac{K_2}{s}\right)\frac{1}{s-2}}=\frac{K_1s+K_2}{s(s-2)+K_1s+K_2}=\frac{K_1s+K_2}{s^2+(K_1-2)s+K_2}$$<p>With $K_1=3.5$ the poles are the roots of $s^2+1.5s+K_2$: $p=\dfrac{-1.5\pm\sqrt{2.25-4K_2}}{2}$.</p><p>$-1.5+\sqrt{\ }$ could be positive, so need $\sqrt{2.25-4K_2}<1.5$: $2.25-4K_2<2.25$, so $K_2>0$.</p>`,
+  ans:"K2 > 0", prov:"Follows the posted solution."},
  {src:"Block Diagram Tutorial Q1", fig:["ssc_bdT1","ssc_bdT1b"], see:[2,0], q:R`<b>First diagram:</b> $R(s)$ enters a summer (unity feedback of $Y$ subtracted) giving $X_1$, then a gain $K$ gives $X_2$. $X_2$ feeds an inner loop: a summer forms $X_3=X_2-X_4$ and $\dfrac{1}{s+2}$ gives $X_4$. A branch $\dfrac{1}{s+3}$ from $X_2$ is added to $X_4$ to give $Y(s)$. <b>Second diagram:</b> the same, except the branch is a block $G_{EQ}(s)$ taken from $X_1$ (before the gain $K$). (a) What is $G_{EQ}(s)$ so that both diagrams give the same $Y/R$? (b) Find $Y(s)/R(s)$.`,
   hint:"Close the inner loop first: (1/(s+2))/(1 + 1/(s+2)) = 1/(s+3). For (a), the branch must deliver the same signal to the output summer: G_EQ·X1 = X2/(s+3) with X2 = K·X1.",
   sol:R`<p><b>(a)</b> In the first diagram the branch delivers $\dfrac{1}{s+3}X_2$ to the output summer. In the second it delivers $G_{EQ}X_1$. With $X_2=KX_1$:</p>$$G_{EQ}X_1=\frac{1}{s+3}KX_1\quad\Rightarrow\quad G_{EQ}(s)=\frac{K}{s+3}$$<p>(Moving a pick-off point back past a block multiplies the branch by that block.)</p><p><b>(b)</b> Signals: $X_1=R-Y$, $X_3=X_2-X_4$, $X_4=\dfrac{1}{s+2}X_3$. Then $X_4\left(1+\dfrac{1}{s+2}\right)=\dfrac{X_2}{s+2}$, so $X_4=\dfrac{1}{s+3}X_2$: the inner loop reduces to $\dfrac{1}{s+3}$.</p><p>It now sits in parallel with the $\dfrac{1}{s+3}$ branch: $\dfrac{1}{s+3}+\dfrac{1}{s+3}=\dfrac{2}{s+3}$. Cascade with $K$ gives forward path $\dfrac{2K}{s+3}$, inside unity negative feedback:</p>$$\frac{Y}{R}=\frac{\dfrac{2K}{s+3}}{1+\dfrac{2K}{s+3}}=\frac{2K}{s+3+2K}$$`,
@@ -212,6 +257,8 @@ traps: [
  "Feedback paths can be added in parallel only when no block sits between the summers they enter.",
  "With several inputs, every output term must have the same denominator; if they differ, there is an algebra slip.",
  "When setting an input to zero for superposition, keep the sign of the feedback: with R = 0 the loop becomes −1 × (feedback) into the remaining summer.",
+ "In the z-domain, stability means every pole inside the unit circle (|p| < 1), not a negative real part. Check both boundaries p = +1 and p = −1 when a pole depends on a gain.",
+ "A pole exactly on the unit circle (e.g. p = −1) is marginally stable, not stable.",
  "Clear the fraction-within-a-fraction carefully: multiply top and bottom by the inner denominator, which then appears in the final denominator."
 ]
 });
