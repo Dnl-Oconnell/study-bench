@@ -65,7 +65,25 @@ questions: [
  {src:"Practice (Lecture 6 static balance)", see:[1], q:R`Using the rotors from the Lecture 6 example (A 0.040 kg·m at 0°, B 0.090 at 60°, C 0.200 at 190°, D 0.175 at 270°), find the single balancing mass-radius product and its angle that would give <b>static</b> balance only. Explain why this alone would not give dynamic balance.`,
   hint:"Add the x and y components of the four mr vectors. The balancing mr is equal and opposite to the resultant.",
   sol:R`<p>$\sum mr\cos\theta=0.04+0.09\cos60^\circ+0.2\cos190^\circ+0.175\cos270^\circ=0.04+0.045-0.19696+0=-0.11196$.</p><p>$\sum mr\sin\theta=0+0.07794-0.03473-0.175=-0.13179$.</p><p>The balancing mass must supply $+0.11196$ and $+0.13179$: $m_br_b=\sqrt{0.11196^2+0.13179^2}=0.1729$ kg·m at $\theta_b=\tan^{-1}(0.13179/0.11196)=49.65^\circ$.</p><p>This closes the $m\vec r$ polygon, but the rotors sit at different axial positions, so $\sum m\vec r\,l\ne0$: the forces still form a rotating couple that bends the shaft and loads the bearings. Dynamic balance needs two correction planes.</p>`,
-  ans:"0.173 kg·m at 49.6°; a single plane cannot cancel the couple Σmrl", prov:"Worked by Claude; no solution is available. The components match the force sums in the Lecture 6 example before E and F are added."}
+  ans:"0.173 kg·m at 49.6°; a single plane cannot cancel the couple Σmrl", prov:"Worked by Claude; no solution is available. The components match the force sums in the Lecture 6 example before E and F are added."},
+ {src:"Tutorial 9 Q1", see:[1,2,3], q:R`A disc A is mounted on a shaft. Masses C, D and E are attached to it as below.<table class="data num"><tr><th>Mass on A</th><th>Mass (kg)</th><th>Radius (mm)</th><th>Angle</th></tr><tr><td>C</td><td>2</td><td>100</td><td>0°</td></tr><tr><td>D</td><td>1.5</td><td>125</td><td>60°</td></tr><tr><td>E</td><td>3</td><td>87.5</td><td>135°</td></tr></table>(a) Find the unbalanced force on the shaft at 300 rpm. (b) A similar disc B is mounted 200 mm from A. Find the magnitude and angular position of a mass on B, at 150 mm radius, that makes the resultant radial force zero. (c) What rocking couple then acts on the shaft at 120 rpm?`,
+  hint:"Resolve the three mr vectors into x and y components. The mass on B must cancel the resultant, so it sits 180° from it. The two equal and opposite forces 200 mm apart form a couple.",
+  sol:R`<p><b>(a)</b> $mr$ values: C $0.200$ kg·m at 0°, D $0.1875$ at 60°, E $0.2625$ at 135°.</p>
+  <p>$\sum mr\cos\theta=0.200+0.1875(0.5)+0.2625(-0.7071)=0.1081$; $\sum mr\sin\theta=0+0.1875(0.8660)+0.2625(0.7071)=0.3480$.</p>
+  <p>Resultant $mr=\sqrt{0.1081^2+0.3480^2}=0.3644$ kg·m at $\tan^{-1}(0.3480/0.1081)=72.7^\circ$.</p>
+  <p>At 300 rpm, $\omega=31.42$ rad/s: $F=0.3644(31.42)^2=360$ N.</p>
+  <p><b>(b)</b> B must supply $m_Br_B=0.3644$ kg·m opposite the resultant: $m_B=0.3644/0.150=2.43$ kg at $72.7^\circ+180^\circ=252.7^\circ$.</p>
+  <p><b>(c)</b> The radial forces now cancel, but they act in planes 0.2 m apart, so they form a couple: $C=m r\omega^2\times0.2$. At 120 rpm, $\omega=12.57$ rad/s: $C=0.3644(12.57)^2(0.2)=11.5$ N·m. This is static balance without dynamic balance.</p>`,
+  ans:"(a) ≈ 360 N; (b) 2.43 kg at 252.7°; (c) ≈ 11.5 N·m", prov:"Worked by Claude; no solution is available. Arithmetic checked in code."},
+ {src:"Tutorial 9 Q2", see:[1,3], q:R`A shaft carries three pulleys A, B and C, with B and C 1.2 m and 2.1 m from A. Their out-of-balance is 0.03, 0.05 and 0.04 kg·m respectively. They are keyed to the shaft to give static balance. Find the relative angular positions of the out-of-balance radii and the unbalanced couple. If the shaft runs in bearings 1.8 m apart, find the dynamic load on each bearing at 300 rpm.`,
+  hint:"Static balance means the three mr vectors close into a triangle. 0.03, 0.04, 0.05 is a 3-4-5 triangle, so two of the vectors are at right angles. Then take moments about A.",
+  sol:R`<p><b>Angles.</b> The three $m\vec r$ vectors must close: sides 0.03, 0.05, 0.04, a 3-4-5 right triangle. Put A at 0°. Then C (0.04) is at right angles to A, and the triangle closes with B (0.05) at <b>126.9°</b> and C at <b>270°</b> (−90°). Check: $x$: $0.03+0.05\cos126.9^\circ+0=0.03-0.03=0$; $y$: $0+0.05\sin126.9^\circ-0.04=0.04-0.04=0$ ✓. (The mirror image, B at 233.1° and C at 90°, is equally valid.)</p>
+  <p><b>Couple</b> (moments about A, $l_B=1.2$ m, $l_C=2.1$ m):</p>
+  <p>$\sum mrl\cos\theta=0.05(1.2)\cos126.9^\circ+0.04(2.1)\cos270^\circ=-0.036$; $\sum mrl\sin\theta=0.05(1.2)\sin126.9^\circ+0.04(2.1)\sin270^\circ=0.048-0.084=-0.036$.</p>
+  <p>$\sum mrl=\sqrt{0.036^2+0.036^2}=0.0509$ kg·m² at 225°. Because the system is in static balance, this couple is the same about any reference point.</p>
+  <p>At 300 rpm, $\omega=31.42$ rad/s: $C=0.0509(31.42)^2=50.2$ N·m.</p>
+  <p><b>Bearings:</b> the couple is carried by equal and opposite forces 1.8 m apart: $F=50.2/1.8=27.9$ N on each bearing, rotating with the shaft.</p>`,
+  ans:"B at 126.9°, C at 270° from A; couple 0.0509 kg·m² → 50.2 N·m; ≈ 27.9 N per bearing", prov:"Worked by Claude; no solution is available. Arithmetic checked in code."}
 ],
 traps: [
  "Static balance at one position (ΣT = 0) is not static balance. The mr vectors must sum to zero, so the shaft stays put at any angle.",

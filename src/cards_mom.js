@@ -205,5 +205,26 @@ balance: [
     R`Tramp: static imbalance (wheel hops). Shimmy: dynamic imbalance (wheel wobbles side to side).`),
 ],
 
+gyro: [
+  C("def", R`How is the direction of an angular velocity vector defined in 3-D?`,
+    R`Normal to the plane of rotation, by the right-hand rule: fingers curl with the rotation, thumb points along $\vec\omega$.`),
+  C("f", R`Angular momentum of a spinning body, and $I$ for a uniform disc.`,
+    R`$$\vec H=I\vec\omega\ \ [\text{kg·m}^2/\text{s}],\qquad I_{disc}=\tfrac12mR^2$$ With a radius of gyration, $I=mk^2$.`),
+  C("def", R`Spin vs precession.`,
+    R`Spin $\omega$: rotation about the body's own axis. Precession $\Omega$: rotation of that axis about another axis; it changes the direction of $\vec H$, not its size.`),
+  C("f", R`Gyroscopic couple: vector form and magnitude.`,
+    R`$$\dot{\vec H}=\vec\Omega\times I\vec\omega,\qquad C=I\omega\Omega$$ Units N·m.`),
+  C("why", R`Where does $C=I\omega\Omega$ come from?`,
+    R`In time $dt$ the momentum vector (length $I\omega$) turns through $d\theta$, so its tip moves $I\omega\,d\theta$. Rate of change $=I\omega\,d\theta/dt=I\omega\Omega$, and by Newton's second law for rotation that equals the external moment.`),
+  C("def", R`Applied couple vs reaction couple.`,
+    R`Applied $\vec C_A=\vec\Omega\times I\vec\omega$: the couple that must act on the rotor to make it precess. Reaction $\vec C_R=I\vec\omega\times\vec\Omega=-\vec C_A$: what the rotor exerts on its bearings or frame.`),
+  C("f", R`Precession rate of a vehicle rounding a bend.`,
+    R`$$\Omega=\frac vR$$`),
+  C("why", R`Banked motorcycle: which couples overturn the bike and which restores it?`,
+    R`Overturning: centrifugal $\frac{mv^2}{R}h\cos\alpha$ and gyroscopic $(I_w\omega_w+I_e\omega_e)\frac vR\cos\alpha$ (engine added if it spins the same way as the wheels). Restoring: gravity $mgh\sin\alpha$.`),
+  C("def", R`How does a ship's gyro-stabiliser work?`,
+    R`Rolling precesses the spinning flywheel; the resulting precession of its frame, combined with the spin, produces a couple that opposes the roll.`),
+],
+
 };
 })();

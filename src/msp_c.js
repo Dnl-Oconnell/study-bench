@@ -1,4 +1,4 @@
-/* MEC1015 — topics 16–17: frequency response of physical systems (Lectures 19.1–19.2) and filters (Lectures 20.1–20.2 + additional notes) */
+/* MEC1015 — topics 16–18: frequency response of physical systems (Lectures 19.1–19.2), filters (Lectures 20.1–20.2 + additional notes) and the limits of the Fourier transform (Lecture 22) */
 (function(){
 const R = String.raw;
 STUDY.content.msp = STUDY.content.msp || { topics: [] };
@@ -217,5 +217,62 @@ questions: [
   ans:"X = 2/(2 + jω); H = 1/((1 + 2jω)(1 + jω)); ω ≈ 0.419 rad/s", prov:"Follows the worked example in the Lecture 20 additional notes; the final root is recomputed in code (0.4188 vs the notes' 0.4175)."}
 ],
 traps: ["Linear phase (φ = −kω) is what you want: it means a constant time delay, not zero phase.", "Every Butterworth filter is −3 dB (0.707) at ω_c, whatever its order; order changes the slope after it.", "The −3 dB point is relative to the pass-band gain (often H(0)), not to 1, when the gain isn't unity.", "Square the magnitudes before solving: |a + jb|² = a² + b².", "Solving for ω² gives two roots; keep the positive one.", "Output across C is low-pass, across L is high-pass.", "The spring–mass–damper cut-off (16.27 rad/s) is above its natural frequency (≈10.2 rad/s) because of the resonant bump."]
+});
+
+T.topics.push({
+id: "laplace", part: "Signal processing", title: "Limits of the Fourier Transform: Towards Laplace",
+lectures: "Lecture 22", status: "lectured",
+summary: "Why some signals, like the ramp, have no Fourier transform (the integral must converge), and how multiplying by a decaying exponential e^(−σt) fixes it, giving the Laplace transform with s = σ + jω.",
+theory: R`
+<h3>0. When does a Fourier transform exist?</h3>
+<p>The Fourier transform converts an aperiodic signal to the frequency domain:</p>
+$$F(\omega)=\int_{-\infty}^{\infty}f(t)e^{-j\omega t}dt$$
+<p>This only works if the right-hand side is <b>finite</b>. Since $|e^{-j\omega t}|=1$ for every $\omega$ and $t$, the integral is guaranteed finite only when the signal is absolutely integrable:</p>
+<div class="callout key">$$\int_{-\infty}^{\infty}|f(t)|\,dt\lt\infty$$</div>
+<p>Many useful signals fail this test and so do not have Fourier transforms.</p>
+
+<h3>1. Example: the ramp</h3>
+<p>For the ramp $f(t)=t$ the Fourier transform would be</p>
+$$F(\omega)=\int_{-\infty}^{\infty}t\,e^{-j\omega t}dt=\left[\frac{e^{-j\omega t}}{\omega}\left(jt+\frac1\omega\right)\right]_{-\infty}^{\infty}$$
+<p>(integration by parts). The bracket does not settle to a value at $\pm\infty$: the $t$ term grows without bound while $e^{-j\omega t}$ just keeps rotating. The transform cannot be evaluated.</p>
+
+<h3>2. The fix: multiply by a decaying exponential</h3>
+<p>The Fourier transform builds a signal from sines and cosines that last for all time. Instead, use harmonic signals that <b>start at $t=0$ and decay</b>. Multiply the signal by $e^{-\sigma t}$, with $\sigma$ a positive real number, so the ramp becomes a decaying ramp, and integrate over positive time only:</p>
+$$F(\sigma+j\omega)=\int_0^{\infty}e^{-\sigma t}\,t\,e^{-j\omega t}dt=\int_0^{\infty}t\,e^{-(\sigma+j\omega)t}dt=\frac{1}{(\sigma+j\omega)^2}$$
+<p>Now the integral exists. The result depends on the complex value $\sigma+j\omega$, which is given the symbol $s$:</p>
+<div class="callout key">$$F(s)=\int_0^{\infty}f(t)e^{-st}dt,\qquad s=\sigma+j\omega\qquad\text{ramp: }\ F(s)=\int_0^\infty t\,e^{-st}dt=\frac1{s^2}$$</div>
+<p>This is the <b>Laplace transform</b>, the standard tool in systems and control analysis (it is the transform used throughout EEN1020).</p>
+
+<h3>3. How the two transforms relate</h3>
+<p class="small">Context beyond the five lecture slides.</p>
+<ul><li>Fourier: everlasting sinusoids $e^{j\omega t}$, integral over all time, needs $\int|f|dt\lt\infty$.</li><li>Laplace: growing or decaying sinusoids $e^{st}$, integral from $t=0$, converges for a wider class of signals (ramp, step, growing exponentials) as long as $\sigma$ is large enough.</li><li>For a signal that is zero before $t=0$ and does have a Fourier transform, the Fourier transform is the Laplace transform evaluated on $s=j\omega$ (σ = 0). That is why replacing $s$ by $j\omega$ in a transfer function gives the frequency response function.</li></ul>
+`,
+formulas: [
+ {name:"Existence of the Fourier transform", tex:R`\int_{-\infty}^{\infty}|f(t)|\,dt\lt\infty`},
+ {name:"Laplace transform", tex:R`F(s)=\int_0^\infty f(t)e^{-st}dt,\quad s=\sigma+j\omega`},
+ {name:"Ramp", tex:R`\mathcal L\{t\}=\frac1{s^2}`},
+ {name:"Step and exponential", tex:R`\mathcal L\{1\}=\frac1s,\qquad \mathcal L\{e^{-at}\}=\frac1{s+a}`, note:"not on the slides; standard results that follow from the definition"}
+],
+questions: [
+ {src:"Lecture 22 (derivation)", q:R`Show that the ramp $f(t)=t$ has no Fourier transform, then find its Laplace transform by multiplying by $e^{-\sigma t}$ and integrating over positive time.`,
+  hint:"Check ∫|f| dt first. For the Laplace part, integrate t·e^(−st) by parts with u = t.",
+  sol:R`<p><b>No Fourier transform:</b> $\int_{-\infty}^\infty|t|\,dt$ is infinite, so the existence condition fails. Directly, integration by parts gives $\left[\frac{e^{-j\omega t}}{\omega}\left(jt+\frac1\omega\right)\right]_{-\infty}^{\infty}$, which has no limit because $|e^{-j\omega t}|=1$ while $t\to\pm\infty$.</p>
+  <p><b>Laplace:</b> with $s=\sigma+j\omega$, $\sigma\gt0$:</p>$$\int_0^\infty t\,e^{-st}dt=\left[-\frac{t\,e^{-st}}{s}\right]_0^\infty+\frac1s\int_0^\infty e^{-st}dt=0+\frac1s\cdot\frac1s=\frac1{s^2}$$<p>The boundary term vanishes because $e^{-\sigma t}$ beats $t$ as $t\to\infty$. Written out, $F(\sigma+j\omega)=\dfrac{1}{(\sigma+j\omega)^2}$.</p>`,
+  ans:"No FT (∫|t|dt diverges); L{t} = 1/s²", prov:"From the derivation in Lecture 22; the integration by parts is written out by Claude."},
+ {src:"Lecture 22 practice", q:R`Does the unit step $u(t)$ (0 for $t\lt0$, 1 for $t\ge0$) satisfy the Fourier existence condition? Find its Laplace transform.`,
+  hint:"∫₀^∞ 1 dt. Then ∫₀^∞ e^(−st) dt.",
+  sol:R`<p>$\int_{-\infty}^\infty|u(t)|dt=\int_0^\infty1\,dt=\infty$, so no (it has no ordinary Fourier transform).</p><p>$F(s)=\displaystyle\int_0^\infty e^{-st}dt=\left[-\frac{e^{-st}}{s}\right]_0^\infty=\frac1s$ for $\sigma\gt0$.</p>`,
+  ans:"No; L{u(t)} = 1/s", prov:"Worked by Claude; no solution is available."},
+ {src:"Lecture 22 practice", q:R`For $f(t)=e^{-2t}$ for $t\ge0$ (zero before), find (a) the Fourier transform and (b) the Laplace transform, and show how they are related.`,
+  hint:"This signal is absolutely integrable, so both exist.",
+  sol:R`<p>$\int_0^\infty e^{-2t}dt=\tfrac12$: finite, so the Fourier transform exists.</p><p><b>(a)</b> $F(\omega)=\displaystyle\int_0^\infty e^{-2t}e^{-j\omega t}dt=\frac{1}{2+j\omega}$.</p><p><b>(b)</b> $F(s)=\displaystyle\int_0^\infty e^{-(s+2)t}dt=\frac1{s+2}$.</p><p>Putting $s=j\omega$ (σ = 0) in (b) gives (a): for a signal that starts at $t=0$ and has a Fourier transform, the Fourier transform is the Laplace transform on the imaginary axis.</p>`,
+  ans:"F(ω) = 1/(2 + jω); F(s) = 1/(s + 2); F(ω) = F(s) at s = jω", prov:"Worked by Claude; no solution is available."}
+],
+traps: [
+ "The Fourier test is on |f(t)|: a signal that keeps growing (ramp) or never dies away (step) fails it.",
+ "σ must be positive (large enough) for the Laplace integral to converge; the Laplace integral starts at t = 0, not −∞.",
+ "L{t} = 1/s², not 1/s (that is the step).",
+ "s = σ + jω is complex; setting σ = 0 gives back jω only for signals that have a Fourier transform."
+]
 });
 })();

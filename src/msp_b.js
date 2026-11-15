@@ -560,8 +560,8 @@ traps: ["The alias appears at f_s − f₀, not at f₀ − f_s/2.", "Only frequ
 });
 
 T.topics.push({
-id: "systems", part: "Signal processing", title: "Systems Analysis: Frequency Response & Convolution",
-lectures: "Lectures 18.1–18.3 + tutorial sheet", status: "lectured",
+id: "systems", part: "Signal processing", title: "Systems Analysis: Frequency Response, Impulse Response & Convolution",
+lectures: "Lectures 18.1–18.3, 21 + tutorial sheet", status: "lectured",
 summary: "How a linear system changes a signal: linear ODE models, superposition and frequency preservation, the first-order system's sinusoidal response, the frequency response function H(ω) (gain and phase at a frequency, Bode plot, −3 dB bandwidth), the impulse response and convolution of sampled signals.",
 theory: R`
 <h3>1. Signals and systems</h3>
@@ -605,12 +605,21 @@ $$H(\omega) = \frac{Y}{X} = \frac{\omega_n^2 + 2j\zeta\omega\omega_n}{(\omega_n^
 <p>Below $\omega_n \approx 10.2$ rad/s the mass follows the base (gain ≈ 1, little lag); near $\omega_n$ it amplifies (gain ≈ 2.8) with a large lag; well above it the motion is strongly attenuated and the phase heads towards −180°. <span class="small">The slide gives 0.0918 for the gain at 50 rad/s; the expression gives 0.0938.</span></p>
 
 <h3>6. Impulse response</h3>
-<p class="small">Not in Lectures 18.1–18.3; built from the tutorial sheet and past papers.</p>
+<p class="small">Lecture 21.</p>
+<p><b>Why we need it.</b> In the frequency domain the output is simply $Y(\omega)=H(\omega)X(\omega)$: each input component is multiplied by the FRF at its frequency. For example, two components below the cut-off of an ideal low-pass filter, $x(t)=2R\cos\omega_1t+2S\cos\omega_2t$ with $H(\omega_1)=Le^{-j\alpha}$ and $H(\omega_2)=Le^{-j\beta}$ ($L=1$), come out as $y(t)=2LR\cos(\omega_1t-\alpha)+2LS\cos(\omega_2t-\beta)$: same frequencies, scaled and phase-shifted. But in the time domain you <b>cannot</b> get $y(t)$ by multiplying $h(t)$ by $x(t)$. Starting and ending with time signals would mean a forward transform, $Y=HX$, then $y(t)=\frac1{2\pi}\int Y(\omega)e^{j\omega t}d\omega$. Convolution (section 7) avoids the round trip.</p>
+<p><b>Unit impulse in, FRF out.</b> A unit impulse at $t=0$ has $X(\omega)=1$, so $Y(\omega)=H(\omega)\cdot1=H(\omega)$: the response to an impulse is the time-domain twin of the FRF.</p>
+<div class="callout key">$$h(t)=\mathcal F^{-1}\left[H(\omega)\right]\qquad x(t)\to\boxed{h(t)}\to y(t)\quad\Longleftrightarrow\quad X(\omega)\to\boxed{H(\omega)}\to Y(\omega)$$</div>
 <p>The impulse response $h(t)$ is the output when the input is a unit impulse $\delta(t)$. Since an impulse contains all frequencies equally ($\delta\leftrightarrow1$), $h(t)$ and $H(\omega)$ are a Fourier-transform pair. Find it by hitting the system with a short sharp input (e.g. a hammer tap) and recording the output, or by inverse-transforming $H(\omega)$.</p>
 
 <h3>7. Convolution: output in the time domain</h3>
-<p class="small">Not in Lectures 18.1–18.3; built from the tutorial sheet and past papers.</p>
-<p>Treat the input as a string of impulses; each produces a scaled, delayed copy of $h$, and the output is their sum:</p>
+<p class="small">Lecture 21.</p>
+<p><b>Building it from sampled data.</b> Apply a unit impulse at $t_0=0$ and record $y(t_0)=h_0$, $y(t_1)=h_1$, $y(t_2)=h_2$, $y(t_3)=h_3$, then zero ($t_k=t_0+k\Delta t$).</p>
+<ul><li><b>Superposition:</b> a second unit impulse at $t_1$ adds a delayed copy, so the output reads $h_0$, then $h_1+h_0$, then $h_2+h_1$, …</li><li><b>Scaling:</b> an impulse of size $A$ gives $Y=AH$, i.e. $Ah_0, Ah_1, Ah_2,\dots$</li></ul>
+<p>A sampled input $x_0, x_1, x_2$ (zero after) is three scaled impulses, so</p>
+<table class="data"><tr><td>$y_0=h_0x_0$</td><td>$y_1=h_1x_0+h_0x_1$</td><td>$y_2=h_2x_0+h_1x_1+h_0x_2$</td></tr><tr><td>$y_3=h_3x_0+h_2x_1+h_1x_2$</td><td>$y_4=h_3x_1+h_2x_2$</td><td>$y_5=h_3x_2$</td></tr></table>
+<p>Each output is the cumulative effect of the input samples, each multiplied by the right delayed piece of the impulse response. This is <b>convolution</b>:</p>
+$$y_i=\sum_{j=0}^{i}x_j\,h_{i-j}\ \ (h_k=0\text{ beyond its length})\qquad\qquad y(t)=\int_{-\infty}^{\infty}x(\tau)\,h(t-\tau)\,d\tau$$
+<p>Equivalently (swap the roles):</p>
 $$y(t) = \int_{0}^{t}h(\tau)\,x(t-\tau)\,d\tau \qquad\text{sampled: } y_n = \sum_k h_k\,x_{n-k}$$
 <p>Convolution in time ⇔ multiplication in frequency ($Y = HX$).</p>
 <ol class="steps"><li>Write $h_0, h_1, h_2,\dots$ and $x_0, x_1,\dots$</li><li>For each output index n, multiply every pair whose indices add to n and sum them (flip-and-slide).</li><li>The output lasts (length of x) + (length of h) − 1 samples.</li><li>For a constant input, the output is steady once the whole of h overlaps the input: steady value = input × sum of $h$. After the input stops, it takes (length of h − 1) samples to die away.</li></ol>`,
@@ -682,7 +691,20 @@ questions: [
   sol:R`<p><b>Superposition:</b> the response to a sum of inputs is the sum of the individual responses. <b>Frequency preservation:</b> a sinusoid at ω comes out at ω with changed amplitude and phase.</p>
   <p>At ω = 1: $|H| = 1/\sqrt2 = 0.707$, phase $-45°$. At ω = 10: $|H| = 1/\sqrt{101} = 0.0995$, phase $-\tan^{-1}10 = -84.3°$.</p>
   <p>$y(t) = 0.707\sin(t - 0.785) + 0.0995\sin(10t - 1.471)$: the low-pass system keeps the 1 rad/s component and cuts the 10 rad/s one by about 10×.</p>`,
-  ans:"y = 0.707 sin(t − 0.785) + 0.0995 sin(10t − 1.471)", prov:"Worked by Claude; no solution is available."}
+  ans:"y = 0.707 sin(t − 0.785) + 0.0995 sin(10t − 1.471)", prov:"Worked by Claude; no solution is available."},
+ {src:"Lecture 21 example", q:R`A sampled-data system has impulse response $h^*=1, 2, 1$ (three samples from $t=0$). The input $x^*$ is zero at the first two samples, then 2 for ten samples, then zero. Estimate and sketch the output. How long after the input starts does the output settle to a steady value? How many nonzero output values are there after the input has ceased?`,
+  hint:"Fill in a table: each output sample is h₀ times the current input plus h₁ times the previous one plus h₂ times the one before that.",
+  sol:R`<p>$x=0,0,2,2,2,2,2,2,2,2,2,2,0,0,\dots$ (samples $t=0$ to $13$); $h_0=1$, $h_1=2$, $h_2=1$. Using $y_i=h_0x_i+h_1x_{i-1}+h_2x_{i-2}$:</p>
+  <table class="data num"><tr><th>t</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5–11</td><td>12</td><td>13</td><td>14</td></tr><tr><th>y</th><td>0</td><td>0</td><td>2</td><td>6</td><td>8</td><td>8</td><td>6</td><td>2</td><td>0</td></tr></table>
+  <p>At $t=2$ only $h_0x_2$ acts (the immediate effect): $y=2$. At $t=3$: $h_1x_2+h_0x_3=4+2=6$. From $t=4$ all three samples of $h$ overlap the input: $y=2(1+2+1)=8$, steady.</p>
+  <p>The input starts at $t=2$ and the output is steady from $t=4$: it settles <b>two sample intervals</b> after the input starts (length of $h$ − 1). The input's last nonzero sample is at $t=11$; after it, $y_{12}=h_1x_{11}+h_2x_{10}=6$ and $y_{13}=h_2x_{11}=2$, then zero: <b>two</b> nonzero values after the input ceases.</p>
+  <p class="small">This is the same set-up as Tutorial Q34; the lecture's table counts from the $t=0$ sample, which is where the answer key's "4 samples" comes from.</p>`,
+  ans:"y = 0, 0, 2, 6, 8 … 8, 6, 2, 0; steady two samples after the input starts; two nonzero values after it stops", prov:"From the worked example (table and sketch) in Lecture 21; sequence checked with numpy.convolve."},
+ {src:"Lecture 21 practice", q:R`A system's impulse response is $h=3, 1$ (at $t=0, 1$). The input is $x=1, 2, -1$ (at $t=0, 1, 2$), zero after. (a) Find the output by convolution. (b) Check your answer in the frequency domain using the fact that convolution in time is multiplication in frequency.`,
+  hint:"For (b) treat each sequence as a polynomial in a delay operator z⁻¹ (each sample delay multiplies by e^(−jωΔt)); multiplying the polynomials gives the output samples.",
+  sol:R`<p><b>(a)</b> $y_0=h_0x_0=3$; $y_1=h_1x_0+h_0x_1=1+6=7$; $y_2=h_1x_1+h_0x_2=2-3=-1$; $y_3=h_1x_2=-1$; then 0. Length $3+2-1=4$ samples.</p>
+  <p><b>(b)</b> Writing $D=e^{-j\omega\Delta t}$ for one sample of delay, $H=3+D$ and $X=1+2D-D^2$. Then $Y=HX=3+6D-3D^2+D+2D^2-D^3=3+7D-D^2-D^3$, whose coefficients are $3, 7, -1, -1$ ✓.</p>`,
+  ans:"y = 3, 7, −1, −1", prov:"Worked by Claude; no solution is available. Checked with numpy.convolve."}
 ],
 traps: ["(jω)² = −ω², so 4 − (jω)² = 4 + ω².", "When the real part of a denominator is negative (above ω_n), its angle is π − tan⁻¹(|Im/Re|), not the calculator's tan⁻¹ value.", "The time shift is t_d = φ/ω; phase in radians, not degrees.", "Bandwidth of K/(1 + jωτ) is 1/τ rad/s; convert to Hz only if asked.", "Phase of 1/(a + jb) is −tan⁻¹(b/a): the minus sign comes from being in the denominator."]
 });

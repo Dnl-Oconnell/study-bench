@@ -305,6 +305,10 @@ systems: [
     R`The input is treated as a string of impulses; each produces a scaled, delayed copy of $h$, and the output is their sum: $y_n=\sum_kh_kx_{n-k}$. Convolution in time ⇔ multiplication in frequency, $Y=HX$.`),
   C("def", R`Discrete convolution: how long is the output, and what's the steady value for a constant input?`,
     R`Length = (length of x) + (length of h) − 1. Steady value = input × $\sum h$, reached once all of $h$ overlaps the input.`),
+  C("why", R`Why can't you get $y(t)$ by multiplying $h(t)$ by $x(t)$, and what are the two ways to get it?`,
+    R`Multiplication only works in the frequency domain ($Y=HX$). Either transform, multiply and inverse-transform, or stay in time and convolve $x$ with $h$.`),
+  C("why", R`Why is the response to a unit impulse the time-domain version of $H(\omega)$?`,
+    R`A unit impulse has $X(\omega)=1$, so $Y=H\cdot1=H$. Hence $h(t)=\mathcal F^{-1}[H(\omega)]$.`),
   C("why", R`Base-excited spring–mass–damper: how does the mass move below, near and well above $\omega_n$?`,
     R`Below: follows the base (gain ≈ 1, little lag). Near $\omega_n$: amplified with a large lag. Well above: strongly attenuated, phase heading to −180°.`),
 ],
@@ -348,6 +352,19 @@ filters: [
     R`Power goes as voltage squared: $Y^2/X^2=\tfrac12$ gives $2\log_{10}(Y/X)=-0.3$, and ×10 for decibels gives $20\log_{10}(Y/X)=-3$ dB, i.e. $Y/X=0.707$.`),
   C("def", R`How do you find the −3 dB frequency of any FRF?`,
     R`Set $|H|=|H(0)|/\sqrt2$, square both sides using $|a+jb|^2=a^2+b^2$, solve the polynomial in $\omega^2$ and keep the positive root.`),
+],
+
+laplace: [
+  C("f", R`What condition must a signal meet to have a Fourier transform, and why?`,
+    R`$$\int_{-\infty}^{\infty}|f(t)|\,dt\lt\infty$$ Because $|e^{-j\omega t}|=1$, the transform integral is only guaranteed finite if $f$ itself is absolutely integrable.`),
+  C("why", R`Why does the ramp $f(t)=t$ have no Fourier transform?`,
+    R`$\int|t|\,dt$ is infinite; the integrated-by-parts bracket grows with $t$ and has no value at $\pm\infty$.`),
+  C("f", R`Define the Laplace transform and $s$.`,
+    R`$$F(s)=\int_0^\infty f(t)e^{-st}dt,\qquad s=\sigma+j\omega$$ The $e^{-\sigma t}$ part makes the integrand decay so the integral converges.`),
+  C("f", R`Laplace transform of the ramp.`,
+    R`$$\mathcal L\{t\}=\frac1{s^2}$$ (or $\frac{1}{(\sigma+j\omega)^2}$).`),
+  C("def", R`Fourier vs Laplace building blocks.`,
+    R`Fourier: sinusoids lasting for all time. Laplace: harmonic signals that start at $t=0$ and decay with time.`),
 ],
 };
 })();
