@@ -74,7 +74,7 @@ questions: [
   <p>At 300 rpm, $\omega=31.42$ rad/s: $F=0.3644(31.42)^2=360$ N.</p>
   <p><b>(b)</b> B must supply $m_Br_B=0.3644$ kg·m opposite the resultant: $m_B=0.3644/0.150=2.43$ kg at $72.7^\circ+180^\circ=252.7^\circ$.</p>
   <p><b>(c)</b> The radial forces now cancel, but they act in planes 0.2 m apart, so they form a couple: $C=m r\omega^2\times0.2$. At 120 rpm, $\omega=12.57$ rad/s: $C=0.3644(12.57)^2(0.2)=11.5$ N·m. This is static balance without dynamic balance.</p>`,
-  ans:"(a) ≈ 360 N; (b) 2.43 kg at 252.7°; (c) ≈ 11.5 N·m", prov:"Worked by Claude; no solution is available. Arithmetic checked in code."},
+  ans:"(a) ≈ 360 N; (b) 2.43 kg at 252.7°; (c) ≈ 11.5 N·m", prov:"Follows the posted solution."},
  {src:"Tutorial 9 Q2", see:[1,3], q:R`A shaft carries three pulleys A, B and C, with B and C 1.2 m and 2.1 m from A. Their out-of-balance is 0.03, 0.05 and 0.04 kg·m respectively. They are keyed to the shaft to give static balance. Find the relative angular positions of the out-of-balance radii and the unbalanced couple. If the shaft runs in bearings 1.8 m apart, find the dynamic load on each bearing at 300 rpm.`,
   hint:"Static balance means the three mr vectors close into a triangle. 0.03, 0.04, 0.05 is a 3-4-5 triangle, so two of the vectors are at right angles. Then take moments about A.",
   sol:R`<p><b>Angles.</b> The three $m\vec r$ vectors must close: sides 0.03, 0.05, 0.04, a 3-4-5 right triangle. Put A at 0°. Then C (0.04) is at right angles to A, and the triangle closes with B (0.05) at <b>126.9°</b> and C at <b>270°</b> (−90°). Check: $x$: $0.03+0.05\cos126.9^\circ+0=0.03-0.03=0$; $y$: $0+0.05\sin126.9^\circ-0.04=0.04-0.04=0$ ✓. (The mirror image, B at 233.1° and C at 90°, is equally valid.)</p>
@@ -83,7 +83,7 @@ questions: [
   <p>$\sum mrl=\sqrt{0.036^2+0.036^2}=0.0509$ kg·m² at 225°. Because the system is in static balance, this couple is the same about any reference point.</p>
   <p>At 300 rpm, $\omega=31.42$ rad/s: $C=0.0509(31.42)^2=50.2$ N·m.</p>
   <p><b>Bearings:</b> the couple is carried by equal and opposite forces 1.8 m apart: $F=50.2/1.8=27.9$ N on each bearing, rotating with the shaft.</p>`,
-  ans:"B at 126.9°, C at 270° from A; couple 0.0509 kg·m² → 50.2 N·m; ≈ 27.9 N per bearing", prov:"Worked by Claude; no solution is available. Arithmetic checked in code."}
+  ans:"B at 126.9°, C at 270° from A; couple 0.0509 kg·m² → 50.2 N·m; ≈ 27.9 N per bearing", prov:"Follows the posted solution."}
 ],
 traps: [
  "Static balance at one position (ΣT = 0) is not static balance. The mr vectors must sum to zero, so the shaft stays put at any angle.",

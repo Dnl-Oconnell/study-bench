@@ -640,11 +640,11 @@ questions: [
  {src:"Tutorial Q31 & Q33", q:R`A system obeys $y + 2\dfrac{dy}{dt} = 3x$. (Q31) How is a 4 rad/s signal altered? (Q33) What is the bandwidth (−3 dB point)?`,
   sol:R`<p>$H(\omega) = \dfrac{3}{1+2j\omega}$. At ω = 4: $H = \dfrac{3}{1+8j}$, $|H| = 3/\sqrt{65} = 0.372$, phase $= -\tan^{-1}8 = -82.9° = -1.446$ rad. The signal is multiplied by 0.372 and lags by 82.9°.</p>
   <p>Bandwidth: $|H| = 3/\sqrt2$ when $2\omega = 1$ → $\omega_c = 0.5$ rad/s.</p>
-  <p class="small">The sheet gives √17/2 rad/s for Q33, which doesn't follow from this equation (it may belong to another version of Q31). 0.5 rad/s is what this system gives.</p>`, ans:"×0.372, lag 82.9°; 0.5 rad/s"},
+  <p class="small"><b>About the posted Q33 solution:</b> it sets $|H| = 1/\sqrt2$ in absolute terms, $\dfrac{9}{1+4\omega^2} = \dfrac12$, which gives $\omega_c = \sqrt{17}/2 \approx 2.06$ rad/s. The −3 dB point is normally measured from the low-frequency gain (here 3), i.e. $|H| = 3/\sqrt2$, which gives 0.5 rad/s, the corner frequency $1/\tau$ with $\tau = 2$ s. Know both: if a question is marked against the posted method, it expects √17/2.</p>`, ans:"×0.372, lag 82.9°; 0.5 rad/s (posted solution: √17/2 rad/s, see note)", prov:"Q31 follows the posted solution. Q33 is worked by Claude; the posted solution uses an absolute 1/√2 and gets √17/2 rad/s (see note)."},
  {src:"Tutorial Q32", q:R`Series R, L, C driven by $V_i$. Find the frequency response with output across the inductor.`,
   sol:R`Current $I = \dfrac{V_i}{R + j\omega L + 1/j\omega C}$; $V_L = j\omega L\,I$.
   $$H(\omega) = \frac{j\omega L}{R + j\omega L + \frac{1}{j\omega C}} = \frac{-\omega^2LC}{1-\omega^2LC + j\omega RC}$$
-  (multiply top and bottom by $j\omega C$). It's high-pass: 0 at ω = 0, → 1 at high ω.`},
+  (multiply top and bottom by $j\omega C$). It's high-pass: 0 at ω = 0, → 1 at high ω. This is a second-order system.`, ans:"H = −ω²LC / (1 − ω²LC + jωRC)", prov:"Follows the posted solution."},
  {src:"2025 Exam, Q2 (30 marks)", q:R`(a) What is the frequency response function and how is it found from $X(\omega)$ and $Y(\omega)$? (b) What is the impulse response and how can it be found? (c) How is the output calculated in the time domain from $x(t)$ and $h(t)$? (d) Why sample signals? (e) Impulse response $h^*$: 1 at t = 0, 2 at the next sample. Input $x^*$: 2 at the first two samples after t = 0. Find $y^*$ for the first 5 samples and sketch it.`,
   hint:"Read the figure carefully; the values below are my reading of it.",
   sol:R`<p><b>(a)</b> $H(\omega)$ gives the gain and phase change the system applies at each frequency; $H = Y(\omega)/X(\omega)$, the ratio of output and input spectra.</p>

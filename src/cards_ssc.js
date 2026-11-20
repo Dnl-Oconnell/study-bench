@@ -267,5 +267,24 @@ bdreduce: [
     R`Exactly when $a_1\gt 0$ and $a_0\gt 0$.`),
 ],
 
+ssreal: [
+  C("def", R`State space vs transfer function: which is unique?`,
+    R`The transfer function (external, input–output) is unique. State space (internal) is not: different state choices give different A, B, C, D but the same $G(s)$.`),
+  C("def", R`What three blocks can draw any state-space model?`,
+    R`Integrator $\frac1s$ (one per state), gain, and summing junction.`),
+  C("f", R`Series (cascade) form for $\frac{k}{(s-p_2)(s-p_1)}$?`,
+    R`$$A=\begin{bmatrix}p_2&1\\0&p_1\end{bmatrix},\ B=\begin{bmatrix}0\\1\end{bmatrix},\ C=[k\ \ 0]$$ Poles on the diagonal, 1 above it; the first stage (input end) is the last state.`),
+  C("why", R`Main advantage and drawback of each form (CCF, series, parallel)?`,
+    R`CCF: read straight off the TF, best for controller design; states usually not physical. Series: poles on the diagonal, modular; needs factoring. Parallel: decoupled modes, best numerics; needs partial fractions, repeated poles need a Jordan block.`),
+  C("def", R`What does controllable mean? Which form guarantees it?`,
+    R`The input can drive every state from any start to any end point. The CCF is guaranteed controllable.`),
+  C("def", R`What does observable mean? Which form guarantees it?`,
+    R`Every state can be deduced from watching $y(t)$. None of CCF, series or parallel guarantees it.`),
+  C("why", R`In parallel form, what happens if one entry of C is zero?`,
+    R`That state has no effect on the output, so it is unobservable; its mode cancels out of $G(s)$ (pole–zero cancellation) and the TF order drops.`),
+  C("why", R`When are the CCF states physical?`,
+    R`For an all-pole system they are $y$ and $\dot y$ (up to a scale), so yes. With zeros they mix input and output derivatives and lose physical meaning.`),
+],
+
 };
 })();
