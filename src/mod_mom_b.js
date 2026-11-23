@@ -206,7 +206,15 @@ questions: [
   <p>$k = 350\,000$ N/m, $\omega_n = \sqrt{350000/15} = 152.8$ rad/s, $r = 0.823$ (below resonance, in phase).</p>
   <p>$X = \dfrac{2527}{350000 - 15(125.7)^2} = \dfrac{2527}{113\,130} = 22.3$ mm.</p>
   <p>Spring force amplitude $= kX = 350\,000(0.0223) \approx 7.8$ kN.</p>`,
-  ans:"≈ 7.8 kN (X ≈ 22.3 mm)", prov:"Follows the posted solution (X = 0.0223 m, F = 7805 N)."}
+  ans:"≈ 7.8 kN (X ≈ 22.3 mm)", prov:"Follows the posted solution (X = 0.0223 m, F = 7805 N)."},
+ {src:"Tutorial 10 Q1", see:[0,1], q:R`A machine of total mass 120 kg is supported by a spring of stiffness 48 kN/m. The damping ratio is 0.15. The machine contains an unbalanced rotating mass of 0.6 kg at an eccentricity of 40 mm and operates at 600 rpm. Find (a) the natural frequency and damping coefficient; (b) the excitation force amplitude at 600 rpm; (c) the steady-state amplitude and phase lag; (d) the speed of maximum amplitude; (e) the maximum amplitude, and explain why it occurs above $\omega_n$.`,
+  hint:"F₀ = mₑrₑω². X = (mₑrₑ/m)r²/√[(1−r²)² + (2ζr)²]. The peak for rotating unbalance is at r = 1/√(1 − 2ζ²).",
+  sol:R`<p><b>(a)</b> $\omega_n=\sqrt{48\,000/120}=20$ rad/s (191.0 rpm); $c=2\zeta m\omega_n=2(0.15)(120)(20)=720$ N·s/m.</p>
+  <p><b>(b)</b> $\omega=2\pi(600)/60=62.83$ rad/s; $F_0=m_er_e\omega^2=0.6(0.04)(62.83)^2=94.75$ N. Equation of motion: $m\ddot x+c\dot x+kx=m_er_e\omega^2\sin\omega t$.</p>
+  <p><b>(c)</b> $r=62.83/20=3.142$. $X=\dfrac{(m_er_e/m)\,r^2}{\sqrt{(1-r^2)^2+(2\zeta r)^2}}=\dfrac{(2\times10^{-4})(9.870)}{\sqrt{(-8.870)^2+(0.9425)^2}}=0.221$ mm. $\phi=\text{atan2}(2\zeta r,\,1-r^2)=173.9^\circ$: almost 180° out of phase with the force.</p>
+  <p><b>(d)</b> $r_p=1/\sqrt{1-2\zeta^2}=1/\sqrt{1-2(0.15)^2}=1.0233$, so $\omega_p=20.47$ rad/s, $N_p=195.4$ rpm.</p>
+  <p><b>(e)</b> $X_{max}=\dfrac{m_er_e/m}{2\zeta\sqrt{1-\zeta^2}}=\dfrac{2\times10^{-4}}{2(0.15)\sqrt{1-0.0225}}=0.674$ mm. The peak is above $\omega_n$ because the unbalance force itself grows as $\omega^2$.</p>`,
+  ans:"ωₙ = 20 rad/s (191 rpm), c = 720 N·s/m; F₀ = 94.75 N; X = 0.221 mm, φ = 173.9°; peak at 195.4 rpm; X_max = 0.674 mm", prov:"Follows the posted solution in Tutorial 10; numbers re-checked."}
 ],
 traps: [
  "Imbalance force grows with ω², so the response tends to m_e r_e/m at high speed instead of zero.",

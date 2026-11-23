@@ -286,5 +286,24 @@ ssreal: [
     R`For an all-pole system they are $y$ and $\dot y$ (up to a scale), so yes. With zeros they mix input and output derivatives and lose physical meaning.`),
 ],
 
+dss: [
+  C("def", R`Discrete state equation?`,
+    R`$x[k+1]=Ax[k]+Bu[k]$, $y[k]=Cx[k]+Du[k]$: the next state from the current state and input, one sample at a time.`),
+  C("def", R`What replaces the integrator in a discrete block diagram?`,
+    R`The unit delay $z^{-1}$: its input is $x_i[k+1]$ and its output is $x_i[k]$.`),
+  C("f", R`Discrete transfer function from state space?`,
+    R`$G(z)=C(zI-A)^{-1}B+D$`),
+  C("why", R`Why are the poles of $G(z)$ the eigenvalues of $A$?`,
+    R`$(zI-A)^{-1}$ has $\det(zI-A)$ as its denominator, and the roots of $\det(zI-A)=0$ are the eigenvalues.`),
+  C("f", R`Discrete stability condition?`,
+    R`Every eigenvalue inside the unit circle: $|\lambda|\lt 1$. On the circle: marginally stable. Any outside: unstable.`),
+  C("def", R`Discrete CCF for $\frac{k}{z^2+a_1z+a_0}$?`,
+    R`$A=\begin{bmatrix}0&1\\-a_0&-a_1\end{bmatrix}$, $B=\begin{bmatrix}0\\k\end{bmatrix}$, $C=[1\ 0]$: the same shape as continuous time.`),
+  C("def", R`Parallel form $A$, $B$, $C$?`,
+    R`$A=\text{diag}(p_i)$, $B$ all ones, $C=[c_1\ \cdots\ c_n]$ (the partial-fraction residues).`),
+  C("why", R`Three realisations of one $G(z)$ give different matrices. What stays the same?`,
+    R`The eigenvalues of $A$ (the poles) and the transfer function itself. Only the choice of states changes.`),
+],
+
 };
 })();

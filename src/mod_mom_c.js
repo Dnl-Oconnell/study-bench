@@ -123,7 +123,16 @@ questions: [
   <p>At $\theta_s = 150^\circ = \tfrac56\pi$: $\mu = \dfrac{1}{\theta_s}\ln\dfrac{T_1 - T_c}{T_2 - T_c} = \dfrac{\ln(1050/550)}{5\pi/6} = \dfrac{0.6466}{2.618} = 0.247$.</p>
   <p>At $\theta_s = 210^\circ = \tfrac76\pi$: $\mu\theta_s = 0.247\times3.665 = 0.905$, so $T_2 = \dfrac{1050}{e^{0.905}} + 300 = 424.7 + 300 = 724.7$ N.</p>
   <p>$P = (1350 - 724.7)(20) = 12.51$ kW, an increase of $\Delta P = 2.5$ kW.</p>`,
-  ans:"μ = 0.247; new T₂ ≈ 725 N; P = 12.5 kW, an increase of 2.5 kW", prov:"Follows the posted solution; numbers re-checked. The posted working prints the exponent as 0.343(7π/6), a typo: its 725 N only follows from μ = 0.247."}
+  ans:"μ = 0.247; new T₂ ≈ 725 N; P = 12.5 kW, an increase of 2.5 kW", prov:"Follows the posted solution; numbers re-checked. The posted working prints the exponent as 0.343(7π/6), a typo: its 725 N only follows from μ = 0.247."},
+ {src:"Tutorial 10 Q2", see:[1,2,3,4,5,6], q:R`A motor drives a machine through an open flat belt; the smaller pulley is the driver. Assume no gross slip and limiting friction at the smaller pulley. Driver diameter 240 mm, driven diameter 480 mm, centre distance 1.60 m, driver speed 1000 rpm, $\mu = 0.30$, belt mass 0.65 kg/m, initial tension 550 N. Find the contact angles, the driven speed and belt speed, the centrifugal tension, the tight- and slack-side tensions, the power transmitted, and the optimum belt speed and maximum power.`,
+  hint:"sin α = (r₂ − r₁)/L, θ₁ = π − 2α. Use (T₁ − T_c)/(T₂ − T_c) = e^{μθ₁} with T₁ + T₂ = 2T₀ + 2T_c.",
+  sol:R`<p><b>Angles.</b> $\sin\alpha=(0.240-0.120)/1.60=0.075$, $\alpha=4.301^\circ$. $\theta_1=180^\circ-2\alpha=171.40^\circ=2.9915$ rad (small pulley, limits traction); $\theta_2=188.60^\circ$.</p>
+  <p><b>Speeds.</b> $N_2=1000(240/480)=500$ rpm; $v=\pi(0.240)(1000)/60=12.57$ m/s.</p>
+  <p><b>Centrifugal tension.</b> $T_c=m'v^2=0.65(12.566)^2=102.64$ N.</p>
+  <p><b>Tensions.</b> $e^{\mu\theta_1}=e^{0.3(2.9915)}=2.4533$. With $A=T_1-T_c$, $B=T_2-T_c$: $A=2.4533B$ and $A+B=2T_0=1100$ N, so $B=318.54$ N, $A=781.46$ N. $T_1=884.11$ N, $T_2=421.18$ N.</p>
+  <p><b>Power.</b> $P=(T_1-T_2)v=462.93(12.566)=5817$ W $=5.82$ kW; driver torque $=462.93(0.120)=55.55$ N·m.</p>
+  <p><b>Optimum.</b> $T_{1,max}=\dfrac{3T_0}{1+e^{-\mu\theta_1}}=\dfrac{1650}{1+1/2.4533}=1172.2$ N. At the optimum $T_c=T_{1,max}/3=390.73$ N, so $v_{opt}=\sqrt{T_{1,max}/(3m')}=24.52$ m/s. $T_2=390.73+(1172.2-390.73)/2.4533=709.27$ N. $P_{max}=(1172.2-709.27)(24.52)=11.35$ kW.</p>`,
+  ans:"θ₁ = 171.4°, θ₂ = 188.6°; N₂ = 500 rpm, v = 12.57 m/s; T_c = 102.6 N; T₁ = 884.1 N, T₂ = 421.2 N; P = 5.82 kW; v_opt = 24.5 m/s, P_max = 11.35 kW", prov:"Follows the posted solution in Tutorial 10; numbers re-checked. The maximum-power result is theoretical and assumes limiting friction with the stated initial tension."}
 ],
 traps: [
  "Use the lap angle of the small pulley in e^{μθ}: it slips first.",
