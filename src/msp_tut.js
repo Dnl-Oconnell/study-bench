@@ -14,7 +14,10 @@ STUDY.content.msp.tutorials = [{
      <tr><th>y<sub>n</sub></th><td>−1</td><td>−2</td><td>0</td><td>2</td><td>2</td><td>2</td><td>0</td><td>−2</td><td>−1</td></tr></table>
      <p>For example $y_5 = h_1x_4 + h_3x_2 = -2 + 4 = 2$ and $y_6 = h_1x_5 + h_3x_3 + h_5x_1 = -1+4-1 = 2$.</p>
      <p>The output dips negative, rises to a plateau of <b>2</b> from n = 5 to 7, then dips negative again and dies away. It reaches the plateau at n = 5, <b>4 samples after the input starts</b> (input starts at n = 1).</p>
-     <p class="small">The values come from my reading of a small figure, so check the spike heights against your copy. Note Σh = 0: a long constant input would give zero output once fully overlapped.</p>`}
+     <p>The posted solution's table gives the same sequence: $y^* = 0, 0, -1, -2, 0, 2, 2, 2, 0, -2, -1, 0$ for $t = 0$ to $11$.</p>
+     <p class="small">Note Σh = 0: a long constant input would give zero output once fully overlapped.</p>`,
+     ans:"y = −1, −2, 0, 2, 2, 2, 0, −2, −1 (n = 2 to 10); plateau of 2 from n = 5, 4 samples after the input starts",
+     prov:"Follows the posted solution (table of h(i)x(t−i) products); checked with numpy.convolve. The posted slides don't state the settling time; 4 samples is read from the same table."}
   ]
 }];
 })();
