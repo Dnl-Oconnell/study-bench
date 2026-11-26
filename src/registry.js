@@ -9,7 +9,7 @@ window.STUDY = {
       assess:"Exam 80% (2 h: 20 MCQs × 2 marks + 2 long questions × 30) · Labs 20%",
       blurb:"Sensors, measurement error and statistics, signal conditioning, and the frequency domain." },
     ssc: { code:"EEN1020", name:"Introduction to Systems, Signals & Control", color:"--m-ssc", ready:true,
-      assess:"Exam 80% (2 h) · CA 20%: four Loop quizzes, best three count (wk 3 transforms, wk 6 block diagrams, wk 8 stability & transient, wk 11 state space)",
+      assess:"Exam 80% (2 h: Q1 compulsory, 50 marks, + any two of Q2–Q4 at 25; Q4 is digital systems; only the exam is resittable) · CA 20%: four Loop quizzes, best three count (wk 3 transforms, wk 6 block diagrams, wk 8 stability & transient, wk 11 state space)",
       blurb:"Laplace and Z transforms, modelling circuits and mechanical systems, stability and first/second-order response, state-space models, state-space response and stability, and block diagrams and their reduction." },
     ems: { code:"EEN1029", name:"Electromechanical Systems", color:"--m-ems", ready:true,
       assess:"Exam 50% (2 h, answer 4 of 5) · CA 50%: weekly quizzes 5%, demos 10%, reports 25%, peer/self-assessment 10%",

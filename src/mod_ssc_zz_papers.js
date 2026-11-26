@@ -5,6 +5,7 @@
 const R = String.raw;
 const T = STUDY.content.ssc;
 const PROV = "Worked by Claude from the past paper; every number checked with SymPy.";
+const PROV26 = "Follows the posted 2025/26 marking scheme.";
 const add = (id, q) => { const t = T.topics.find(x => x.id === id); if (t) t.questions.push(Object.assign({ prov: PROV }, q)); };
 
 /* ---------- a small topic the older EE207 papers always examined ---------- */
@@ -277,94 +278,94 @@ add("linearise", { src: "Exam 2024 Q4(a)", see: [1, 2, 4],
   ans: "A = [0 1; −1 −1]; stable (λ = −0.5 ± j0.866)" });
 
 /* =================== 2025/26 Semester 1 (EEN1020) =================== */
-add("statespace", { src: "Exam 2025/26 Q1(a)", fig: "ssc_pp26_q1a", see: [1, 3],
+add("statespace", { prov: PROV26, src: "Exam 2025/26 Q1(a)", fig: "ssc_pp26_q1a", see: [1, 3],
   q: R`Construct a state-space representation with $v_C$ and $i_L$ as states for the series RLC circuit shown (source $V_{in}$, then R, L, C in series). Output $v_C$. [10 marks]`,
   hint: R`Capacitor: $C\dot v_C=i_L$. KVL round the loop: $V_{in}=Ri_L+L\dot i_L+v_C$.`,
   sol: R`<ol class="steps"><li>$\dot v_C=\frac1Ci_L$.</li><li>$\dot i_L=-\frac1Lv_C-\frac RLi_L+\frac1LV_{in}$.</li><li>$$\frac{d}{dt}\begin{bmatrix}v_C\\i_L\end{bmatrix}=\begin{bmatrix}0&\frac1C\\-\frac1L&-\frac RL\end{bmatrix}\begin{bmatrix}v_C\\i_L\end{bmatrix}+\begin{bmatrix}0\\\frac1L\end{bmatrix}V_{in},\quad y=\begin{bmatrix}1&0\end{bmatrix}\begin{bmatrix}v_C\\i_L\end{bmatrix}$$</li></ol>`,
   ans: "A = [0 1/C; −1/L −R/L], B = [0; 1/L], C = [1 0]" });
-add("statespace", { src: "Exam 2025/26 Q1(b)", see: [4],
+add("statespace", { prov: PROV26, src: "Exam 2025/26 Q1(b)", see: [4],
   q: R`$\dfrac{d}{dt}\begin{bmatrix}v_c\\i_L\end{bmatrix}=\begin{bmatrix}-\frac1{RC}&\frac1C\\-\frac1L&0\end{bmatrix}\begin{bmatrix}v_c\\i_L\end{bmatrix}+\begin{bmatrix}0\\\frac1L\end{bmatrix}V_{in}$, $y=\begin{bmatrix}1&0\end{bmatrix}x$. Form $V_C/V_{in}$. [5 marks]`,
   hint: R`$G=C(sI-A)^{-1}B$: only the (1,2) element of the inverse matters, times $1/L$.`,
   sol: R`<ol class="steps"><li>$sI-A=\begin{bmatrix}s+\frac1{RC}&-\frac1C\\\frac1L&s\end{bmatrix}$, $\det=s^2+\frac{s}{RC}+\frac1{LC}$.</li><li>$(sI-A)^{-1}_{12}=\dfrac{1/C}{\det}$ ⇒ $G=\dfrac{1/C}{\det}\cdot\dfrac1L$.</li><li>$$\frac{V_C}{V_{in}}=\frac{1/LC}{s^2+\frac{1}{RC}s+\frac{1}{LC}}$$</li></ol>`,
   ans: "(1/LC)/(s² + s/RC + 1/LC)" });
-add("order12", { src: "Exam 2025/26 Q1(c)", see: [1, 4, 3],
+add("order12", { prov: PROV26, src: "Exam 2025/26 Q1(c)", see: [1, 4, 3],
   q: R`$H(s)=\dfrac{4}{s^2+2s+4}$. Find (i) the damped natural frequency, (ii) the period of oscillation, (iii) the time to peak, (iv) the percentage overshoot, (v) the initial and final values, and (vi) sketch the step response. [20 marks]`,
   hint: R`$\omega_n=2$, $\zeta=0.5$.`,
   sol: R`<ol class="steps"><li>(i) $\omega_d=\omega_n\sqrt{1-\zeta^2}=2\sqrt{0.75}=\sqrt3=1.73$ rad/s.</li><li>(ii) $T=2\pi/\omega_d=3.63$ s.</li><li>(iii) $t_p=\pi/\omega_d=1.81$ s.</li><li>(iv) $\%OS=100e^{-\pi(0.5)/\sqrt{0.75}}=16.3\%$.</li><li>(v) $y(0)=0$ (IVT); $y(\infty)=H(0)=1$.</li><li>(vi) Rises from 0, peaks at 1.163 at 1.81 s, dips below 1 at about 3.6 s, settles to 1 by $t_s=4/(\zeta\omega_n)=4$ s.</li></ol>`,
   ans: "ω_d = 1.73 rad/s; T = 3.63 s; t_p = 1.81 s; 16.3%; 0 → 1" });
-add("rotational", { src: "Exam 2025/26 Q2(a)", plab: "Q2(a)–(b)", fig: "ssc_pp26_q2", see: [0],
+add("rotational", { prov: PROV26, src: "Exam 2025/26 Q2(a)", plab: "Q2(a)–(b)", fig: "ssc_pp26_q2", see: [0],
   q: R`A disc of inertia $J$ is held by a torsional spring $K$ and damper $B$ to a wall, and driven by torque $T$. (a) Form $\Theta/T$. (b) Give a range of $K$, $B$, $J$ for stability. [8 marks]`,
   hint: R`$J\ddot\theta=T-B\dot\theta-K\theta$.`,
   sol: R`<ol class="steps"><li>$J\ddot\theta+B\dot\theta+K\theta=T$ ⇒ $\dfrac{\Theta}{T}=\dfrac{1}{Js^2+Bs+K}$.</li><li>Second order: stable iff all coefficients have the same sign: $J\gt 0$ (physical), $B\gt 0$, $K\gt 0$. $B=0$ gives marginal (undamped) oscillation.</li></ol>`,
   ans: "1/(Js² + Bs + K); stable for J, B, K > 0" });
-add("ssresp", { src: "Exam 2025/26 Q2(c)", plab: "Q2(c)–(e)", see: [3, 2],
+add("ssresp", { prov: PROV26, src: "Exam 2025/26 Q2(c)", plab: "Q2(c)–(e)", see: [3, 2],
   q: R`For $J\ddot\theta+B\dot\theta+K\theta=T$: (c) form a state space with $x_1=\theta$, $x_2=\dot\theta$. (d) Form the state-transition matrix for $J=1$, $B=3$, $K=2$. (e) Find $\theta(t)$ with no torque and $x(0)=[1\ \ -1]^T$. [17 marks]`,
   hint: R`$A=\begin{bmatrix}0&1\\-2&-3\end{bmatrix}$: eigenvalues −1, −2. Use $\mathcal L^{-1}\{(sI-A)^{-1}\}$ or $Pe^{\Lambda t}P^{-1}$.`,
   sol: R`<ol class="steps"><li>(c) $\dot x=\begin{bmatrix}0&1\\-K/J&-B/J\end{bmatrix}x+\begin{bmatrix}0\\1/J\end{bmatrix}T$, $\theta=\begin{bmatrix}1&0\end{bmatrix}x$.</li><li>(d) $(sI-A)^{-1}=\dfrac{1}{(s+1)(s+2)}\begin{bmatrix}s+3&1\\-2&s\end{bmatrix}$ ⇒ $$\Phi(t)=\begin{bmatrix}2e^{-t}-e^{-2t}&e^{-t}-e^{-2t}\\-2e^{-t}+2e^{-2t}&-e^{-t}+2e^{-2t}\end{bmatrix}$$ $\Phi(0)=I$ ✓.</li><li>(e) $x(t)=\Phi x(0)$: $\theta=(2e^{-t}-e^{-2t})-(e^{-t}-e^{-2t})=e^{-t}$.</li><li>Neat: $x(0)=[1,-1]$ is the eigenvector for λ = −1, so only that mode is excited.</li></ol>`,
   ans: "Φ = [2e^(−t)−e^(−2t), e^(−t)−e^(−2t); −2e^(−t)+2e^(−2t), −e^(−t)+2e^(−2t)]; θ = e^(−t)" });
-add("bdreduce", { src: "Exam 2025/26 Q3(a)", plab: "Q3(a)–(c)", fig: "ssc_pp26_q3", see: [2, 3, 5],
+add("bdreduce", { prov: PROV26, src: "Exam 2025/26 Q3(a)", plab: "Q3(a)–(c)", fig: "ssc_pp26_q3", see: [2, 3, 5],
   q: R`For the feedback system shown: (a) reduce to a single $Y/X$. (b) For which $K$ is it asymptotically stable? (c) For which $K$ is the response oscillatory? [13 marks]`,
   hint: R`Call the second summer's output $w$. Inner loop round $\frac1{s-1}$: $w=5E-\frac{w}{s-1}$. The upper path takes $w$ through $\frac1{s+3}$ and is <b>subtracted</b> at the output summer.`,
   sol: R`<ol class="steps"><li>$w\left(1+\frac{1}{s-1}\right)=5E$ ⇒ $w=\frac{5(s-1)}{s}E$; lower path $\frac{w}{s-1}=\frac5sE$; upper path $\frac{w}{s+3}=\frac{5(s-1)}{s(s+3)}E$.</li><li>$Y=\frac5s\left[1-\frac{s-1}{s+3}\right]E=\frac{20}{s(s+3)}E$.</li><li>$E=X-KY$ ⇒ $$\frac YX=\frac{20}{s^2+3s+20K}$$</li><li>(b) Stable ⇔ $20K\gt 0$ ⇒ $K\gt 0$.</li><li>(c) Oscillatory ⇔ $9-80K\lt 0$ ⇒ $K\gt 0.1125$.</li></ol>`,
   ans: "20/(s² + 3s + 20K); stable K > 0; oscillatory K > 0.1125" });
-add("sstrans", { src: "Exam 2025/26 Q3(d)", see: [0, 3],
+add("sstrans", { prov: PROV26, src: "Exam 2025/26 Q3(d)", see: [0, 3],
   q: R`For some $K$ the impulse response is $h(t)=\dfrac{20}{\sqrt{28.75}}e^{-1.5t}\sin(\sqrt{28.75}t)u(t)$. (i) Find $T(s)$. (ii) Find $K$. (iii) Steady-state gain? (iv) Form the CCF and write the unit-impulse response in terms of the matrices. [12 marks]`,
   hint: R`$\frac{\omega}{(s+a)^2+\omega^2}\leftrightarrow e^{-at}\sin\omega t$. Then match $s^2+3s+20K$.`,
   sol: R`<ol class="steps"><li>(i) $T(s)=\dfrac{20}{(s+1.5)^2+28.75}=\dfrac{20}{s^2+3s+31}$.</li><li>(ii) $20K=31$ ⇒ $K=1.55$.</li><li>(iii) $T(0)=20/31=0.645$.</li><li>(iv) $A=\begin{bmatrix}0&1\\-31&-3\end{bmatrix}$, $B=\begin{bmatrix}0\\1\end{bmatrix}$, $C=\begin{bmatrix}20&0\end{bmatrix}$, $D=0$. $$h(t)=Ce^{At}B=\begin{bmatrix}20&0\end{bmatrix}e^{\begin{bmatrix}0&1\\-31&-3\end{bmatrix}t}\begin{bmatrix}0\\1\end{bmatrix}$$</li></ol>`,
   ans: "T = 20/(s²+3s+31); K = 1.55; gain 0.645; h = C e^(At) B" });
-add("dtstab", { src: "Exam 2025/26 Q4(b)", see: [0],
+add("dtstab", { prov: PROV26, src: "Exam 2025/26 Q4(b)", see: [0],
   q: R`$y[n]=-0.9y[n-1]-0.2y[n-2]+x[n-2]$. Is the system stable? [5 marks]`,
   hint: R`$H(z)=\dfrac{1}{z^2+0.9z+0.2}$.`,
   sol: R`<ol class="steps"><li>$z^2+0.9z+0.2=(z+0.4)(z+0.5)$ ⇒ poles −0.4, −0.5.</li><li>Both inside the unit circle ⇒ stable (negative real: the response alternates in sign as it decays).</li></ol>`,
   ans: "Poles −0.4, −0.5 ⇒ stable" });
-add("ssode", { src: "Exam 2025/26 Q4(c)", see: [1, 2],
+add("ssode", { prov: PROV26, src: "Exam 2025/26 Q4(c)", see: [1, 2],
   q: R`Form a companion-form state space for $y[n]=-0.9y[n-1]-0.2y[n-2]+x[n-2]$. [8 marks]`,
   hint: R`Same pattern as CCF, with $x[n+1]$ in place of $\dot x$. $H=\dfrac{1}{z^2+0.9z+0.2}$.`,
   sol: R`<ol class="steps"><li>Let $x_1[n]=y[n]$, $x_2[n]=y[n+1]$.</li><li>$x_1[n+1]=x_2[n]$; $x_2[n+1]=y[n+2]=-0.2x_1[n]-0.9x_2[n]+u[n]$.</li><li>$$\mathbf x[n+1]=\begin{bmatrix}0&1\\-0.2&-0.9\end{bmatrix}\mathbf x[n]+\begin{bmatrix}0\\1\end{bmatrix}u[n],\quad y[n]=\begin{bmatrix}1&0\end{bmatrix}\mathbf x[n]$$</li></ol>`,
   ans: "A = [0 1; −0.2 −0.9], B = [0;1], C = [1 0]" });
 
 /* =================== 2025/26 Resit =================== */
-add("tfcircuits", { src: "Resit 2025/26 Q1(a)", fig: "ssc_pp26r_q1a", see: [1, 2],
+add("tfcircuits", { prov: PROV26, src: "Resit 2025/26 Q1(a)", fig: "ssc_pp26r_q1a", see: [1, 2],
   q: R`$v_i$ drives L in series, then C in parallel with R (output $v_o$ across C). (i) Show $LC\ddot v_o+\frac LR\dot v_o+v_o=v_i$. (ii) Write $V_o/V_i$ in the form $\dfrac{a}{s^2+bs+c}$. [7 marks]`,
   hint: R`KCL at the output node: $i_L=C\dot v_o+v_o/R$. KVL: $v_i=L\dot i_L+v_o$.`,
   sol: R`<ol class="steps"><li>Differentiate the KCL: $\dot i_L=C\ddot v_o+\dot v_o/R$.</li><li>Substitute into the KVL: $v_i=LC\ddot v_o+\frac LR\dot v_o+v_o$ ✓.</li><li>$$\frac{V_o}{V_i}=\frac{1/LC}{s^2+\frac{1}{RC}s+\frac{1}{LC}}$$ so $a=c=\frac{1}{LC}$, $b=\frac{1}{RC}$.</li></ol>`,
   ans: "(1/LC)/(s² + s/RC + 1/LC)" });
-add("order12", { src: "Resit 2025/26 Q1(b)", see: [3, 4, 1],
+add("order12", { prov: PROV26, src: "Resit 2025/26 Q1(b)", see: [3, 4, 1],
   q: R`$\dfrac{V_o}{V_i}=\dfrac{1}{s^2+2s+2}$. (i) Poles. (ii) Stable (pole-zero map)? (iii) Peak overshoot. (iv) Period of oscillation. (v) Step response by Laplace. (vi) Initial and final values by IVT/FVT. (vii) Sketch. [29 marks]`,
   hint: R`$(s+1)^2+1$: $\omega_n=\sqrt2$, $\zeta=1/\sqrt2$, $\omega_d=1$. The DC gain is ½, not 1.`,
   sol: R`<ol class="steps"><li>(i) $s=-1\pm j$.</li><li>(ii) Both in the left half-plane, no zeros ⇒ stable.</li><li>(iii) $\zeta=\frac{2}{2\sqrt2}=0.707$ ⇒ $\%OS=100e^{-\pi}=4.3\%$.</li><li>(iv) $T=2\pi/\omega_d=2\pi=6.28$ s.</li><li>(v) $Y=\frac{1}{s(s^2+2s+2)}=\frac{1/2}{s}-\frac12\frac{(s+1)+1}{(s+1)^2+1}$ ⇒ $y=\frac12\left[1-e^{-t}(\cos t+\sin t)\right]u(t)$.</li><li>(vi) IVT: $\lim_{s\to\infty}sY=0$. FVT: $\lim_{s\to0}sY=\frac12$.</li><li>(vii) Rises from 0, peaks at 0.522 at $t_p=\pi$ s, settles to 0.5 by about 4 s.</li></ol>`,
   ans: "−1 ± j; stable; 4.3%; T = 6.28 s; y = ½[1 − e^(−t)(cos t + sin t)]; 0 → 0.5" });
-add("ctstab", { src: "Resit 2025/26 Q1(c)", fig: "ssc_pp26r_q1c", see: [4, 5],
+add("ctstab", { prov: PROV26, src: "Resit 2025/26 Q1(c)", fig: "ssc_pp26r_q1c", see: [4, 5],
   q: R`$G=\dfrac{1}{s+3}$. (i) Form $Y/X$. (ii) Range of $K$ for asymptotic stability. (iii) Range of $K$ for stable and oscillatory. [14 marks]`,
   hint: R`The inner unity loop round $\frac1s$ is $\frac{1}{s+1}$. Then the outer loop has feedback $K$.`,
   sol: R`<ol class="steps"><li>Inner: $\dfrac{1}{s+1}$. Forward: $\dfrac{1}{(s+3)(s+1)}$.</li><li>$$\frac YX=\frac{1}{(s+1)(s+3)+K}=\frac{1}{s^2+4s+3+K}$$</li><li>(ii) $3+K\gt 0$ ⇒ $K\gt-3$.</li><li>(iii) $16-4(3+K)\lt 0$ ⇒ $K\gt 1$.</li></ol>`,
   ans: "1/(s² + 4s + 3 + K); K > −3; K > 1" });
-add("translational", { src: "Resit 2025/26 Q2(a)", fig: "ssc_pp26r_q2", see: [2, 4],
+add("translational", { prov: PROV26, src: "Resit 2025/26 Q2(a)", fig: "ssc_pp26r_q2", see: [2, 4],
   q: R`Mass $M$ (displacement $y$, force $f$) is tied to the wall by spring $K_1$, and by spring $K_2$ in series with damper $B$ (junction displacement $x$). (i) Write the free-body equations. (ii) Find $Y/F$. [10 marks]`,
   hint: R`The junction between $K_2$ and $B$ is a massless node: $B\dot x=K_2(y-x)$.`,
   sol: R`<ol class="steps"><li>Mass: $M\ddot y+K_1y+K_2(y-x)=f$.</li><li>Node: $B\dot x+K_2(x-y)=0$.</li><li>Node in $s$: $X=\dfrac{K_2}{Bs+K_2}Y$.</li><li>Substitute: $$\frac YF=\frac{Bs+K_2}{MBs^3+MK_2s^2+B(K_1+K_2)s+K_1K_2}$$</li></ol>`,
   ans: "(Bs+K₂)/(MBs³ + MK₂s² + B(K₁+K₂)s + K₁K₂)" });
-add("laplace", { src: "Resit 2025/26 Q2(b)", see: [2, 1],
+add("laplace", { prov: PROV26, src: "Resit 2025/26 Q2(b)", see: [2, 1],
   q: R`A simplified model is $\dfrac YF=\dfrac{0.5}{(s+1)^2}$, with a unit-step force. (i) How was it simplified, and why prefer it? (ii) Find $y(t)$. (iii) Find the velocity by Laplace. (iv) Confirm (iii) by differentiating (ii). (v) Is the mass speeding up, slowing down or steady after the step? [15 marks]`,
   hint: R`Repeated pole: $\frac{0.5}{s(s+1)^2}=\frac{A}{s}+\frac{B}{s+1}+\frac{C}{(s+1)^2}$. Velocity: $sY$.`,
   sol: R`<ol class="steps"><li>(i) Third order → second order: the $K_2$–$B$ branch is replaced by a damper acting directly on the mass (or a fast pole dropped). Lower order is easier to analyse, and the dominant behaviour is kept.</li><li>(ii) $Y=\frac{0.5}{s}-\frac{0.5}{s+1}-\frac{0.5}{(s+1)^2}$ ⇒ $y=0.5\left[1-e^{-t}-te^{-t}\right]u(t)$.</li><li>(iii) $V=sY=\frac{0.5}{(s+1)^2}$ ⇒ $v=0.5te^{-t}u(t)$.</li><li>(iv) $\dot y=0.5[e^{-t}-e^{-t}+te^{-t}]=0.5te^{-t}$ ✓.</li><li>(v) Speeding up for $0\lt t\lt 1$ s ($\dot v=0.5e^{-t}(1-t)$), peak speed 0.184 at $t=1$ s, then slowing down to rest at $y=0.5$.</li></ol>`,
   ans: "y = 0.5(1 − e^(−t) − te^(−t)); v = 0.5te^(−t); speeds up to t = 1 s, then slows" });
-add("bdreduce", { src: "Resit 2025/26 Q3(a)", fig: "ssc_pp26r_q3", see: [3, 2],
+add("bdreduce", { prov: PROV26, src: "Resit 2025/26 Q3(a)", fig: "ssc_pp26r_q3", see: [3, 2],
   q: R`Find $Y/R$ for the diagram (forward $\frac{10}{s+7}$ then $\frac1s$; feedback is $Y$ plus $0.4\times$ the signal between the blocks). [5 marks]`,
   hint: R`Let $V$ be the signal between the blocks: $Y=V/s$, feedback $=0.4V+V/s$.`,
   sol: R`<ol class="steps"><li>$V=\frac{10}{s+7}\left(R-0.4V-\frac Vs\right)$.</li><li>Multiply by $s(s+7)$: $V[s(s+7)+4s+10]=10sR$.</li><li>$Y=\frac Vs=\dfrac{10}{s^2+11s+10}R$.</li></ol>`,
   ans: "10/(s² + 11s + 10)" });
-add("ssresp", { src: "Resit 2025/26 Q3(b)", see: [3, 0],
+add("ssresp", { prov: PROV26, src: "Resit 2025/26 Q3(b)", see: [3, 0],
   q: R`Determine the state-transition matrix of $\dot x=\begin{bmatrix}-11&-10\\1&0\end{bmatrix}x+\begin{bmatrix}10\\0\end{bmatrix}r$. [10 marks]`,
   hint: R`$\det(sI-A)=s^2+11s+10=(s+1)(s+10)$.`,
   sol: R`<ol class="steps"><li>$(sI-A)^{-1}=\dfrac{1}{(s+1)(s+10)}\begin{bmatrix}s&-10\\1&s+11\end{bmatrix}$.</li><li>Element by element ($\frac{s}{(s+1)(s+10)}=\frac{-1/9}{s+1}+\frac{10/9}{s+10}$, etc.): $$\Phi(t)=\frac19\begin{bmatrix}10e^{-10t}-e^{-t}&10e^{-10t}-10e^{-t}\\e^{-t}-e^{-10t}&10e^{-t}-e^{-10t}\end{bmatrix}$$</li><li>Check $\Phi(0)=I$ ✓.</li></ol>`,
   ans: "Φ = (1/9)[10e^(−10t)−e^(−t), 10e^(−10t)−10e^(−t); e^(−t)−e^(−10t), 10e^(−t)−e^(−10t)]" });
-add("order12", { src: "Resit 2025/26 Q3(c)", see: [1, 4, 5],
+add("order12", { prov: PROV26, src: "Resit 2025/26 Q3(c)", see: [1, 4, 5],
   q: R`$\dfrac{Y}{R}=\dfrac{10}{s^2+11ks+10}$. Agree or disagree, with engineering reasons: (i) raising $k$ drives the final step output close to zero; (ii) $k$ tunes the frequency response; (iii) to tame large overshoot, increase $k$; (iv) $k=0$ makes it unstable; (v) to speed the response up, increase $k$. [10 marks]`,
   hint: R`$\omega_n=\sqrt{10}$ is fixed; $k$ only sets $\zeta=\frac{11k}{2\sqrt{10}}$. DC gain $=10/10$.`,
-  sol: R`<ol class="steps"><li>(i) <b>Disagree.</b> FVT: $y(\infty)=10/10=1$ for every $k\gt 0$. $k$ changes the transient, not the final value.</li><li>(ii) <b>Agree.</b> $k$ sets the damping ratio, which shapes the resonant peak and the bandwidth of $|H(j\omega)|$ ($\omega_n$ stays $\sqrt{10}$).</li><li>(iii) <b>Agree.</b> Larger $k$ → larger ζ → smaller overshoot ($\%OS$ depends only on ζ). At $k=2\sqrt{10}/11=0.575$ it's critically damped.</li><li>(iv) <b>Disagree</b> (strictly). $k=0$ gives poles $\pm j\sqrt{10}$: marginally stable, a sustained oscillation, not growing. It is no longer asymptotically stable, though.</li><li>(v) <b>Only up to a point.</b> Underdamped, $t_s=4/(\zeta\omega_n)=8/(11k)$ falls as $k$ rises. Beyond critical damping one pole moves toward the origin and the response gets slower. Speed is capped by the fixed $\omega_n$.</li></ol>`,
-  ans: "(i) disagree (FV = 1); (ii) agree; (iii) agree; (iv) disagree: marginal, not unstable; (v) only until critical damping" });
-add("ztrans", { src: "Resit 2025/26 Q4(a)", plab: "Q4(a)–(d)", see: [4, 5, 6],
+  sol: R`<ol class="steps"><li>(i) <b>Disagree.</b> FVT: $y(\infty)=10/10=1$ for every $k\gt 0$. $k$ changes the transient, not the final value.</li><li>(ii) <b>Agree.</b> $k$ sets the damping ratio, which shapes the resonant peak and the bandwidth of $|H(j\omega)|$ ($\omega_n$ stays $\sqrt{10}$).</li><li>(iii) <b>Agree.</b> Larger $k$ → larger ζ → smaller overshoot ($\%OS$ depends only on ζ). At $k=2\sqrt{10}/11=0.575$ it's critically damped.</li><li>(iv) <b>Disagree</b> (strictly). $k=0$ gives poles $\pm j\sqrt{10}$: marginally stable, a sustained oscillation, not growing. It is no longer asymptotically stable, though.</li><li>(v) <b>Disagree.</b> Raising $k$ raises $\zeta=\frac{11k}{2\sqrt{10}}$. While underdamped that cuts overshoot and settling time ($t_s=4/(\zeta\omega_n)=8/(11k)$), but it lengthens the rise time. Past critical damping ($k\gt 2\sqrt{10}/11\approx0.575$) the slow pole moves toward the origin and the whole response gets slower. So increasing $k$ does not, in general, speed it up.</li></ol><div class="callout">Marking scheme: 2 marks per statement, and only with a correct reason. A bare agree/disagree, or a wrong reason, scores 0.</div>`,
+  ans: "(i) disagree (FV = 1); (ii) agree; (iii) agree; (iv) disagree: marginal, not unstable; (v) disagree: slower rise, and slower overall once overdamped" });
+add("ztrans", { prov: PROV26, src: "Resit 2025/26 Q4(a)", plab: "Q4(a)–(d)", see: [4, 5, 6],
   q: R`$y[n]+0.5y[n-1]+0.06y[n-2]=x[n-2]$. (a) Form $H(z)$. (b) Is it stable? (c) Form a companion-form state space. (d) Find the unit-step response. [25 marks]`,
   hint: R`$H=\dfrac{1}{z^2+0.5z+0.06}=\dfrac{1}{(z+0.2)(z+0.3)}$. Expand $Y/z=\dfrac{1}{(z+0.2)(z+0.3)(z-1)}$.`,
   sol: R`<ol class="steps"><li>(a) $H=\dfrac{z^{-2}}{1+0.5z^{-1}+0.06z^{-2}}=\dfrac{1}{z^2+0.5z+0.06}$.</li><li>(b) Poles −0.2, −0.3: inside the unit circle ⇒ stable.</li><li>(c) $\mathbf x[n+1]=\begin{bmatrix}0&1\\-0.06&-0.5\end{bmatrix}\mathbf x[n]+\begin{bmatrix}0\\1\end{bmatrix}x[n]$, $y=\begin{bmatrix}1&0\end{bmatrix}\mathbf x$.</li><li>(d) $\dfrac Yz=\dfrac{25/39}{z-1}+\dfrac{100/13}{z+0.3}-\dfrac{25/3}{z+0.2}$ ⇒ $$y[n]=\left[\tfrac{25}{39}+\tfrac{100}{13}(-0.3)^n-\tfrac{25}{3}(-0.2)^n\right]u[n]$$</li><li>Check: $y[0]=y[1]=0$, $y[2]=1$ (two-sample delay) ✓; final value $H(1)=1/1.56=0.641$ ✓.</li></ol>`,
